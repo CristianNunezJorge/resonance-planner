@@ -1,0 +1,25 @@
+# Local PostgreSQL for development and tests (D79, D84).
+# Credentials come from the .env file in this folder (see .env.example).
+services:
+  postgres:
+    image: postgres:16
+    container_name: resonance-planner-db
+    environment:
+      POSTGRES_DB: resonance_planner
+      POSTGRES_USER: ${DATABASE_USERNAME:?Set DATABASE_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD in .env}
+    ports:
+      # 5433 on the host, so it does not clash with a PostgreSQL installed on the computer
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Scripts run only on the first start, when the volume is still empty
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
