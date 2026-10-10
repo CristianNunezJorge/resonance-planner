@@ -1,0 +1,40 @@
+# Settings shared by every profile (D83).
+# Required values come from environment variables. The empty default after ":" lets
+# AppProperties stop the startup with the name of the missing variable.
+app:
+  database:
+    url: ${DATABASE_URL:}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
+  jwt:
+    secret: ${JWT_SECRET:}
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+
+spring:
+  application:
+    name: resonance-planner
+  profiles:
+    # Used when no profile is chosen; Render sets SPRING_PROFILES_ACTIVE=prod
+    default: dev
+  # No spring.datasource here: the DataSource is built from app.database by DatabaseConfig
+  jpa:
+    # Flyway owns the schema; Hibernate only checks that the entities match it (D38)
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          # Moments are stored in UTC (D41, D43)
+          time_zone: UTC
+
+# Swagger stays public, also in production (D53)
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

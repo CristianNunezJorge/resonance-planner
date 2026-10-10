@@ -1,0 +1,4 @@
+# Production on Render (D82): every value comes from the environment variables set on Render.
+server:
+  # Render tells the service which port to listen on
+  port: ${PORT:8080}
