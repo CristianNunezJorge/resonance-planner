@@ -795,3 +795,11 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Come:** valori in `farming-sources.json` con `estimated: true`, mostrati nell'app come stima (D25). Il limite di 400 uccisioni al giorno e la ricomparsa delle specialità non sono modellati.
 - **Perché:** il wiki non riporta probabilità di drop né tempi di ricomparsa. Le quantità della demo sono così basse che quei limiti non si raggiungono mai.
 - **Scartate:** lasciare questi materiali fuori dal calcolo (il piano sarebbe incompleto).
+
+## D98 · Tipi numerici dello schema
+**Stato:** Confermata · 10/10/2026 · nata dalla revisione di `V1__schema.sql` (T04)
+
+- **Cosa:** tutte le colonne numeriche intere usano `integer`, mai `smallint`; le quantità medie dei drop restano `numeric(8,2)`, quindi i dati hanno al massimo due decimali.
+- **Come:** in `V1__schema.sql` le nove colonne prima `smallint` (rarità, gradi, livelli, posizioni, limite giornaliero) sono `integer` e le entità useranno `Integer`. In `farming-sources.json` la media della Premium Resonance Potion passa da 1,099 a 1,10.
+- **Perché:** Hibernate 7 in modalità `validate` (D38) rifiuta un campo `Integer` su una colonna `smallint`, e la colonna d'ordine di una lista JPA è sempre un intero. Con tabelle così piccole lo spazio risparmiato da `smallint` non conta. Con `numeric(8,2)` PostgreSQL avrebbe arrotondato 1,099 senza avvisare: meglio arrotondare il dato in modo esplicito (differenza dello 0,1%).
+- **Scartate:** tenere `smallint` e usare `Short` nelle entità (conversioni scomode in tutto il codice); `numeric(8,3)` per conservare il terzo decimale.

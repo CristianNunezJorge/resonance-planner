@@ -6,7 +6,7 @@
     "waveplateCost": 40,
     "minutesPerRun": 3,
     "drops": [
-      { "materialId": "premium-resonance-potion", "avgQuantity": 1.099, "estimated": false },
+      { "materialId": "premium-resonance-potion", "avgQuantity": 1.10, "estimated": false },
       { "materialId": "advanced-resonance-potion", "avgQuantity": 5.04, "estimated": false },
       { "materialId": "medium-resonance-potion", "avgQuantity": 2.35, "estimated": false },
       { "materialId": "shell-credit", "avgQuantity": 3600, "estimated": false }
