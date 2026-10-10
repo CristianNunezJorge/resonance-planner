@@ -1,0 +1,15 @@
+# Normalize line endings in the repository
+* text=auto
+
+# Scripts that run on Linux (Docker image, Render) must keep LF endings
+*.sh text eol=lf
+mvnw text eol=lf
+
+# Windows scripts keep CRLF endings
+*.cmd text eol=crlf
+
+# Binary files
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary

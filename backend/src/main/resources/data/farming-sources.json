@@ -1,0 +1,183 @@
+[
+  {
+    "id": "sim-resonance-potion",
+    "name": "Simulation Training: Resonance Potion",
+    "type": "SIMULATION_TRAINING",
+    "waveplateCost": 40,
+    "minutesPerRun": 3,
+    "drops": [
+      { "materialId": "premium-resonance-potion", "avgQuantity": 1.099, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 5.04, "estimated": false },
+      { "materialId": "medium-resonance-potion", "avgQuantity": 2.35, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 3600, "estimated": false }
+    ]
+  },
+  {
+    "id": "sim-shell-credit",
+    "name": "Simulation Training: Shell Credit",
+    "type": "SIMULATION_TRAINING",
+    "waveplateCost": 40,
+    "minutesPerRun": 3,
+    "drops": [
+      { "materialId": "shell-credit", "avgQuantity": 72000, "estimated": false }
+    ]
+  },
+
+  {
+    "id": "boss-mourning-aix",
+    "name": "Boss Challenge: Mourning Aix",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "elegy-tacet-core", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+  {
+    "id": "boss-mech-abomination",
+    "name": "Boss Challenge: Mech Abomination",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "group-abomination-tacet-core", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+  {
+    "id": "boss-inferno-rider",
+    "name": "Boss Challenge: Inferno Rider",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "rage-tacet-core", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+  {
+    "id": "boss-lampylumen-myriad",
+    "name": "Boss Challenge: Lampylumen Myriad",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "sound-keeping-tacet-core", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+  {
+    "id": "boss-crownless",
+    "name": "Boss Challenge: Crownless",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "strife-tacet-core", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+  {
+    "id": "boss-feilian-beringal",
+    "name": "Boss Challenge: Feilian Beringal",
+    "type": "BOSS_CHALLENGE",
+    "waveplateCost": 60,
+    "minutesPerRun": 4,
+    "drops": [
+      { "materialId": "roaring-rock-fist", "avgQuantity": 2.0, "estimated": false },
+      { "materialId": "advanced-resonance-potion", "avgQuantity": 2.18, "estimated": false },
+      { "materialId": "shell-credit", "avgQuantity": 5760, "estimated": false }
+    ]
+  },
+
+  {
+    "id": "overworld-howlers",
+    "name": "Nemici comuni: Howler",
+    "type": "OVERWORLD_ENEMIES",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "lf-howler-core", "avgQuantity": 5, "estimated": true },
+      { "materialId": "mf-howler-core", "avgQuantity": 2, "estimated": true }
+    ]
+  },
+  {
+    "id": "overworld-whisperins",
+    "name": "Nemici comuni: Whisperin",
+    "type": "OVERWORLD_ENEMIES",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "lf-whisperin-core", "avgQuantity": 5, "estimated": true },
+      { "materialId": "mf-whisperin-core", "avgQuantity": 2, "estimated": true }
+    ]
+  },
+  {
+    "id": "overworld-exiles",
+    "name": "Nemici comuni: Exile",
+    "type": "OVERWORLD_ENEMIES",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "crude-ring", "avgQuantity": 5, "estimated": true },
+      { "materialId": "basic-ring", "avgQuantity": 2, "estimated": true }
+    ]
+  },
+
+  {
+    "id": "collect-loongs-pearl",
+    "name": "Raccolta: Loong's Pearl",
+    "type": "OVERWORLD_COLLECTION",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "loongs-pearl", "avgQuantity": 6, "estimated": true }
+    ]
+  },
+  {
+    "id": "collect-coriolus",
+    "name": "Raccolta: Coriolus",
+    "type": "OVERWORLD_COLLECTION",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "coriolus", "avgQuantity": 6, "estimated": true }
+    ]
+  },
+  {
+    "id": "collect-pavo-plum",
+    "name": "Raccolta: Pavo Plum",
+    "type": "OVERWORLD_COLLECTION",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "pavo-plum", "avgQuantity": 6, "estimated": true }
+    ]
+  },
+  {
+    "id": "collect-belle-poppy",
+    "name": "Raccolta: Belle Poppy",
+    "type": "OVERWORLD_COLLECTION",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "belle-poppy", "avgQuantity": 6, "estimated": true }
+    ]
+  },
+  {
+    "id": "collect-wintry-bell",
+    "name": "Raccolta: Wintry Bell",
+    "type": "OVERWORLD_COLLECTION",
+    "waveplateCost": 0,
+    "minutesPerRun": 10,
+    "drops": [
+      { "materialId": "wintry-bell", "avgQuantity": 6, "estimated": true }
+    ]
+  }
+]

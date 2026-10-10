@@ -1,0 +1,10 @@
+{
+  "waveplate": { "max": 240, "regenMinutes": 6 },
+  "waveplateCrystals": { "max": 480, "regenMinutes": 12 },
+  "ascensionLevels": [20, 40],
+  "maxLevel": 40,
+  "shellCreditPerExp": 0.35,
+  "sol3Phase": 4,
+  "demoEventsAnchorDate": "2026-10-01",
+  "playTimeOptionsMinutes": [30, 60, 120]
+}

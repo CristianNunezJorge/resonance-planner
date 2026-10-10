@@ -1,0 +1,29 @@
+# Environment variables with real values (D83): only .env.example is versioned
+.env
+.env.*
+!.env.example
+
+# Backend (Maven)
+target/
+
+# Frontend (Node, Vite, Vitest)
+node_modules/
+dist/
+coverage/
+*.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Claude Code personal settings
+.claude/settings.local.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system
+.DS_Store
+Thumbs.db

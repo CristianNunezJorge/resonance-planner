@@ -1,0 +1,28 @@
+[
+  { "id": "shell-credit", "name": "Shell Credit", "category": "CREDIT" },
+
+  { "id": "basic-resonance-potion", "name": "Basic Resonance Potion", "category": "CHARACTER_EXP", "exp": 1000 },
+  { "id": "medium-resonance-potion", "name": "Medium Resonance Potion", "category": "CHARACTER_EXP", "exp": 3000 },
+  { "id": "advanced-resonance-potion", "name": "Advanced Resonance Potion", "category": "CHARACTER_EXP", "exp": 8000 },
+  { "id": "premium-resonance-potion", "name": "Premium Resonance Potion", "category": "CHARACTER_EXP", "exp": 20000 },
+
+  { "id": "lf-howler-core", "name": "LF Howler Core", "category": "ENEMY_DROP" },
+  { "id": "mf-howler-core", "name": "MF Howler Core", "category": "ENEMY_DROP" },
+  { "id": "lf-whisperin-core", "name": "LF Whisperin Core", "category": "ENEMY_DROP" },
+  { "id": "mf-whisperin-core", "name": "MF Whisperin Core", "category": "ENEMY_DROP" },
+  { "id": "crude-ring", "name": "Crude Ring", "category": "ENEMY_DROP" },
+  { "id": "basic-ring", "name": "Basic Ring", "category": "ENEMY_DROP" },
+
+  { "id": "elegy-tacet-core", "name": "Elegy Tacet Core", "category": "BOSS_DROP" },
+  { "id": "group-abomination-tacet-core", "name": "Group Abomination Tacet Core", "category": "BOSS_DROP" },
+  { "id": "rage-tacet-core", "name": "Rage Tacet Core", "category": "BOSS_DROP" },
+  { "id": "sound-keeping-tacet-core", "name": "Sound-Keeping Tacet Core", "category": "BOSS_DROP" },
+  { "id": "strife-tacet-core", "name": "Strife Tacet Core", "category": "BOSS_DROP" },
+  { "id": "roaring-rock-fist", "name": "Roaring Rock Fist", "category": "BOSS_DROP" },
+
+  { "id": "loongs-pearl", "name": "Loong's Pearl", "category": "LOCAL_SPECIALTY" },
+  { "id": "coriolus", "name": "Coriolus", "category": "LOCAL_SPECIALTY" },
+  { "id": "pavo-plum", "name": "Pavo Plum", "category": "LOCAL_SPECIALTY" },
+  { "id": "belle-poppy", "name": "Belle Poppy", "category": "LOCAL_SPECIALTY" },
+  { "id": "wintry-bell", "name": "Wintry Bell", "category": "LOCAL_SPECIALTY" }
+]

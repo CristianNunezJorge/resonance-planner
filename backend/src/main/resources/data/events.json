@@ -1,0 +1,46 @@
+[
+  {
+    "id": "bountiful-crescendo",
+    "name": "Bountiful Crescendo",
+    "type": "DOUBLE_DROP",
+    "description": "Per tutta la durata dell'evento, Simulation Training e Forgery Challenge danno ricompense doppie, fino a 3 volte al giorno in totale. Il contatore delle ricompense doppie si azzera ogni giorno.",
+    "schedule": { "startOffsetDays": 3, "durationDays": 7, "repeatEveryDays": 14, "activeWeekdays": null },
+    "rewards": ["Ricompense doppie in Simulation Training e Forgery Challenge, massimo 3 al giorno"],
+    "activities": [],
+    "effect": { "type": "DROP_MULTIPLIER", "sourceType": "SIMULATION_TRAINING", "multiplier": 2, "dailyLimit": 3 }
+  },
+  {
+    "id": "lament-recon-solaris-soldier",
+    "name": "Lament Recon: Solaris Soldier",
+    "type": "COMBAT_STAGES",
+    "description": "Evento di combattimento: si sceglie un personaggio e lo si guida attraverso 7 drill a ondate di nemici, potenziandolo con i moduli ottenuti superando ogni drill.",
+    "schedule": { "startOffsetDays": -2, "durationDays": 39, "repeatEveryDays": 42, "activeWeekdays": null },
+    "rewards": [
+      "Medaglia e avatar esclusivi «Lighthouse and Blake Bloom»",
+      "Ricompense per ogni drill completato"
+    ],
+    "activities": [
+      { "title": "Drill 1", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 2", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 3", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 4", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 5", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 6", "minutes": 15, "frequency": "ONCE", "unlockDay": null },
+      { "title": "Drill 7", "minutes": 15, "frequency": "ONCE", "unlockDay": null }
+    ],
+    "effect": null
+  },
+  {
+    "id": "by-moons-grace",
+    "name": "By Moon's Grace",
+    "type": "POINTS_SHOP",
+    "description": "Festa della Luna: completando gli obiettivi della festa (desideri, bancarelle, compagni) si ottengono Palace Lantern, la valuta da spendere nel negozio dell'evento.",
+    "schedule": { "startOffsetDays": -10, "durationDays": 44, "repeatEveryDays": 49, "activeWeekdays": null },
+    "rewards": ["Palace Lantern da spendere nel negozio dell'evento"],
+    "activities": [
+      { "title": "Obiettivi della festa", "minutes": 15, "frequency": "DAILY", "unlockDay": null },
+      { "title": "Acquisti nel negozio dell'evento", "minutes": 5, "frequency": "ONCE", "unlockDay": null }
+    ],
+    "effect": null
+  }
+]

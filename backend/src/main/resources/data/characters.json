@@ -1,0 +1,176 @@
+[
+  {
+    "id": "jinhsi",
+    "name": "Jinhsi",
+    "element": "SPECTRO",
+    "weaponType": "BROADBLADE",
+    "rarity": 5,
+    "role": "Main Damage Dealer",
+    "icon": "characters/jinhsi.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "lf-howler-core", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "elegy-tacet-core", "quantity": 3 },
+          { "materialId": "loongs-pearl", "quantity": 4 },
+          { "materialId": "mf-howler-core", "quantity": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "yinlin",
+    "name": "Yinlin",
+    "element": "ELECTRO",
+    "weaponType": "RECTIFIER",
+    "rarity": 5,
+    "role": "Concerto Efficiency",
+    "icon": "characters/yinlin.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "lf-whisperin-core", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "group-abomination-tacet-core", "quantity": 3 },
+          { "materialId": "coriolus", "quantity": 4 },
+          { "materialId": "mf-whisperin-core", "quantity": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "changli",
+    "name": "Changli",
+    "element": "FUSION",
+    "weaponType": "SWORD",
+    "rarity": 5,
+    "role": "Main Damage Dealer",
+    "icon": "characters/changli.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "crude-ring", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "rage-tacet-core", "quantity": 3 },
+          { "materialId": "pavo-plum", "quantity": 4 },
+          { "materialId": "basic-ring", "quantity": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lingyang",
+    "name": "Lingyang",
+    "element": "GLACIO",
+    "weaponType": "GAUNTLETS",
+    "rarity": 5,
+    "role": "Main Damage Dealer",
+    "icon": "characters/lingyang.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "lf-whisperin-core", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "sound-keeping-tacet-core", "quantity": 3 },
+          { "materialId": "coriolus", "quantity": 4 },
+          { "materialId": "mf-whisperin-core", "quantity": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "danjin",
+    "name": "Danjin",
+    "element": "HAVOC",
+    "weaponType": "SWORD",
+    "rarity": 4,
+    "role": "Concerto Efficiency",
+    "icon": "characters/danjin.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "crude-ring", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "strife-tacet-core", "quantity": 3 },
+          { "materialId": "belle-poppy", "quantity": 4 },
+          { "materialId": "basic-ring", "quantity": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "aalto",
+    "name": "Aalto",
+    "element": "AERO",
+    "weaponType": "PISTOLS",
+    "rarity": 4,
+    "role": "Concerto Efficiency",
+    "icon": "characters/aalto.webp",
+    "ascensions": [
+      {
+        "toRank": 1,
+        "atLevel": 20,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 5000 },
+          { "materialId": "lf-howler-core", "quantity": 4 }
+        ]
+      },
+      {
+        "toRank": 2,
+        "atLevel": 40,
+        "cost": [
+          { "materialId": "shell-credit", "quantity": 10000 },
+          { "materialId": "roaring-rock-fist", "quantity": 3 },
+          { "materialId": "wintry-bell", "quantity": 4 },
+          { "materialId": "mf-howler-core", "quantity": 4 }
+        ]
+      }
+    ]
+  }
+]
