@@ -1,0 +1,11 @@
+# Local development (D84): values come from the .env file in the repository root.
+# Both paths are listed so it works when started from backend/ or from the root folder.
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+
+logging:
+  level:
+    com.resonanceplanner: DEBUG
