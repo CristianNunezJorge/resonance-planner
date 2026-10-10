@@ -18,14 +18,14 @@ Progetto capstone del Master Full-Stack AI Developer di Epicode. "Resonance Plan
 
 ## Stack
 
-| Parte | Tecnologie |
-|---|---|
-| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS |
-| Backend | Java 21, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT |
-| Database | PostgreSQL, schema gestito con Flyway |
-| IA | API Claude con l'SDK Java ufficiale |
-| Test | JUnit 5, Mockito, Vitest, React Testing Library |
-| Deploy | Render (frontend, backend e database) |
+| Parte | Tecnologie | Versioni |
+|---|---|---|
+| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS | Node 24, React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3 |
+| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT | Java 21, Spring Boot 4.1.1, Maven 3.10 (wrapper incluso) |
+| Database | PostgreSQL, schema gestito con Flyway | PostgreSQL 16 |
+| IA | API Claude con l'SDK Java ufficiale | — |
+| Test | JUnit 5, Mockito, JaCoCo, Vitest, React Testing Library | — |
+| Deploy | Render (frontend, backend e database) | — |
 
 ## Struttura del repository
 
@@ -39,7 +39,39 @@ La progettazione completa, con il registro di tutte le decisioni, è in [`docs/`
 
 ## Variabili d'ambiente
 
-L'elenco è in [`.env.example`](.env.example): si copia in `.env` e si completano i valori. Il file `.env` non entra mai nel repository.
+L'elenco è in [`.env.example`](.env.example): si copia in `.env` e si completano i valori. Il file `.env` non entra mai nel repository. Se manca una variabile obbligatoria, il backend non parte e il messaggio indica quale.
+
+## Avvio in locale
+
+Servono Docker Desktop, JDK 21 e Node.js 24.
+
+```bash
+# 1. Database PostgreSQL sulla porta 5433, con un database di sviluppo e uno di test
+docker compose up -d
+
+# 2. Backend su http://localhost:8080 (dalla cartella backend/)
+./mvnw spring-boot:run
+
+# 3. Frontend su http://localhost:5173 (dalla cartella frontend/)
+npm install
+npm run dev
+```
+
+Al primo avvio Flyway crea lo schema del database.
+
+## Test e controlli
+
+Da lanciare prima di ogni pull request:
+
+```bash
+# Backend: test unitari e di integrazione, report di copertura in target/site/jacoco/
+./mvnw verify
+
+# Frontend: lint, controllo dei tipi, test e build
+npm run lint && npm run typecheck && npm test && npm run build
+```
+
+I test di integrazione del backend usano il database di test di Docker Compose, che deve essere avviato.
 
 ## Crediti
 

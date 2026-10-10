@@ -1,5 +1,7 @@
 # Handoff · da progettazione a sviluppo
 
+> **Superato:** il giorno 1 è stato completato il 10/10/2026. Per riprendere il lavoro leggere `CLAUDE.md` e `docs/stato-del-progetto.md`. Questo file resta come traccia del passaggio dalla progettazione allo sviluppo.
+
 Passaggio di consegne del 10/10/2026, per iniziare lo sviluppo in una nuova sessione di Claude Code.
 
 ## Messaggio da incollare nella nuova sessione

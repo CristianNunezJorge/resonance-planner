@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 03/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 10/10/2026, per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-La progettazione è completa e confermata, i dati di gioco sono raccolti e la board Trello è pronta. Si aspetta l'approvazione dello staff per iniziare a scrivere codice, partendo dalla card T01.
+Il progetto è approvato e il giorno 1 di sviluppo è completato (T01-T06): repository, database in Docker, backend, schema e frontend funzionano in locale. Il prossimo passo è il giorno 2, con il primo deploy su Render.
 
 ## Cosa è stato fatto
 
@@ -19,18 +19,34 @@ La progettazione è completa e confermata, i dati di gioco sono raccolti e la bo
 | 02/10 | Decisioni nate dalla raccolta | D92-D97, compresi gli eventi attivi giorno per giorno chiesti dall'utente (D96) |
 | 02-03/10 | Board Trello | 5 colonne, 54 card, 10 etichette, descrizioni su ogni card |
 | 10/10 | Deploy tutto su Render | Anche il database passa su Render invece che su Neon (D82 aggiornata) |
+| 10/10 | Ambiente di sviluppo | Installati WSL 2 e Docker Desktop; scelto il JDK 21 già presente |
+| 10/10 | **Giorno 1: T01-T06** | Repository pubblico, Docker Compose, backend Spring Boot 4.1.1, schema Flyway, frontend Vite; 5 commit su `main`, uno per card, tramite pull request |
+| 10/10 | Decisione nata dalla revisione dello schema | D98: colonne `integer` invece di `smallint`, medie dei drop con al massimo due decimali |
+
+### Giorno 1 in dettaglio
+
+| Card | Cosa c'è | Verifica |
+|---|---|---|
+| T01 | `.gitignore`, `.gitattributes` (LF per `mvnw` e script), `.env.example`, README | Repository pubblico su GitHub |
+| T05 | Vite + React + TS, Redux Toolkit con `toastSlice`, React Router con home, 404 e pagina di errore, Bootstrap via SASS, Vitest | Lint, tipi, 5 test (copertura 83%), build |
+| T02 | PostgreSQL 16 sulla porta 5433, volume persistente, database di test creato al primo avvio | Container *healthy*, due database |
+| T03 | Spring Boot 4.1.1, profili `dev`/`test`/`prod`, `AppProperties` validato, `DatabaseConfig`, springdoc, JaCoCo | Senza una variabile obbligatoria l'avvio si ferma e la nomina |
+| T04 | `V1__schema.sql`: 16 tabelle, controlli, chiavi esterne, indice parziale di D37 | 24 test del backend, 8 sullo schema |
+| T06 | `CLAUDE.md` con comandi e versioni, README con avvio e controlli, questo documento | — |
 
 ## Dove sta ogni cosa
 
 | Cosa | Dove |
 |---|---|
+| Repository | https://github.com/CristianNunezJorge/resonance-planner |
+| Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D97) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D98) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Fonti, ipotesi e stime dei dati | `backend/src/main/resources/data/README.md` |
+| Schema del database | `backend/src/main/resources/db/migration/` |
 | Icone dei personaggi | `frontend/public/characters/*.webp` |
-| Istruzioni per Claude Code | `CLAUDE.md` nella cartella principale |
 | Board Trello | https://trello.com/b/JCkNlahy/capstone |
 | Proposta per lo staff | https://claude.ai/artifact/8U2yRsZMJxTCjNkqmfWrSF |
 
@@ -44,26 +60,38 @@ La progettazione è completa e confermata, i dati di gioco sono raccolti e la bo
 ## Questioni aperte
 
 1. **Revisione dei dati da parte dell'utente.** Le card P01-P05 sono in "In verifica". Da guardare soprattutto le stime (drop dei nemici comuni, specialità, durate) e le date di partenza degli eventi.
-2. **Approvazione dello staff.** La proposta in 14 righe è pronta da inviare.
-3. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide. Se serve un allegato aggiornato, va rigenerato dai documenti attuali.
-4. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
-5. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
-6. **Card T10 su Trello:** il titolo cita ancora Neon; va aggiornato in "Dockerfile e primo deploy su Render" (D82 del 10/10).
+2. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide.
+3. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
+4. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
+
+## Promemoria per le prossime card
+
+Emersi dalle revisioni del codice del giorno 1. Non sono difetti di oggi, ma vanno fatti nella card indicata.
+
+| Card | Cosa ricordare |
+|---|---|
+| T07-T10 | Spring Security oggi blocca tutto tranne `/actuator/health` e stampa nel log una password generata. Prima del deploy serve una configurazione minima che apra `/api/game/**` (D49), Swagger (D53) e `/actuator/health`, e che tolga l'utente generato |
+| T08 e seguenti | Entità con `GenerationType.IDENTITY`, `Integer` per le colonne intere (D98), `BigDecimal` per `numeric`, enum con `@Enumerated(EnumType.STRING)` (D43) |
+| T10 | Nel Dockerfile `SPRING_PROFILES_ACTIVE=prod` e immagine `eclipse-temurin:21`. In `application-prod.yml`, `server.forward-headers-strategy: framework`, perché Swagger funzioni in HTTPS dietro Render. Sul sito statico, la regola di riscrittura `/* → /index.html` e la versione di Node |
+| T11 | `src/vite-env.d.ts` con il tipo di `VITE_API_BASE_URL`. Tema scuro: con Bootstrap 5.3 le variabili si cambiano con `@import` dei file di Bootstrap, non con `@use ... with`, oppure con `data-bs-theme="dark"` |
+| T16 | Sostituire la favicon di Vite |
+| T17 | Fuso orario `Europe/Rome` in configurazione (D41). Se l'avviso "Mockito is currently self-attaching" disturba, aggiungere l'agente di Mockito all'`argLine` di Surefire |
+| T30 | Quando si sostituisce la proposta in attesa, fare `flush()` dopo aver segnato la vecchia come `REPLACED`: Hibernate esegue gli INSERT prima degli UPDATE e l'indice di D37 scatterebbe |
+| X04 | In GitHub Actions i test hanno bisogno di `DATABASE_USERNAME` e `DATABASE_PASSWORD` come variabili d'ambiente |
 
 ## Prossimi passi
 
-1. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
-2. Invio della proposta e attesa dell'approvazione.
-3. Giorno 1: card T01-T06 di `docs/09-task.md` (repository GitHub, Docker Compose, progetto Spring Boot, Flyway V1, progetto Vite, aggiornamento di `CLAUDE.md`).
-4. Giorno 2: primo deploy online (D89).
+1. Giorno 2: card T07-T11 di `docs/09-task.md`, con il primo deploy online (D89).
+2. Il database gratuito di Render scade dopo 30 giorni: crearlo o ricrearlo a meno di 30 giorni dal Demo Day e segnarsi la data.
+3. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi riprendiamo dal prossimo passo.
+> Leggi `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 2 (card T07-T11). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
-Il messaggio completo, pensato per iniziare lo sviluppo, è in `HANDOFF.md`.
+Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`.
 
 ## Lezioni pratiche dalle sessioni
 
@@ -71,3 +99,6 @@ Il messaggio completo, pensato per iniziare lo sviluppo, è in `HANDOFF.md`.
 - Alcuni dati non sono sul wiki (per esempio le probabilità di drop): in quei casi si stima e si segna `estimated: true` (D25).
 - Trello: per scrivere nelle card serve il focus verificato sull'editor. In caso contrario i tasti diventano scorciatoie.
 - Le operazioni lunghe nel browser vanno spezzate in gruppi di circa un minuto, perché gli strumenti hanno un tempo massimo di risposta.
+- In SQL un `CHECK` che vale NULL viene considerato superato: ogni regola deve controllare anche `IS NOT NULL`.
+- Se si modifica in locale una migrazione già applicata (solo prima di unirla a `main`), Flyway rifiuta il checksum: si ricreano i database con `docker compose down -v`.
+- Una revisione del codice prima di ogni pull request ha trovato problemi veri in tutte e tre le card di codice: vale la pena farla sempre.
