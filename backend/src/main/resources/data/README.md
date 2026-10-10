@@ -26,6 +26,7 @@ Fonte principale: [Wuthering Waves Wiki](https://wutheringwaves.fandom.com) su F
 - **Fase SOL3 4** (Union Level 30) per tutte le ricompense. Le ricompense del gioco cambiano con la fase; la demo ne usa una sola.
 - **Date degli eventi:** le durate sono quelle reali (7, 39 e 44 giorni); data di inizio e ripetizione sono scelte per la demo, così c'è sempre un evento in corso o in arrivo.
 - **Descrizioni degli eventi** scritte da noi, non copiate.
+- **Medie con al massimo due decimali** (D98): la Premium Resonance Potion, misurata in 1,099, è arrotondata a 1,10.
 
 ## Stime (`estimated: true` e durate)
 

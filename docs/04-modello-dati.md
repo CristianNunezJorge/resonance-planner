@@ -1,6 +1,6 @@
 # 4. Modello dati
 
-**Stato:** completata · 01/10/2026 · aggiornata il 02/10/2026 con D93, D94 e D96
+**Stato:** completata · 01/10/2026 · aggiornata il 02/10/2026 con D93, D94 e D96 e il 10/10/2026 con D98
 
 Il database è PostgreSQL. Le tabelle si dividono in quattro gruppi:
 
@@ -164,7 +164,7 @@ Per ogni tabella: colonne, tipi PostgreSQL e regole. Tutte le chiavi esterne son
 | `id` | `bigint` | Chiave primaria generata |
 | `farming_source_id` | `varchar(60)` | → `farming_source` |
 | `material_id` | `varchar(60)` | → `material` |
-| `avg_quantity` | `numeric(8,2)` | > 0, quantità media per run |
+| `avg_quantity` | `numeric(8,2)` | > 0, quantità media per run, al massimo due decimali (D98) |
 | `estimated` | `boolean` | `true` se il numero è una nostra stima (D25) |
 
 Unico: (`farming_source_id`, `material_id`).
@@ -184,7 +184,7 @@ Il costo in Shell Credit si ricava dall'EXP con la regola `shellCreditPerExp` (D
 | `name` | `varchar(100)` | Obbligatorio |
 | `element` | `varchar(20)` | `AERO`, `ELECTRO`, `FUSION`, `GLACIO`, `HAVOC`, `SPECTRO` |
 | `weapon_type` | `varchar(20)` | `BROADBLADE`, `SWORD`, `PISTOLS`, `GAUNTLETS`, `RECTIFIER` |
-| `rarity` | `smallint` | 4 o 5 |
+| `rarity` | `integer` | 4 o 5 |
 | `role` | `varchar(60)` | Obbligatorio, es. "Main Damage Dealer" |
 | `icon` | `varchar(200)` | Facoltativo (D30) |
 
@@ -193,7 +193,7 @@ Il costo in Shell Credit si ricava dall'EXP con la regola `shellCreditPerExp` (D
 |---|---|---|
 | `id` | `bigint` | Chiave primaria generata |
 | `character_id` | `varchar(60)` | → `game_character` |
-| `to_rank` | `smallint` | ≥ 1: l'ascensione che porta a questo grado |
+| `to_rank` | `integer` | ≥ 1: l'ascensione che porta a questo grado |
 | `material_id` | `varchar(60)` | → `material` |
 | `quantity` | `integer` | > 0 |
 
@@ -215,7 +215,7 @@ Unico: (`character_id`, `to_rank`, `material_id`).
 | `effect_type` | `varchar(30)` | Facoltativo: `DROP_MULTIPLIER` |
 | `effect_source_type` | `varchar(30)` | Facoltativo: il tipo di fonte potenziato, per esempio `SIMULATION_TRAINING` (D94) |
 | `effect_multiplier` | `numeric(4,2)` | Facoltativo, > 1 |
-| `effect_daily_limit` | `smallint` | Facoltativo, > 0: quante run al giorno ricevono il moltiplicatore; vuoto = tutte (D94) |
+| `effect_daily_limit` | `integer` | Facoltativo, > 0: quante run al giorno ricevono il moltiplicatore; vuoto = tutte (D94) |
 
 Controlli: i campi della data devono corrispondere a `schedule_type`; tipo, fonte e moltiplicatore dell'effetto sono tutti vuoti o tutti compilati.
 
@@ -235,14 +235,14 @@ Chiave primaria: (`event_id`, `day_of_week`). Nessuna riga = evento attivo tutti
 | `title` | `varchar(120)` | Obbligatorio |
 | `minutes` | `integer` | > 0, stima (D31) |
 | `frequency` | `varchar(10)` | `DAILY` o `ONCE` |
-| `unlock_day` | `smallint` | Facoltativo, ≥ 1: giorno dell'evento da cui l'attività è disponibile; vuoto = dal primo giorno (D96) |
-| `position` | `smallint` | Ordine di visualizzazione |
+| `unlock_day` | `integer` | Facoltativo, ≥ 1: giorno dell'evento da cui l'attività è disponibile; vuoto = dal primo giorno (D96) |
+| `position` | `integer` | Ordine di visualizzazione |
 
 **`event_reward`**: elenco delle ricompense, in ordine.
 | Colonna | Tipo | Regole |
 |---|---|---|
 | `event_id` | `bigint` | → `game_event`, cancellata insieme all'evento |
-| `position` | `smallint` | Ordine |
+| `position` | `integer` | Ordine |
 | `reward` | `varchar(120)` | Obbligatorio |
 
 Chiave primaria: (`event_id`, `position`).
@@ -272,8 +272,8 @@ I limiti 240 e 480 non sono nel database: stanno nelle regole di gioco (D33), co
 | `id` | `bigint` | Chiave primaria generata |
 | `user_id` | `bigint` | → `users`, cancellata insieme all'utente |
 | `character_id` | `varchar(60)` | → `game_character` |
-| `current_level`, `current_rank` | `smallint` | Livello e grado di ascensione attuali (D34) |
-| `target_level`, `target_rank` | `smallint` | Obiettivo |
+| `current_level`, `current_rank` | `integer` | Livello e grado di ascensione attuali (D34) |
+| `target_level`, `target_rank` | `integer` | Obiettivo |
 
 Unico: (`user_id`, `character_id`). Le regole tra livello e grado (vedi D34) le controlla il backend, perché dipendono dalle regole di gioco.
 
@@ -321,7 +321,7 @@ Indice unico parziale: un solo `PENDING` per utente (D37).
 | `completed_at` | `timestamptz` | Quando è stata segnata come fatta |
 | `created_at` | `timestamptz` | Obbligatorio |
 
-Controlli: `FARMING` richiede fonte e numero di run; `MANUAL` richiede `kind = CUSTOM` e nessuna proposta. Indici su (`user_id`, `task_date`) e su `proposal_id`.
+Controlli: `FARMING` richiede fonte e numero di run; `MANUAL` richiede `kind = CUSTOM` e nessuna proposta. Indici su (`user_id`, `task_date`), su `proposal_id` e su `event_id`.
 
 Corrispondenza con gli stati della fase 2: `PROPOSED` = proposta, `CONFIRMED` = confermata, `DONE` = fatta, `REJECTED` = scartata, `REPLACED` = sostituita.
 
@@ -335,7 +335,7 @@ Corrispondenza con gli stati della fase 2: `PROPOSED` = proposta, `CONFIRMED` = 
 | `proposal_id` | `bigint` | → `plan_proposal`, se il messaggio ha prodotto una proposta |
 | `created_at` | `timestamptz` | Obbligatorio |
 
-Indice su (`user_id`, `created_at`).
+Indici su (`user_id`, `created_at`) e su `proposal_id`.
 
 ## Cosa non salviamo nel database
 
