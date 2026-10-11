@@ -20,6 +20,10 @@ spring:
   profiles:
     # Used when no profile is chosen; Render sets SPRING_PROFILES_ACTIVE=prod
     default: dev
+  web:
+    # Interface in Italian (D71): default validation messages too, whatever the server's language
+    locale: it
+    locale-resolver: fixed
   # No spring.datasource here: the DataSource is built from app.database by DatabaseConfig
   jpa:
     # Flyway owns the schema; Hibernate only checks that the entities match it (D38)
