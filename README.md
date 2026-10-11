@@ -4,7 +4,16 @@ Planner per **Wuthering Waves**: un calendario che unisce eventi a tempo, Wavepl
 
 Progetto capstone del Master Full-Stack AI Developer di Epicode. "Resonance Planner" è un nome provvisorio.
 
-> **Stato:** in sviluppo. Questo README viene completato durante il progetto: link alla demo online, screenshot, avvio e test arriveranno con i prossimi rilasci.
+> **Stato:** in sviluppo. Oggi online ci sono il catalogo dei personaggi e le API pubbliche; screenshot e funzionalità complete arriveranno con i prossimi rilasci.
+
+## Demo online
+
+| Cosa | Indirizzo |
+|---|---|
+| Applicazione | https://resonance-planner.onrender.com |
+| Documentazione delle API (Swagger) | https://resonance-planner-api.onrender.com/swagger-ui.html |
+
+Il backend usa il piano gratuito di Render: dopo 15 minuti senza richieste si spegne, e la prima richiesta successiva può richiedere fino a tre minuti. L'applicazione lo segnala con un messaggio durante il caricamento.
 
 ## Cosa fa
 
