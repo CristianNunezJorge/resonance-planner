@@ -1,0 +1,68 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { ApiError } from '../../api/client'
+import type { RootState } from '../../app/store'
+import { getCharacters } from './catalogApi'
+import type { CharacterSummary } from './types'
+
+// Catalog data shared by several pages (presentation, guided setup, roster): loaded once, kept in the store
+
+type LoadStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
+
+interface CatalogState {
+  characters: CharacterSummary[]
+  charactersStatus: LoadStatus
+  charactersError: string | null
+}
+
+const initialState: CatalogState = {
+  characters: [],
+  charactersStatus: 'idle',
+  charactersError: null,
+}
+
+const UNEXPECTED_ERROR_MESSAGE = 'Si è verificato un errore imprevisto. Riprova più tardi.'
+
+export const fetchCharacters = createAsyncThunk<
+  CharacterSummary[],
+  void,
+  { state: RootState; rejectValue: string }
+>(
+  'catalog/fetchCharacters',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getCharacters()
+    } catch (error) {
+      return rejectWithValue(error instanceof ApiError ? error.message : UNEXPECTED_ERROR_MESSAGE)
+    }
+  },
+  {
+    // No second request while one is running or after the data has arrived
+    condition: (_, { getState }) => {
+      const status = getState().catalog.charactersStatus
+      return status !== 'loading' && status !== 'succeeded'
+    },
+  },
+)
+
+const catalogSlice = createSlice({
+  name: 'catalog',
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCharacters.pending, (state) => {
+        state.charactersStatus = 'loading'
+        state.charactersError = null
+      })
+      .addCase(fetchCharacters.fulfilled, (state, action) => {
+        state.charactersStatus = 'succeeded'
+        state.characters = action.payload
+      })
+      .addCase(fetchCharacters.rejected, (state, action) => {
+        state.charactersStatus = 'failed'
+        state.charactersError = action.payload ?? UNEXPECTED_ERROR_MESSAGE
+      })
+  },
+})
+
+export default catalogSlice.reducer

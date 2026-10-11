@@ -1,0 +1,17 @@
+// One colour for each element, for badges and avatars (D65).
+// color-contrast() picks black or white text with a ratio of at least 4.5:1 (WCAG AA, D70).
+$element-colors: (
+  'aero': #4cc79a,
+  'electro': #a77bf3,
+  'fusion': #f0703f,
+  'glacio': #5bbbe9,
+  'havoc': #b8336f,
+  'spectro': #e8c766,
+);
+
+@each $name, $color in $element-colors {
+  .element-#{$name} {
+    background-color: $color;
+    color: color-contrast($color);
+  }
+}
