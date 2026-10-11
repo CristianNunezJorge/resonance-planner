@@ -1,8 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import catalogReducer from '../features/catalog/catalogSlice'
 import toastReducer from './toastSlice'
 
 const rootReducer = combineReducers({
   toast: toastReducer,
+  catalog: catalogReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

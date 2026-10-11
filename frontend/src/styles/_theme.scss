@@ -1,0 +1,23 @@
+// Dark theme inspired by Wuthering Waves (D65): night blue background, gold accent.
+// These variables are read by Bootstrap, so they must come before it in main.scss.
+
+$night-blue: #0d1326;
+$night-blue-raised: #151d38;
+$night-blue-border: #2a3558;
+$gold: #e0b04f;
+$gold-light: #f0c96f;
+$text-light: #e7eaf3;
+$text-muted: #a9b1c9;
+
+$primary: $gold;
+
+// Only the dark colour mode is used (index.html sets data-bs-theme="dark")
+$body-bg-dark: $night-blue;
+$body-color-dark: $text-light;
+$body-secondary-color-dark: $text-muted;
+$body-secondary-bg-dark: $night-blue-raised;
+$body-tertiary-bg-dark: $night-blue-raised;
+$border-color-dark: $night-blue-border;
+$link-color-dark: $gold-light;
+$link-hover-color-dark: $gold;
+$headings-color-dark: $text-light;

@@ -1,2 +1,5 @@
-// Bootstrap with its default theme; the dark theme of D65 arrives with T11
-@use 'bootstrap/scss/bootstrap';
+// Bootstrap 5.3 reads its variables through @import: our theme must come first (D65).
+// Bootstrap does not support @use with configuration yet, so this file keeps @import.
+@import 'theme';
+@import 'bootstrap/scss/bootstrap';
+@import 'elements';

@@ -2,9 +2,12 @@ import { render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { createMemoryRouter } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { routes } from './routes'
 import { setupStore } from './store'
+
+// The landing page loads the characters: no real network in this test
+vi.mock('../features/catalog/catalogApi', () => ({ getCharacters: vi.fn().mockResolvedValue([]) }))
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
