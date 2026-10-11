@@ -71,6 +71,8 @@ Errore:
 
 Una risorsa di un altro utente risponde 404, non 403: così non si rivela nemmeno che esiste.
 
+Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non ammesso, formato non supportato) mantengono il loro codice di stato, per esempio 405, e usano `VALIDATION_ERROR` con il messaggio "Richiesta non valida.".
+
 ## Endpoint
 
 ### Autenticazione
