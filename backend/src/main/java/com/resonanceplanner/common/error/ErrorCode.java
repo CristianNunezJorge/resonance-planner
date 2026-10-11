@@ -1,5 +1,7 @@
 package com.resonanceplanner.common.error;
 
+import com.resonanceplanner.common.api.ApiError;
+import com.resonanceplanner.common.api.ApiResponse;
 import org.springframework.http.HttpStatus;
 
 /** The error codes of docs/05-api.md, each with its HTTP status and default message in Italian. */
@@ -29,5 +31,10 @@ public enum ErrorCode {
 
     public String defaultMessage() {
         return defaultMessage;
+    }
+
+    /** The error body of an ApiResponse with this code and the given message. */
+    public ApiResponse<Void> toResponse(String message) {
+        return ApiResponse.failure(new ApiError(name(), message, null));
     }
 }

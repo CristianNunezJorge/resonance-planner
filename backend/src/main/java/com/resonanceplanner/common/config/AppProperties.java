@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -59,7 +60,11 @@ public record AppProperties(
         }
     }
 
+    // Real origins such as https://planner.example.com: no "*" and no path (D48)
     public record Cors(
             @NotEmpty(message = "set the CORS_ALLOWED_ORIGINS environment variable")
-            List<@NotBlank(message = "CORS_ALLOWED_ORIGINS must not contain empty origins") String> allowedOrigins) {}
+            List<@NotBlank(message = "CORS_ALLOWED_ORIGINS must not contain empty origins")
+                    @Pattern(regexp = "^https?://[^/*\\s]+$",
+                            message = "CORS_ALLOWED_ORIGINS must list origins like https://example.com, without * or paths")
+                    String> allowedOrigins) {}
 }

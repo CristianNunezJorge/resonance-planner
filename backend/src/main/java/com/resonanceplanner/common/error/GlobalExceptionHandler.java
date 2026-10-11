@@ -149,6 +149,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private static ApiResponse<Void> errorBody(ErrorCode code, String message) {
-        return ApiResponse.failure(new ApiError(code.name(), message, null));
+        return code.toResponse(message);
     }
 }
