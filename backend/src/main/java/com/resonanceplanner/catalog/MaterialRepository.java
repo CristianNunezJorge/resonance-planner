@@ -1,6 +1,10 @@
 package com.resonanceplanner.catalog;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Materials of the catalog, by readable id. */
-public interface MaterialRepository extends JpaRepository<Material, String> {}
+public interface MaterialRepository extends JpaRepository<Material, String> {
+
+    List<Material> findAllByOrderByCategoryAscNameAsc();
+}
