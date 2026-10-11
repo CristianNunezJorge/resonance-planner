@@ -2,3 +2,6 @@
 server:
   # Render tells the service which port to listen on
   port: ${PORT:8080}
+  # Render ends HTTPS in front of the app and forwards the original scheme, host and client address:
+  # without this Swagger would build http:// links and every user would look like the same address
+  forward-headers-strategy: native

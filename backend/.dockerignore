@@ -1,0 +1,6 @@
+# Files the Docker build does not need: smaller context, faster builds
+target/
+.idea/
+*.iml
+.vscode/
+*.log
