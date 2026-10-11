@@ -2,11 +2,12 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (10/10/2026)
+## Stato attuale (11/10/2026)
 
 - **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 98 decisioni (D1-D98).
-- **Giorno 1 completato (T01-T06):** repository pubblico, Docker Compose, backend Spring Boot con controllo delle variabili, schema Flyway con 16 tabelle, frontend Vite con router, store e test.
-- **Prossimo passo:** giorno 2, card T07-T11 di `docs/09-task.md` (errori e `ApiResponse`, catalogo, API pubbliche, primo deploy su Render, client HTTP e tema). Prima leggere i promemoria in `docs/stato-del-progetto.md`.
+- **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
+- **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
+- **Prossimo passo:** giorno 3, card T12-T16 (JWT, limiti di richieste, profilo, login e registrazione, presentazione). Prima leggere i promemoria in `docs/stato-del-progetto.md`.
 
 ## Da leggere per riprendere
 
@@ -83,19 +84,28 @@ La struttura completa prevista è in `docs/08-regole-di-lavoro.md`. Oggi esiste:
 .env.example                  variabili d'ambiente, senza valori
 docker-compose.yml            PostgreSQL locale; docker/postgres/init/ crea il database di test
 backend/
-  pom.xml, mvnw               Spring Boot 4.1.1, Maven wrapper
+  pom.xml, mvnw, Dockerfile   Spring Boot 4.1.1, Maven wrapper, immagine in due fasi per Render
   src/main/java/com/resonanceplanner/
+    common/api/               ApiResponse, ApiError (D46)
+    common/error/             ErrorCode, eccezioni, GlobalExceptionHandler
     common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig
+    common/security/          SecurityConfig (accessi e CORS), ApiSecurityErrorHandler (401/403)
+    common/data/              DataFileReader: lettura rigorosa dei JSON di data/
+    catalog/                  entità, repository, GameRules, CatalogService e CatalogController, dto/
+    event/                    GameEvent con effetto, attività, ricompense e giorni attivi
+    seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
     db/migration/V1__schema.sql
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
 frontend/
+  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
-  src/features/landing/       pagina di presentazione (segnaposto fino a T16)
-  src/components/             pagine 404 ed errore
-  src/styles/main.scss        Bootstrap
+  src/features/catalog/       tipi, chiamate e catalogSlice (personaggi caricati una volta)
+  src/features/landing/       pagina di presentazione (oggi l'elenco dei personaggi, fino a T16)
+  src/components/             LoadingState, ErrorState, pagine 404 ed errore
+  src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
 ```
@@ -107,11 +117,15 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - Test prima del codice per tutti i calcoli; copertura minima dell'80% su service e logica.
 - Nessun segreto nel codice: solo variabili d'ambiente (elenco in `docs/08-regole-di-lavoro.md`). Nuove variabili obbligatorie vanno in `AppProperties`, con un messaggio che nomina la variabile.
 - Schema: una migrazione già unita a `main` non si modifica mai, se ne crea una nuova (`V2__...`). Le colonne intere sono `integer` (D98) e ogni `CHECK` controlla anche `IS NOT NULL`, perché un controllo che vale NULL viene considerato superato.
+- Backend: gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
+- Frontend: tutte le chiamate passano da `api/client.ts`; ogni pagina usa `LoadingState` ed `ErrorState` (D69).
 - Definizione di "fatto" in 6 punti: `docs/08-regole-di-lavoro.md`.
 
 ## Link utili
 
 - Repository: https://github.com/CristianNunezJorge/resonance-planner
+- App online: https://resonance-planner.onrender.com · API e Swagger: https://resonance-planner-api.onrender.com/swagger-ui.html
+- Render: servizi `resonance-planner` (sito statico), `resonance-planner-api` (Docker), `resonance-planner-db` (PostgreSQL 16, Frankfurt, **scade il 10/11/2026**)
 - Board Trello: https://trello.com/b/JCkNlahy/capstone
 - Proposta per lo staff (artifact): https://claude.ai/artifact/8U2yRsZMJxTCjNkqmfWrSF
 
@@ -120,5 +134,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **Su questo computer:** il `JAVA_HOME` globale punta al JDK 25, quindi nei comandi va indicato il JDK 21. Il PostgreSQL 18 installato occupa la porta 5432, perciò Docker usa la 5433.
 - **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
+- **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
+- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
 - Trello: il testo digitato in una card aperta può diventare una scorciatoia da tastiera. Le descrizioni si scrivono via JavaScript con `execCommand`, dopo aver verificato il focus sull'editor. Le etichette si possono applicare con i tasti 1-0 sulla card, uno alla volta e con una pausa. Il riepilogo `/b/JCkNlahy.json` può essere in ritardo di qualche secondo.

@@ -660,14 +660,14 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** unire senza controlli.
 
 ## D82 · Deploy tutto su Render
-**Stato:** Confermata · 10/10/2026 · scelta dell'utente, sostituisce la versione del 01/10 con il database su Neon · piani da ricontrollare al primo deploy
+**Stato:** Confermata · 10/10/2026 · scelta dell'utente, sostituisce la versione del 01/10 con il database su Neon · piani ricontrollati e tempi di avvio misurati al primo deploy (11/10/2026)
 
 - **Cosa:** tutto su Render: frontend come sito statico, backend come immagine Docker, database come PostgreSQL di Render.
 - **Come:** pubblicazione automatica da `main`. Il frontend mostra un messaggio se il backend si sta riaccendendo; prima del Demo Day si apre il sito con qualche minuto di anticipo. Il backend riceve l'indirizzo del database dalle variabili d'ambiente di Render.
 - **Perché:** Render è la piattaforma usata nella settimana 20. Con una sola piattaforma c'è un solo pannello da gestire e niente strumenti fuori dal programma.
 - **Scartate:** database su Neon (la versione precedente di questa decisione: non scade, ma è una piattaforma in più fuori dal programma); Vercel per il frontend (una piattaforma in più senza vantaggi reali).
 - **Limiti noti:**
-  - il backend gratuito si spegne dopo 15 minuti di inattività e si riaccende in circa un minuto;
+  - il backend gratuito si spegne dopo 15 minuti di inattività; al risveglio la prima risposta arriva in poco meno di 3 minuti (2 min e 43 s, misurati l'11/10/2026 con 0,1 CPU), quindi il messaggio del frontend dice "fino a tre minuti";
   - il PostgreSQL gratuito di Render scade 30 giorni dopo la creazione; dopo altri 14 giorni di tolleranza viene cancellato, dati compresi.
 - **Come si gestisce la scadenza:** il database si ricrea senza perdere nulla di importante. Lo schema lo rifà Flyway (D38) e catalogo, eventi demo e account admin li ricarica l'avvio del backend (D39). Si perdono solo gli account creati da chi ha provato la demo. Va creato o ricreato a meno di 30 giorni dal Demo Day e rinnovato ogni mese finché il progetto deve restare nel portfolio, oppure si passa al piano a pagamento di Render.
 

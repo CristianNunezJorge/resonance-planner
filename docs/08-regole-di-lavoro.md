@@ -147,7 +147,7 @@ I due comandi sono scritti nel README. **Facoltativo:** se avanza tempo, GitHub 
 | Parte | Piattaforma | Piano gratuito |
 |---|---|---|
 | Frontend | Render, sito statico | Pubblicato a ogni push su `main` |
-| Backend | Render, come immagine Docker | Si spegne dopo 15 minuti di inattività e si riaccende in circa un minuto alla prima richiesta |
+| Backend | Render, come immagine Docker | Si spegne dopo 15 minuti di inattività e alla prima richiesta si riaccende in poco meno di 3 minuti (2 min e 43 s, misurati l'11/10/2026) |
 | Database | Render, PostgreSQL | Scade 30 giorni dopo la creazione; dopo altri 14 giorni viene cancellato |
 
 Tutto sta su Render, la piattaforma usata nella settimana 20.
@@ -158,7 +158,7 @@ Tutto sta su Render, la piattaforma usata nella settimana 20.
 - finché il progetto deve restare nel portfolio, ricrearlo ogni mese oppure passare al piano a pagamento di Render.
 
 **Per la riaccensione del backend:**
-- se la prima richiesta è lenta, il frontend mostra "Il server si sta avviando, può volerci fino a un minuto";
+- se la prima richiesta è lenta, dopo 5 secondi il frontend mostra "Il server si sta avviando: può volerci fino a tre minuti.";
 - prima del Demo Day si apre il sito qualche minuto prima, così il backend è già acceso.
 
 I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
