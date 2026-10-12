@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Writes 401 and 403 in the ApiResponse format (D46). The security filters run before the controllers,
- * so these errors never reach GlobalExceptionHandler.
+ * Writes 401 and 403 in the ApiResponse format (D46), and the errors of the other filters (the rate limits).
+ * The security filters run before the controllers, so these errors never reach GlobalExceptionHandler.
  */
 @Component
 public class ApiSecurityErrorHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
@@ -43,9 +43,14 @@ public class ApiSecurityErrorHandler implements AuthenticationEntryPoint, Access
     }
 
     private void write(HttpServletResponse response, ErrorCode code) throws IOException {
+        write(response, code, code.defaultMessage());
+    }
+
+    /** Also used by the other filters that answer before the controllers, like the rate limits. */
+    public void write(HttpServletResponse response, ErrorCode code, String message) throws IOException {
         response.setStatus(code.status().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        jsonMapper.writeValue(response.getOutputStream(), code.toResponse(code.defaultMessage()));
+        jsonMapper.writeValue(response.getOutputStream(), code.toResponse(message));
     }
 }

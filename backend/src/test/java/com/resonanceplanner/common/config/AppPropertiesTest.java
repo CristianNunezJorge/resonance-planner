@@ -3,9 +3,11 @@ package com.resonanceplanner.common.config;
 import static com.resonanceplanner.common.config.AppPropertiesTestSupport.VALID_PROPERTIES;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class AppPropertiesTest {
@@ -23,6 +25,63 @@ class AppPropertiesTest {
             assertThat(properties.admin().email()).isEqualTo("admin@example.com");
             assertThat(properties.cors().allowedOrigins())
                     .containsExactly("http://localhost:5173", "https://planner.example.com");
+        });
+    }
+
+    @Test
+    void usesTheLimitsOfD48WhenTheRateLimitPropertiesAreNotSet() {
+        contextRunner.withPropertyValues(VALID_PROPERTIES).run(context -> {
+            assertThat(context).hasNotFailed();
+            AppProperties.RateLimit limits = context.getBean(AppProperties.class).rateLimit();
+            assertThat(limits.authAttempts()).isEqualTo(10);
+            assertThat(limits.authWindow()).isEqualTo(Duration.ofMinutes(15));
+            assertThat(limits.generalRequests()).isEqualTo(120);
+            assertThat(limits.generalWindow()).isEqualTo(Duration.ofMinutes(1));
+        });
+    }
+
+    @Test
+    void readsTheRateLimitPropertiesWhenTheyAreSet() {
+        contextRunner.withPropertyValues(VALID_PROPERTIES)
+                .withPropertyValues("app.rate-limit.auth-attempts=50", "app.rate-limit.auth-window=30m",
+                        "app.rate-limit.general-requests=600", "app.rate-limit.general-window=10s")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    AppProperties.RateLimit limits = context.getBean(AppProperties.class).rateLimit();
+                    assertThat(limits.authAttempts()).isEqualTo(50);
+                    assertThat(limits.authWindow()).isEqualTo(Duration.ofMinutes(30));
+                    assertThat(limits.generalRequests()).isEqualTo(600);
+                    assertThat(limits.generalWindow()).isEqualTo(Duration.ofSeconds(10));
+                });
+    }
+
+    @Test
+    void readsAWindowWrittenAsABareNumberInMinutesOrSecondsAndNotInMilliseconds() {
+        contextRunner.withPropertyValues(VALID_PROPERTIES)
+                .withPropertyValues("app.rate-limit.auth-window=20", "app.rate-limit.general-window=30")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    AppProperties.RateLimit limits = context.getBean(AppProperties.class).rateLimit();
+                    assertThat(limits.authWindow()).isEqualTo(Duration.ofMinutes(20));
+                    assertThat(limits.generalWindow()).isEqualTo(Duration.ofSeconds(30));
+                });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "app.rate-limit.auth-attempts=0",
+        "app.rate-limit.auth-attempts=1000001",
+        "app.rate-limit.general-requests=-5",
+        "app.rate-limit.auth-window=0s",
+        "app.rate-limit.auth-window=500ms",
+        "app.rate-limit.auth-window=25h",
+        "app.rate-limit.general-window=-1m",
+        "app.rate-limit.general-window=PT99999999999H"
+    })
+    void stopsWhenARateLimitIsOutOfTheAllowedRange(String invalidProperty) {
+        contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(invalidProperty).run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure()).rootCause().hasMessageContaining(invalidProperty.split("=")[0]);
         });
     }
 

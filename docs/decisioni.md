@@ -840,3 +840,28 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:**
   - **Password:** nessun requisito di complessità (maiuscole, simboli), perché per una demo basta la lunghezza minima.
   - **Admin:** aggiornare la password dell'admin a ogni avvio da `ADMIN_PASSWORD`; promuovere l'account trovato con la stessa email; creare l'admin prima che il server ascolti (più lontano dalla struttura di D39).
+
+## D101 · Come funzionano i limiti di richieste
+**Stato:** Confermata · 12/10/2026 · nata da T13
+
+- **Cosa:** i numeri sono quelli di D48. Login e registrazione hanno un contatore ciascuno (10 tentativi ogni 15 minuti per indirizzo); tutte le altre richieste hanno un contatore comune (120 al minuto); il controllo di salute ha un contatore generoso a parte (600 al minuto). Superato il limite la risposta è 429 `RATE_LIMITED`, con l'header `Retry-After` e un messaggio che dice quanto aspettare.
+- **Come:**
+  - **Filtro:** `RateLimitFilter`, con contatori in memoria e senza librerie esterne (D48). Lo crea `SecurityConfig` e sta dopo il filtro CORS e prima di quello JWT: il 429 mantiene gli header CORS e una richiesta rifiutata non costa quasi nulla. `Retry-After` è tra gli header che il CORS lascia leggere al frontend.
+  - **Finestra fissa:** la prima richiesta apre la finestra e il contatore riparte quando finisce. Un tentativo conta anche se riesce.
+  - **Indirizzo del client:** quello che Tomcat ricava dagli header del proxy (`getRemoteAddr()`). Per IPv6 si usano i primi 64 bit. Quello che non è un indirizzo (con una porta attaccata, un nome, un testo lungo) va in un unico contatore "unknown": un valore sbagliato limita troppo e si vede subito, invece di non limitare per niente.
+  - **Controllo di salute:** `/actuator/health` ha un contatore suo perché Render lo chiama di continuo e un 429 potrebbe farlo riavviare, ma non è illimitato perché interroga il database. Le richieste di verifica del CORS (preflight) non arrivano al filtro.
+  - **Memoria:** i contatori scaduti si eliminano ogni minuto e ce ne sono al massimo 200.000 (circa 36 MB). Se sono tutti occupati, login e registrazione di un client nuovo ricevono 429, mentre il resto dell'API passa senza contatore.
+  - **Valori modificabili:** proprietà `app.rate-limit.*`, cioè le variabili d'ambiente `APP_RATELIMIT_AUTHATTEMPTS`, `APP_RATELIMIT_AUTHWINDOW`, `APP_RATELIMIT_GENERALREQUESTS` e `APP_RATELIMIT_GENERALWINDOW`. I valori predefiniti sono quelli di D48. Le finestre ammesse vanno da 1 secondo a 24 ore, i limiti da 1 a 1.000.000; un numero semplice è in minuti per il login e in secondi per il resto.
+  - **Log:** all'avvio si registrano i valori in uso. Al primo rifiuto di ogni finestra si registrano il contatore, l'indirizzo e gli header `X-Forwarded-For` e `CF-Connecting-IP` (ripuliti dai caratteri strani).
+  - **`/logout`:** il percorso predefinito di Spring Security è disattivato: il logout è il frontend che dimentica il token (D45).
+- **Perché:**
+  - **Contatori separati:** la registrazione costa un calcolo BCrypt e fa da test per scoprire le email già usate; il login frena chi indovina le password. Con un contatore unico, chi si registra consumerebbe i tentativi del login e viceversa.
+  - **Finestra fissa:** è la più semplice da spiegare e da testare. Il suo difetto (fino al doppio dei tentativi a cavallo di due finestre) non conta con questi numeri.
+  - **Primi 64 bit di IPv6:** chi usa IPv6 possiede miliardi di indirizzi della sua rete e cambierebbe indirizzo a ogni tentativo.
+  - **Valori modificabili:** servono ai test (altrimenti tutte le classi di test condividerebbero un contatore) e al Demo Day: se i valutatori usano la stessa rete si alza il limite con una variabile d'ambiente, senza cambiare il codice. I limiti sui valori evitano che un errore di scrittura (per esempio una finestra di 15 millisecondi) spenga la protezione senza avvisare.
+  - **Memoria piena e catalogo aperto:** le chiavi le sceglie chi manda le richieste, e il server gratuito ha 512 MB; ma il catalogo pubblico non deve diventare irraggiungibile perché qualcuno riempie i contatori.
+- **Limiti noti:**
+  - I contatori si azzerano al riavvio (D48) e più istanze del server non li condividerebbero (su Render ce n'è una sola).
+  - Dietro Render c'è Cloudflare: l'indirizzo ricavato dagli header potrebbe essere quello di un nodo Cloudflare e non del client. Si verifica online dopo il deploy leggendo la riga di log del primo rifiuto.
+  - Chi dispone di molti indirizzi IPv4 diversi aggira un limite per indirizzo. Chi ha una rete IPv6 più grande di un /64 (un /48 ne contiene 65.536) ha altrettanti contatori. Una casa o un ufficio con IPv6 condivide invece un solo contatore, come con l'IPv4 dietro un router.
+- **Scartate:** una libreria per i limiti (D48); un contatore unico per login e registrazione; un contatore per email (permetterebbe di bloccare dall'esterno l'account di una persona che si conosce, e le chiavi le sceglierebbe chi attacca); un limite totale sul login (un solo client potrebbe bloccare tutti); la finestra scorrevole (più codice per lo stesso risultato in una demo).

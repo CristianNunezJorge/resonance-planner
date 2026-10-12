@@ -84,6 +84,13 @@ class SecurityConfigTest {
     }
 
     @Test
+    void hasNoDefaultLogoutPath() throws Exception {
+        // Logging out is the frontend forgetting the token (D45); a leftover /logout would answer a redirect
+        mockMvc.perform(get("/logout")).andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/logout")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void acceptsTheBearerSchemeInAnyLetterCaseAndExtraSpacesAroundTheToken() throws Exception {
         String token = jwtService.generateToken(5L, Role.USER);
 
