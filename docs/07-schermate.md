@@ -72,7 +72,7 @@ Senza login, le pagine protette portano al login e, dopo l'accesso, riportano al
 
 **Dati:** `POST /api/auth/login`, `POST /api/auth/register`.
 **Campi:** login con email e password; registrazione con username, email e password (almeno 8 caratteri).
-**Errori:** sotto il campo sbagliato; per il login un messaggio unico "Email o password non corretti" (F2). Pulsante disabilitato durante l'invio.
+**Errori:** sotto il campo sbagliato; per il login un messaggio unico "Email o password non corrette" (F2). Pulsante disabilitato durante l'invio.
 
 ### P3 · Configurazione guidata `/configurazione`
 

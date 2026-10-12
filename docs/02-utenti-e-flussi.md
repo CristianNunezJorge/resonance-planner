@@ -41,7 +41,7 @@ La chat si apre a lato del calendario: così l'anteprima del piano proposto si v
 2. Il backend restituisce un token JWT, che il frontend allega a ogni richiesta.
 3. Se la configurazione non è completa l'utente va lì, altrimenti al calendario.
 
-**Se qualcosa va storto:** credenziali errate → un messaggio unico ("Email o password non corretti") senza dire quale dei due è sbagliato. Token scaduto → si torna al login.
+**Se qualcosa va storto:** credenziali errate → un messaggio unico ("Email o password non corrette") senza dire quale dei due è sbagliato. Token scaduto → si torna al login.
 
 Dove salvare il token nel browser lo decidiamo nella fase 5.
 

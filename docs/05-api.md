@@ -21,7 +21,7 @@ Authorization: Bearer eyJhbGciOi...
 
 | Percorsi | Chi può usarli |
 |---|---|
-| `/api/auth/**` | Tutti |
+| `POST /api/auth/register`, `POST /api/auth/login` (e `guest` nella v3) | Tutti. Gli altri percorsi sotto `/api/auth` richiedono il login |
 | `GET /api/game/**`, `GET /api/events/**` | Tutti (D49) |
 | `/api/me/**` | Utenti con login (USER, ADMIN, GUEST) |
 | `/api/admin/**` | Solo ADMIN |
@@ -81,6 +81,10 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 | POST | `/api/auth/register` | Registra un utente | 201, token e utente |
 | POST | `/api/auth/login` | Login | 200, token e utente |
 | POST | `/api/auth/guest` | Entra come ospite (v3, D15) | 201, token e utente |
+
+- **Registrazione:** `{ "username", "email", "password" }`. Username da 3 a 30 caratteri tra lettere, numeri, punto, trattino e underscore; password da 8 caratteri a 72 byte (D100). `admin` e l'email dell'admin non si possono registrare. L'email si salva in minuscolo. 409 `CONFLICT` se email o username sono già usati.
+- **Login:** `{ "email", "password" }`. Email o password sbagliate danno sempre lo stesso 401 `BAD_CREDENTIALS`.
+- **Risposta di entrambi:** `{ "token": "eyJ...", "user": { "id", "username", "email", "role", "playTimeMinutes", "onboardingCompleted" } }`. Il token vale 24 ore e contiene identificativo e ruolo (D45, D99).
 
 ### Profilo
 | Metodo | Percorso | Cosa fa | Risposta |

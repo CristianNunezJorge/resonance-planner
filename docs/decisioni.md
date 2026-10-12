@@ -803,3 +803,40 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Come:** in `V1__schema.sql` le nove colonne prima `smallint` (rarità, gradi, livelli, posizioni, limite giornaliero) sono `integer` e le entità useranno `Integer`. In `farming-sources.json` la media della Premium Resonance Potion passa da 1,099 a 1,10.
 - **Perché:** Hibernate 7 in modalità `validate` (D38) rifiuta un campo `Integer` su una colonna `smallint`, e la colonna d'ordine di una lista JPA è sempre un intero. Con tabelle così piccole lo spazio risparmiato da `smallint` non conta. Con `numeric(8,2)` PostgreSQL avrebbe arrotondato 1,099 senza avvisare: meglio arrotondare il dato in modo esplicito (differenza dello 0,1%).
 - **Scartate:** tenere `smallint` e usare `Short` nelle entità (conversioni scomode in tutto il codice); `numeric(8,3)` per conservare il terzo decimale.
+
+## D99 · Libreria JWT: JJWT
+**Stato:** Confermata · 12/10/2026 · nata dall'inizio di T12
+
+- **Cosa:** i token JWT si creano e si leggono con JJWT (`io.jsonwebtoken`), versione 0.13.0.
+- **Come:** dipendenze `jjwt-api`, `jjwt-impl` e `jjwt-jackson`; la versione sta in una proprietà del `pom.xml`, perché Spring Boot non la gestisce. Tutto il codice che usa la libreria sta in `JwtService`. La chiave è fatta dai byte UTF-8 di `JWT_SECRET` (testo semplice, non base64) e la firma è sempre HS256. Il token contiene l'identificativo dell'utente (`sub`), il ruolo e le date di emissione e scadenza (24 ore, D45). Il filtro `JwtAuthenticationFilter` viene creato dentro `SecurityConfig` e non è un bean, altrimenti Spring Boot lo registrerebbe due volte. Con un token mancante, scaduto o non valido il filtro non identifica nessuno e la richiesta prosegue: i percorsi pubblici funzionano, quelli protetti rispondono 401.
+- **Perché:** è la libreria vista nel corso (D45 sceglie già il metodo del corso) e lascia a noi il controllo del filtro, che serve per tenere usabile il catalogo anche con un token scaduto. Con Spring Boot 4 il test che crea e rilegge un token passa.
+- **Limiti noti:** l'ultima versione (0.13.0, agosto 2025) non supporta Jackson 3. `jjwt-jackson` porta quindi anche Jackson 2, accanto al Jackson 3 di Spring Boot 4: i pacchetti sono diversi e nei test non c'è nessun conflitto. Se la libreria non venisse più aggiornata, si cambia solo `JwtService`.
+- **Scartate:** il resource server di Spring con Nimbus (ufficiale, ma fuori dal programma; per quanto ne so risponde 401 a un token scaduto anche sui percorsi pubblici, quindi andrebbe aggirato); `jjwt-gson` (sostituirebbe Jackson 2 con Gson, senza vantaggi).
+
+## D100 · Regole di username, password e account admin
+**Stato:** Confermata · 12/10/2026 · nata da T12
+
+- **Cosa:** lo username ha da 3 a 30 caratteri tra lettere (di qualsiasi alfabeto), numeri, punto, trattino e underscore. La password ha da 8 caratteri a 72 byte. L'email si salva in minuscolo e senza spazi ai lati. L'account admin si crea all'avvio solo se manca, e nessuno può registrare il suo username o la sua email.
+- **Come:**
+  - **Username:** una lista di caratteri ammessi (`@Pattern`), non "tutto tranne gli spazi ai lati".
+  - **Password:** il limite si controlla sui byte con `@MaxUtf8Bytes`, non sui caratteri (`@Size`). Una password di soli spazi è ammessa, quindi al login si controlla solo che non sia vuota.
+  - **Corpo delle richieste:** Jackson rifiuta qualsiasi stringa JSON oltre 20.000 caratteri (`spring.jackson.factory.constraints.read.max-string-length`), prima di leggerla in memoria.
+  - **Login:** email sconosciuta e password sbagliata danno la stessa risposta (401 `BAD_CREDENTIALS`) e lo stesso tempo, perché con un'email sconosciuta si controlla comunque un hash BCrypt.
+  - **Registrazione:** una richiesta in gara che perde sugli indici unici di email e username riceve lo stesso 409 delle altre. Lo username `admin` (in qualsiasi combinazione di maiuscole) e l'email di `ADMIN_EMAIL` rispondono 409 come se fossero già usati.
+  - **Admin:** `AdminSeeder` crea l'account con username `admin` e non modifica mai un account esistente. Se l'email di `ADMIN_EMAIL` è già di un account non admin, l'avvio prosegue con un avviso e quell'account non diventa admin. Se lo username `admin` è di un altro account, l'avvio si ferma con un messaggio che lo spiega. Per cambiare la password dell'admin dopo la creazione si elimina la sua riga in `users` e si riavvia.
+  - **Token:** `JwtService` accetta solo i token HS256 con una data di scadenza.
+- **Perché:**
+  - **Byte e non caratteri:** BCrypt usa solo i primi 72 byte. Spring Security 7.1.1 fa fallire `encode` con un'eccezione oltre quel limite (verificato), quindi con `@Size` una password lunga o piena di emoji (4 byte l'una) darebbe un errore 500 invece di un 400.
+  - **Lista di caratteri per lo username:** così non può contenere spazi, caratteri di controllo (il NUL, che PostgreSQL non salva, darebbe un 500) né caratteri invisibili o che invertono la direzione del testo.
+  - **Limite di 20.000 caratteri:** login e registrazione sono i primi percorsi pubblici con un corpo; il limite predefinito di Jackson (100 milioni di caratteri) permetterebbe a una sola richiesta di riempire i 512 MB del server gratuito.
+  - **Login con tempo uguale:** altrimenti il tempo di risposta rivelerebbe quali email sono registrate.
+  - **Admin mai promosso:** promuovere un account esistente darebbe il controllo a chi si è registrato per primo con quell'email.
+  - **Identità dell'admin riservata:** l'account admin si crea poco dopo che il server ha iniziato ad ascoltare, e il database di Render va ricreato prima del 10/11/2026. In quei secondi qualcuno potrebbe registrare `admin` o l'email dell'admin, e l'avvio successivo non riuscirebbe a creare l'account.
+  - **Admin creato una volta sola:** così una password cambiata dopo resiste ai riavvii del piano gratuito, come per gli eventi (D39).
+- **Limiti noti:**
+  - La registrazione dice se un'email o uno username sono già usati, perché il flusso F1 lo prevede (messaggio sotto il campo): è un compromesso con la semplicità d'uso. T13 limita anche la registrazione.
+  - L'unicità dello username distingue le maiuscole (`Rover` e `rover` sono due account). Lo username non è mostrato agli altri utenti, quindi non c'è un rischio di scambio di persona; se un giorno lo fosse, servirebbe un indice su `lower(username)`.
+  - Dopo aver ricreato il database va cambiato anche `JWT_SECRET`: gli identificativi ripartono da 1 e un token ancora valido del vecchio database indicherebbe un altro utente.
+- **Scartate:**
+  - **Password:** nessun requisito di complessità (maiuscole, simboli), perché per una demo basta la lunghezza minima.
+  - **Admin:** aggiornare la password dell'admin a ogni avvio da `ADMIN_PASSWORD`; promuovere l'account trovato con la stessa email; creare l'admin prima che il server ascolti (più lontano dalla struttura di D39).
