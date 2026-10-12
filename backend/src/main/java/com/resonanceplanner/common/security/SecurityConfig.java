@@ -1,7 +1,10 @@
 package com.resonanceplanner.common.security;
 
+import com.resonanceplanner.auth.JwtAuthenticationFilter;
+import com.resonanceplanner.auth.JwtService;
 import com.resonanceplanner.common.config.AppProperties;
 import jakarta.servlet.DispatcherType;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -12,15 +15,16 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Access rules of docs/05-api.md. Login with JWT arrives with T12: until then every protected path answers 401.
+ * Access rules of docs/05-api.md and JWT login (D45): the token of the Authorization header identifies the user.
  */
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
@@ -29,8 +33,8 @@ public class SecurityConfig {
     private static final String[] PUBLIC_READ_PATHS = {"/api/game/**", "/api/events/**"};
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errorHandler)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errorHandler,
+            JwtService jwtService) throws Exception {
         http
                 // The token travels in the Authorization header, never in a cookie: no session and no CSRF (D45)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -43,15 +47,29 @@ public class SecurityConfig {
                         // HEAD too, because uptime monitors use it
                         .requestMatchers(HttpMethod.GET, PUBLIC_READ_PATHS).permitAll()
                         .requestMatchers(HttpMethod.HEAD, PUBLIC_READ_PATHS).permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // Only these two: a future path under /api/auth must not become public by accident
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(errorHandler)
-                        .accessDeniedHandler(errorHandler));
+                        .accessDeniedHandler(errorHandler))
+                // Created here and not as a bean: a Filter bean would also be registered by Spring Boot, and run twice
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    // The JWT secret is read from the environment (D83); the clock comes from ClockConfig
+    @Bean
+    public JwtService jwtService(AppProperties appProperties, Clock clock) {
+        return new JwtService(appProperties.jwt().secret(), clock);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     // Only the frontend of CORS_ALLOWED_ORIGINS may call the API from a browser (D48)
@@ -65,11 +83,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
-    }
-
-    // No users until T12: this also stops Spring Boot from creating a default user with a generated password
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager();
     }
 }

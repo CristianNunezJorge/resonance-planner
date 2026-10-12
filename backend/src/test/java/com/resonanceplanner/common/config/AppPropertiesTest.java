@@ -47,6 +47,7 @@ class AppPropertiesTest {
     @CsvSource({
         "app.admin.email=not-an-email, ADMIN_EMAIL",
         "app.jwt.secret=shorter-than-32-characters, JWT_SECRET",
+        "app.admin.password=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ADMIN_PASSWORD",
         "'app.cors.allowed-origins=,', CORS_ALLOWED_ORIGINS",
         "app.cors.allowed-origins=*, CORS_ALLOWED_ORIGINS",
         "app.cors.allowed-origins=https://planner.example.com/app, CORS_ALLOWED_ORIGINS"

@@ -1,5 +1,6 @@
 package com.resonanceplanner.common.config;
 
+import com.resonanceplanner.common.validation.MaxUtf8Bytes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -52,7 +53,9 @@ public record AppProperties(
             @NotBlank(message = "set the ADMIN_EMAIL environment variable")
             @Email(message = "ADMIN_EMAIL must be a valid email address")
             String email,
-            @NotBlank(message = "set the ADMIN_PASSWORD environment variable") String password) {
+            @NotBlank(message = "set the ADMIN_PASSWORD environment variable")
+            @MaxUtf8Bytes(value = 72, message = "ADMIN_PASSWORD must be at most 72 bytes (BCrypt limit)")
+            String password) {
 
         @Override
         public String toString() {

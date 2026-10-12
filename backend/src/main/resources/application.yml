@@ -24,6 +24,13 @@ spring:
     # Interface in Italian (D71): default validation messages too, whatever the server's language
     locale: it
     locale-resolver: fixed
+  jackson:
+    factory:
+      constraints:
+        read:
+          # The public login and registration read a JSON body before any check: without a limit (the default is
+          # 100 million characters) a single request could fill the 512 MB of the free server
+          max-string-length: 20000
   # No spring.datasource here: the DataSource is built from app.database by DatabaseConfig
   jpa:
     # Flyway owns the schema; Hibernate only checks that the entities match it (D38)
