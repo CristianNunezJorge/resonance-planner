@@ -90,6 +90,24 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void answersBadRequestWithTheFieldWhenAServiceRejectsOneValue() throws Exception {
+        mockMvc.perform(get("/test/field-validation"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.message").value("Alcuni campi non sono validi."))
+                .andExpect(jsonPath("$.error.fields.quantity").value("La quantità non è tra quelle ammesse."));
+    }
+
+    @Test
+    void answersUnauthorizedWhenTheUserOfTheTokenIsGone() throws Exception {
+        mockMvc.perform(get("/test/user-gone"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.error.message").value("Devi effettuare l'accesso."));
+    }
+
+    @Test
     void listsTheFieldsOfTheBodyAndOfThePathWhenBothAreInvalid() throws Exception {
         mockMvc.perform(post("/test/items/0").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"\", \"quantity\": 0}"))

@@ -40,6 +40,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return failure(ex.getErrorCode(), ex.getMessage());
     }
 
+    // A rule of the service on one field: same answer as the validation of the request body
+    @ExceptionHandler(FieldValidationException.class)
+    public ResponseEntity<Object> handleFieldValidation(FieldValidationException ex) {
+        return validationFailure(ex.getFields());
+    }
+
     // Login with wrong credentials (401) and denied access (403), when thrown inside a controller
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthentication(AuthenticationException ex) {

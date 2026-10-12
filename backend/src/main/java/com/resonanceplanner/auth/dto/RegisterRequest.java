@@ -1,6 +1,7 @@
 package com.resonanceplanner.auth.dto;
 
 import com.resonanceplanner.common.validation.MaxUtf8Bytes;
+import com.resonanceplanner.user.UsernameRules;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,8 +15,7 @@ import jakarta.validation.constraints.Size;
  */
 public record RegisterRequest(
         @NotNull(message = "Inserisci lo username.")
-        @Pattern(regexp = "^[\\p{L}\\p{N}_.-]{3,30}$",
-                message = "Usa da 3 a 30 caratteri tra lettere, numeri, punto, trattino e underscore.")
+        @Pattern(regexp = UsernameRules.PATTERN, message = UsernameRules.MESSAGE)
         String username,
 
         @NotBlank(message = "Inserisci l'email.")

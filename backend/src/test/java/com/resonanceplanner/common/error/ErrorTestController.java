@@ -50,6 +50,16 @@ class ErrorTestController {
         throw new ConflictException("Oggetto già presente.");
     }
 
+    @GetMapping("/field-validation")
+    ApiResponse<Void> fieldValidation() {
+        throw new FieldValidationException("quantity", "La quantità non è tra quelle ammesse.");
+    }
+
+    @GetMapping("/user-gone")
+    ApiResponse<Void> userGone() {
+        throw new UnauthorizedException();
+    }
+
     @GetMapping("/range")
     ApiResponse<Integer> range(@RequestParam @Min(value = 1, message = "Indica almeno un giorno.") @Max(62) int days) {
         return ApiResponse.success(days);

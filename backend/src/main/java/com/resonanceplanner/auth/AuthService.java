@@ -8,6 +8,7 @@ import com.resonanceplanner.common.error.ConflictException;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
 import com.resonanceplanner.user.UserRepository;
+import com.resonanceplanner.user.UserService;
 import com.resonanceplanner.user.dto.UserResponse;
 import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,11 +24,12 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private static final String EMAIL_TAKEN = "Questa email è già registrata.";
-    private static final String USERNAME_TAKEN = "Questo username è già in uso.";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    // The rules on the username are the same as in the profile
+    private final UserService userService;
 
     // Nobody can register the identity of the admin, even in the seconds before the admin account exists (D100)
     private final String adminEmail;
@@ -36,10 +38,11 @@ public class AuthService {
     private final String unknownAccountHash;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-            AppProperties appProperties) {
+            AppProperties appProperties, UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.userService = userService;
         this.adminEmail = User.normalizeEmail(appProperties.admin().email());
         this.unknownAccountHash = passwordEncoder.encode(UUID.randomUUID().toString());
     }
@@ -73,9 +76,7 @@ public class AuthService {
         if (email.equals(adminEmail) || userRepository.existsByEmail(email)) {
             throw new ConflictException(EMAIL_TAKEN);
         }
-        if (User.ADMIN_USERNAME.equalsIgnoreCase(username) || userRepository.existsByUsername(username)) {
-            throw new ConflictException(USERNAME_TAKEN);
-        }
+        userService.requireUsernameAvailable(username);
     }
 
     private AuthResponse toResponse(User user) {
