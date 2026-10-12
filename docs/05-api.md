@@ -94,6 +94,11 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 | DELETE | `/api/me` | Elimina account e dati (D42) | 204 |
 | POST | `/api/me/onboarding` | Salva tutta la configurazione guidata in una volta (D50) | 200; 409 se già completata |
 
+- **Risposta di `GET` e `PATCH`:** lo stesso `user` della registrazione (`id`, `username`, `email`, `role`, `playTimeMinutes`, `onboardingCompleted`).
+- **`PATCH`:** `{ "username": "rover.new", "playTimeMinutes": 60 }`, tutti e due facoltativi (D102). Il tempo di gioco è 30, 60 o 120 (opzioni di `GET /api/game/rules`) e lo username segue le regole della registrazione. 400 con il campo sbagliato (`fields.username` o `fields.playTimeMinutes`), 409 se lo username è già usato. Se un valore non è valido non si salva niente. Email, ruolo e gli altri campi si ignorano.
+- **`DELETE`:** 204 senza contenuto; roster, inventario, attività, proposte e messaggi spariscono con l'account.
+- **Token di un account eliminato:** tutti gli endpoint sotto `/api/me` rispondono 401 `UNAUTHORIZED`, perché il token vale fino alla scadenza ma il suo utente non esiste più.
+
 ### Catalogo di gioco
 | Metodo | Percorso | Cosa fa |
 |---|---|---|

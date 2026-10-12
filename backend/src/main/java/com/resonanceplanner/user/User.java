@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.Locale;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * An account of the application. The table is called users because "user" is a reserved word of PostgreSQL.
@@ -17,6 +18,9 @@ import java.util.Locale;
  */
 @Entity
 @Table(name = "users")
+// An UPDATE writes only the columns that changed: two requests that change different fields of the same user at the
+// same moment (the profile, the guided setup, the Waveplate) must not cancel each other out
+@DynamicUpdate
 public class User {
 
     // Username of the account created at startup from ADMIN_EMAIL; nobody can register it (D100)
@@ -69,6 +73,14 @@ public class User {
     /** The form in which an email is saved and searched: no surrounding spaces, all lowercase. */
     public static String normalizeEmail(String email) {
         return email.strip().toLowerCase(Locale.ROOT);
+    }
+
+    public void changeUsername(String username) {
+        this.username = username;
+    }
+
+    public void changePlayTimeMinutes(int playTimeMinutes) {
+        this.playTimeMinutes = playTimeMinutes;
     }
 
     public Long getId() {

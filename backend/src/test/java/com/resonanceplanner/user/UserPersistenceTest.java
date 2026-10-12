@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,9 @@ class UserPersistenceTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Test
     void savesAndReloadsANewUserWithTheDefaultsOfTheSchema() {
@@ -65,6 +69,21 @@ class UserPersistenceTest {
 
         assertThatThrownBy(() -> userRepository.saveAndFlush(User.create("rover", "other@example.com", "hash", Role.USER)))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void updatesOnlyTheColumnsThatChangedSoConcurrentRequestsDoNotCancelEachOtherOut() {
+        User user = userRepository.saveAndFlush(User.create("rover", "rover@example.com", "hash", Role.USER));
+        // Another request sets the play time after this one has loaded the user and before it saves
+        jdbc.update("UPDATE users SET play_time_minutes = 60 WHERE id = ?", user.getId());
+
+        user.changeUsername("rover.new");
+        userRepository.flush();
+
+        assertThat(jdbc.queryForObject("SELECT play_time_minutes FROM users WHERE id = ?", Integer.class, user.getId()))
+                .isEqualTo(60);
+        assertThat(jdbc.queryForObject("SELECT username FROM users WHERE id = ?", String.class, user.getId()))
+                .isEqualTo("rover.new");
     }
 
     @Test

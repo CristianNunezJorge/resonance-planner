@@ -37,6 +37,16 @@ class DatabaseSchemaTest {
     }
 
     @Test
+    void deletesEveryRowThatDependsOnAUserTogetherWithTheUser() {
+        // D42: with a foreign key to users that does not cascade, deleting an account would fail or leave data behind
+        String foreignKeysToUsers = "FROM pg_constraint WHERE contype = 'f' AND confrelid = 'users'::regclass";
+
+        assertThat(jdbc.queryForObject("SELECT count(*) " + foreignKeysToUsers, Integer.class)).isGreaterThanOrEqualTo(5);
+        assertThat(jdbc.queryForList("SELECT conrelid::regclass::text || '.' || conname " + foreignKeysToUsers
+                + " AND confdeltype <> 'c'", String.class)).isEmpty();
+    }
+
+    @Test
     void usesIntegerInsteadOfSmallintSoHibernateCanMapIntegerFields() {
         List<String> smallintColumns = jdbc.queryForList("""
                 SELECT table_name || '.' || column_name FROM information_schema.columns

@@ -13,9 +13,11 @@ import com.resonanceplanner.auth.dto.LoginRequest;
 import com.resonanceplanner.auth.dto.RegisterRequest;
 import com.resonanceplanner.common.config.AppProperties;
 import com.resonanceplanner.common.error.ConflictException;
+import com.resonanceplanner.testsupport.TestGameRules;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
 import com.resonanceplanner.user.UserRepository;
+import com.resonanceplanner.user.UserService;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +52,9 @@ class AuthServiceTest {
     void setUp() {
         // The service builds the hash for unknown accounts when it is created: it must be a real value in these tests
         when(passwordEncoder.encode(anyString())).thenReturn(UNKNOWN_ACCOUNT_HASH);
-        authService = new AuthService(userRepository, passwordEncoder, jwtService, appProperties());
+        // The real UserService on the mocked repository: it holds the rule on the username that registration uses
+        UserService userService = new UserService(userRepository, TestGameRules.withPlayTimeOptions(30, 60, 120));
+        authService = new AuthService(userRepository, passwordEncoder, jwtService, appProperties(), userService);
     }
 
     private static AppProperties appProperties() {

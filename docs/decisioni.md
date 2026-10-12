@@ -867,3 +867,28 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - Chi esce da indirizzi Cloudflare (WARP, Workers) viene saltato anche lui, e può scegliersi l'indirizzo scrivendolo in `X-Forwarded-For`. È un caso raro che accettiamo.
   - Chi dispone di molti indirizzi IPv4 diversi aggira un limite per indirizzo. Chi ha una rete IPv6 più grande di un /64 (un /48 ne contiene 65.536) ha altrettanti contatori. Una casa o un ufficio con IPv6 condivide invece un solo contatore, come con l'IPv4 dietro un router.
 - **Scartate:** una libreria per i limiti (D48); un contatore unico per login e registrazione; un contatore per email (permetterebbe di bloccare dall'esterno l'account di una persona che si conosce, e le chiavi le sceglierebbe chi attacca); un limite totale sul login (un solo client potrebbe bloccare tutti); la finestra scorrevole (più codice per lo stesso risultato in una demo).
+
+## D102 · Modifica ed eliminazione del profilo
+**Stato:** Confermata · 12/10/2026 · nata da T14
+
+- **Cosa:** `PATCH /api/me` cambia solo lo username e il tempo di gioco. Email, ruolo e gli altri campi dell'account non si cambiano: se arrivano nella richiesta si ignorano. I campi che mancano restano come sono, e una richiesta vuota è ammessa e non cambia niente. Il tempo di gioco deve essere una delle opzioni delle regole di gioco (30, 60 o 120 minuti). `DELETE /api/me` cancella l'account con tutti i suoi dati. Se il token appartiene a un utente che non esiste più, i tre endpoint rispondono 401.
+- **Come:**
+  - **Username:** stesse regole della registrazione (formato di D100, non quello di un altro utente, non `admin`), con un solo controllo condiviso in `UserService`. Tenere il proprio username va bene.
+  - **Errori su un campo:** `FieldValidationException` per le regole che conosce solo il service (D47) risponde 400 con il campo, come la validazione del corpo.
+  - **Tutto o niente:** se un valore non è valido non si salva niente. Se due richieste prendono lo stesso username insieme, l'indice unico decide e la perdente riceve lo stesso 409; ogni altro errore del database non si traveste da "username già usato".
+  - **Aggiornamenti contemporanei:** `@DynamicUpdate` su `User`: un `UPDATE` scrive solo le colonne cambiate, così due richieste che modificano campi diversi dello stesso utente (profilo, configurazione guidata, Waveplate) non si annullano a vicenda.
+  - **Eliminazione:** una sola istruzione `delete from users`; il database cancella a cascata roster, inventario, proposte, attività e messaggi (D42). Un test lo prova con righe in tutte le cinque tabelle, compresi i collegamenti verso le proposte.
+  - **Swagger:** il pulsante "Authorize" per inserire il token (D53); solo gli endpoint del profilo mostrano il lucchetto.
+- **Perché:**
+  - **Email non modificabile:** è la credenziale di accesso, e cambiarla vorrebbe dire verificare il nuovo indirizzo, ma la demo non invia email.
+  - **Campi ignorati:** il DTO della modifica non contiene ruolo, email o identificativo, quindi nessuno può cambiarli per errore o per attacco (mass assignment).
+  - **401 per l'utente scomparso:** il token resta valido fino alla scadenza (D45); senza questo controllo la richiesta finirebbe in un errore di chiave esterna, cioè un 500. Vale anche per le card successive.
+  - **Un'istruzione sola:** non serve caricare l'utente con tutte le sue relazioni, e la cascata resta nel database.
+- **Limiti noti:**
+  - L'admin può eliminare il proprio account (il profilo vale per USER e ADMIN): al riavvio successivo `AdminSeeder` lo ricrea con `ADMIN_PASSWORD`.
+  - La conferma scrivendo la propria email (F12) è solo nel frontend; il backend si fida del token. Chi riesce a rubare il token (per esempio con un attacco XSS) può quindi eliminare l'account, e lo stesso vale per un clic su "Try it out" in Swagger: la descrizione del pulsante "Authorize" lo avverte.
+  - Solo gli endpoint sotto `/api/me` controllano che l'utente del token esista ancora. Il token di un admin eliminato (per esempio cambiando la password dell'admin con "elimina la riga e riavvia") resterebbe valido come ADMIN su `/api/admin/**` fino alla scadenza: la card degli endpoint admin deve controllare che l'utente esista e sia ancora admin, e per annullare tutti i token insieme si cambia `JWT_SECRET`.
+  - Con `PATCH` si può provare uno username dopo l'altro (409 se è usato, 200 se è libero) fino a 120 volte al minuto per indirizzo, molto più che con la registrazione. Gli username non sono segreti né credenziali (il login usa l'email), quindi lo accettiamo.
+  - Caratteri di altri alfabeti simili a quelli latini (una "а" cirillica) aggirano il controllo sul nome `admin`. Oggi nessuna schermata mostra gli username agli altri utenti, quindi non c'è un rischio di scambio di persona; se un giorno li mostrasse, servirebbe un controllo sui caratteri simili.
+  - Un numero con decimali (`60.9`) o scritto come testo (`"60"`) viene letto come `60`, e un campo `null` vale come un campo mancante.
+- **Scartate:** cambiare l'email; `PUT` al posto di `PATCH`; 404 invece di 401 per l'utente eliminato (l'utente non è una risorsa che si cerca: è l'identità del token); eliminazione "morbida" con un contrassegno invece della cancellazione (non rispetterebbe il diritto all'oblio di D42).
