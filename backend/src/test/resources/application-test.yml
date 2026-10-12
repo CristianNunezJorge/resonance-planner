@@ -16,3 +16,8 @@ app:
     password: test-only-admin-password
   cors:
     allowed-origins: http://localhost:5173
+  # The tests of all the classes call the application from the same address and share its counters: the limits are
+  # so high that they never get in the way. RateLimitIntegrationTest sets its own small ones.
+  rate-limit:
+    auth-attempts: 100000
+    general-requests: 100000

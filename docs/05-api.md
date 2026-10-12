@@ -259,11 +259,11 @@ Il secondo evento è attivo solo nel weekend: anche se l'edizione va dal 28 sett
 
 | Cosa | Limite |
 |---|---|
-| Login e registrazione | 10 tentativi ogni 15 minuti per indirizzo IP |
+| Login e registrazione | 10 tentativi ogni 15 minuti per indirizzo IP, con un contatore per il login e uno per la registrazione (D101) |
 | Messaggi all'agente | 20 al giorno per utente |
 | Tutte le altre API | 120 richieste al minuto per indirizzo IP |
 
-Superato un limite, la risposta è 429 con l'orario in cui si può riprovare.
+Superato un limite, la risposta è 429 `RATE_LIMITED` con l'header `Retry-After` (secondi da aspettare) e un messaggio che dice quanto aspettare ("Troppe richieste: riprova tra 12 minuti."). Il controllo di salute ha un contatore suo (600 al minuto) e le richieste di verifica del CORS non contano. Il frontend può leggere `Retry-After` (è tra gli header esposti dal CORS). I numeri si possono cambiare con le variabili d'ambiente `APP_RATELIMIT_*` (D101).
 
 ## Fuori scope
 

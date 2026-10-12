@@ -16,6 +16,7 @@ import com.resonanceplanner.common.error.ConflictException;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
 import com.resonanceplanner.user.UserRepository;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,8 @@ class AuthServiceTest {
                 new AppProperties.Database("jdbc:postgresql://localhost:5433/test", "user", "password"),
                 new AppProperties.Jwt("0123456789abcdef0123456789abcdef"),
                 new AppProperties.Admin("Admin@Example.com", "admin-password"),
-                new AppProperties.Cors(List.of("http://localhost:5173")));
+                new AppProperties.Cors(List.of("http://localhost:5173")),
+                new AppProperties.RateLimit(10, Duration.ofMinutes(15), 120, Duration.ofMinutes(1)));
     }
 
     @Test

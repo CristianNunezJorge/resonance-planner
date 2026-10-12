@@ -34,13 +34,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, ApiSecurityErrorHandler errorHandler,
-            JwtService jwtService) throws Exception {
+            JwtService jwtService, AppProperties appProperties, Clock clock) throws Exception {
         http
                 // The token travels in the Authorization header, never in a cookie: no session and no CSRF (D45)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                // Logging out means forgetting the token in the browser (D45): the default /logout would only
+                // answer a pointless redirect, before the rate limits
+                .logout(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
@@ -56,8 +59,12 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(errorHandler)
                         .accessDeniedHandler(errorHandler))
-                // Created here and not as a bean: a Filter bean would also be registered by Spring Boot, and run twice
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                // Both filters are created here and not as beans: a Filter bean would also be registered by
+                // Spring Boot, and run twice. The limits come first, so a refused request costs almost nothing
+                // (no token to check, no body to read), and after CorsFilter, so the 429 keeps the CORS headers.
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new RateLimitFilter(appProperties.rateLimit(), clock, errorHandler),
+                        JwtAuthenticationFilter.class);
         return http.build();
     }
 
@@ -79,6 +86,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(appProperties.cors().allowedOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE));
+        // The browser hides the other response headers from the frontend: this one tells when to try again (D101)
+        configuration.setExposedHeaders(List.of(HttpHeaders.RETRY_AFTER));
         configuration.setMaxAge(Duration.ofHours(1));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);

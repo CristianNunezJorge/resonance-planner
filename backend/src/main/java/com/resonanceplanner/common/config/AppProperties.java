@@ -8,8 +8,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.boot.convert.DurationUnit;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -23,7 +27,8 @@ public record AppProperties(
         @Valid @NotNull Database database,
         @Valid @NotNull Jwt jwt,
         @Valid @NotNull Admin admin,
-        @Valid @NotNull Cors cors) {
+        @Valid @NotNull Cors cors,
+        @DefaultValue RateLimit rateLimit) {
 
     private static final String HIDDEN = "***";
 
@@ -70,4 +75,41 @@ public record AppProperties(
                     @Pattern(regexp = "^https?://[^/*\\s]+$",
                             message = "CORS_ALLOWED_ORIGINS must list origins like https://example.com, without * or paths")
                     String> allowedOrigins) {}
+
+    /**
+     * Limits of requests per client address (D48, D101). Not required: without properties the values of D48 apply.
+     * They can be changed with the environment variables APP_RATELIMIT_AUTHATTEMPTS and the like, for example
+     * to give more room on the day of the demo, when many people may share one network address.
+     * A window written as a bare number counts minutes (authentication) or seconds (general): a bare number would
+     * otherwise mean milliseconds, and "15" would silently switch the protection off.
+     */
+    public record RateLimit(
+            @DefaultValue("10") int authAttempts,
+            @DefaultValue("15") @DurationUnit(ChronoUnit.MINUTES) Duration authWindow,
+            @DefaultValue("120") int generalRequests,
+            @DefaultValue("60") @DurationUnit(ChronoUnit.SECONDS) Duration generalWindow) {
+
+        private static final int MAX_REQUESTS = 1_000_000;
+        private static final Duration MIN_WINDOW = Duration.ofSeconds(1);
+        private static final Duration MAX_WINDOW = Duration.ofHours(24);
+
+        public RateLimit {
+            requireRequests("app.rate-limit.auth-attempts", authAttempts);
+            requireWindow("app.rate-limit.auth-window", authWindow);
+            requireRequests("app.rate-limit.general-requests", generalRequests);
+            requireWindow("app.rate-limit.general-window", generalWindow);
+        }
+
+        private static void requireRequests(String property, int value) {
+            if (value < 1 || value > MAX_REQUESTS) {
+                throw new IllegalArgumentException(property + " must be between 1 and " + MAX_REQUESTS);
+            }
+        }
+
+        private static void requireWindow(String property, Duration value) {
+            if (value == null || value.compareTo(MIN_WINDOW) < 0 || value.compareTo(MAX_WINDOW) > 0) {
+                throw new IllegalArgumentException(property + " must be between 1 second and 24 hours");
+            }
+        }
+    }
 }

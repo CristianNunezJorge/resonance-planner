@@ -180,6 +180,7 @@ I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Account admin creato all'avvio (D19) |
 | `CORS_ALLOWED_ORIGINS` | Dominio del frontend (D48) |
 | `VITE_API_BASE_URL` | Indirizzo del backend, per il frontend |
+| `APP_RATELIMIT_AUTHATTEMPTS`, `APP_RATELIMIT_AUTHWINDOW`, `APP_RATELIMIT_GENERALREQUESTS`, `APP_RATELIMIT_GENERALWINDOW` | Facoltative: limiti di richieste (D48, D101). Predefiniti: 10 tentativi ogni 15 minuti per login e registrazione, 120 richieste al minuto per il resto. Una finestra scritta come numero semplice vale minuti (`AUTHWINDOW`) o secondi (`GENERALWINDOW`) |
 
 - `.env.example` elenca le variabili senza valori ed entra nel repository; `.env` con i valori veri è escluso da Git.
 - All'avvio il backend controlla che le variabili obbligatorie ci siano, e se ne manca una si ferma con un messaggio chiaro.
