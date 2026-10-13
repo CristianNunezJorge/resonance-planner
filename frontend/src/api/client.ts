@@ -17,6 +17,7 @@ const INVALID_REQUEST_MESSAGE = 'Richiesta non valida.'
 const UNEXPECTED_ERROR_MESSAGE = 'Si è verificato un errore imprevisto. Riprova più tardi.'
 const NOT_READY_MESSAGE = 'Il server non è ancora pronto: riprova tra qualche istante.'
 const NO_CONTENT = 204
+const UNAUTHORIZED = 401
 // Answers of Render's gateway while the free backend is still waking up (D82)
 const GATEWAY_STATUSES = [502, 503, 504]
 
@@ -34,9 +35,34 @@ export class ApiError extends Error {
   }
 }
 
+// What a form or a page needs to show about a failed request
+export interface RequestFailure {
+  code: string
+  message: string
+  status: number
+  fields?: Record<string, string>
+}
+
+// Called when a request that carried a token is answered with 401: the token has expired or its
+// account is gone (D45, D102). The store registers it, so the client does not depend on Redux.
+// It receives the refused token, so a late answer for an old session cannot end the next one.
+let unauthorizedHandler: ((refusedToken: string) => void) | null = null
+
+export function setUnauthorizedHandler(handler: ((refusedToken: string) => void) | null): void {
+  unauthorizedHandler = handler
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, signal } = options
+  // The token goes only to our backend: a path like //other.site would change the destination
+  if (!path.startsWith('/') || path.startsWith('//')) {
+    throw new Error(`Invalid API path: ${path}`)
+  }
   const response = await send(path, method, buildHeaders(body, token), body, signal)
+  // Also when the answer has no ApiResponse body (a gateway, a firewall): the token is refused all the same
+  if (token && response.status === UNAUTHORIZED) {
+    unauthorizedHandler?.(token)
+  }
   if (response.status === NO_CONTENT) {
     return undefined as T
   }
@@ -54,6 +80,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     )
   }
   return envelope.data as T
+}
+
+/** Turns anything thrown by apiRequest into a plain object that can travel in a Redux action. */
+export function describeError(error: unknown): RequestFailure {
+  if (error instanceof ApiError) {
+    return { code: error.code, message: error.message, status: error.status, fields: error.fields }
+  }
+  return { code: 'INTERNAL_ERROR', message: UNEXPECTED_ERROR_MESSAGE, status: 0 }
 }
 
 function buildHeaders(body: unknown, token: string | null | undefined): Headers {

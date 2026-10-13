@@ -37,7 +37,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
-        return failure(ex.getErrorCode(), ex.getMessage());
+        ErrorCode code = ex.getErrorCode();
+        // Only an error about a field has fields in the answer (a conflict on the email or on the username)
+        Map<String, String> fields = ex.getFields().isEmpty() ? null : ex.getFields();
+        return ResponseEntity.status(code.status())
+                .body(ApiResponse.failure(new ApiError(code.name(), ex.getMessage(), fields)));
     }
 
     // A rule of the service on one field: same answer as the validation of the request body

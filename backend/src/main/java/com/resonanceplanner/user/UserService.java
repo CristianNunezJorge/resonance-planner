@@ -65,7 +65,7 @@ public class UserService {
             if (!isUniqueViolation(e)) {
                 throw e;
             }
-            throw new ConflictException(USERNAME_TAKEN);
+            throw new ConflictException(USERNAME_TAKEN, "username");
         }
         return UserResponse.from(user);
     }
@@ -81,7 +81,7 @@ public class UserService {
     /** Nobody can take the username of someone else, nor the one reserved for the admin (D100). */
     public void requireUsernameAvailable(String username) {
         if (User.ADMIN_USERNAME.equalsIgnoreCase(username) || userRepository.existsByUsername(username)) {
-            throw new ConflictException(USERNAME_TAKEN);
+            throw new ConflictException(USERNAME_TAKEN, "username");
         }
     }
 

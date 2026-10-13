@@ -74,7 +74,7 @@ public class AuthService {
 
     private void failIfTaken(String email, String username) {
         if (email.equals(adminEmail) || userRepository.existsByEmail(email)) {
-            throw new ConflictException(EMAIL_TAKEN);
+            throw new ConflictException(EMAIL_TAKEN, "email");
         }
         userService.requireUsernameAvailable(username);
     }

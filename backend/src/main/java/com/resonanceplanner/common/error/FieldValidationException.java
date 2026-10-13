@@ -9,14 +9,7 @@ import java.util.Map;
  */
 public class FieldValidationException extends ApiException {
 
-    private final Map<String, String> fields;
-
     public FieldValidationException(String field, String message) {
-        super(ErrorCode.VALIDATION_ERROR, message);
-        this.fields = Map.of(field, message);
-    }
-
-    public Map<String, String> getFields() {
-        return fields;
+        super(ErrorCode.VALIDATION_ERROR, message, Map.of(field, message));
     }
 }
