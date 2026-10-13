@@ -15,3 +15,13 @@ $element-colors: (
     color: color-contrast($color);
   }
 }
+
+// The close button of a notification is full strength: at the default half opacity its icon is too faint (WCAG 1.4.11)
+.toast .btn-close {
+  opacity: 1;
+}
+
+// The main area receives the focus when the page changes: it is not a control, so it needs no ring
+#contenuto:focus {
+  outline: none;
+}

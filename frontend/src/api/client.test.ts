@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiRequest } from './client'
+import { ApiError, apiRequest, describeError, setUnauthorizedHandler } from './client'
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -118,6 +118,13 @@ describe('apiRequest', () => {
     expect((error as ApiError).cause).toBe(networkFailure)
   })
 
+  it('never sends a request to another address: the path must start with a single slash', async () => {
+    for (const path of ['//other.example.com/api/me', 'https://other.example.com/api/me', 'api/me', '']) {
+      await expect(apiRequest(path, { token: 'abc.def.ghi' }), path).rejects.toThrow('Invalid API path')
+    }
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
   it('sends the token and the body as JSON', async () => {
     fetchMock.mockResolvedValue(jsonResponse({ success: true, data: { id: 1 }, error: null }, 201))
 
@@ -153,5 +160,74 @@ describe('apiRequest', () => {
     const error = await apiRequest('/api/game/characters', { signal: controller.signal }).catch((e: unknown) => e)
 
     expect((error as DOMException).name).toBe('AbortError')
+  })
+
+  describe('when the server answers 401', () => {
+    const unauthorized = () =>
+      jsonResponse({ success: false, data: null, error: { code: 'UNAUTHORIZED', message: 'Devi effettuare l\x27accesso.' } }, 401)
+
+    afterEach(() => {
+      setUnauthorizedHandler(null)
+    })
+
+    it('tells the handler when the request carried a token, so the session can end', async () => {
+      const handler = vi.fn()
+      setUnauthorizedHandler(handler)
+      fetchMock.mockResolvedValue(unauthorized())
+
+      const error = await apiRequest('/api/me', { token: 'old.token' }).catch((e: unknown) => e)
+
+      expect(handler).toHaveBeenCalledExactlyOnceWith('old.token')
+      expect(error).toMatchObject({ code: 'UNAUTHORIZED', status: 401 })
+    })
+
+    it('does not call the handler when there was no token, like a wrong password at login', async () => {
+      const handler = vi.fn()
+      setUnauthorizedHandler(handler)
+      fetchMock.mockResolvedValue(
+        jsonResponse({ success: false, data: null, error: { code: 'BAD_CREDENTIALS', message: 'Email o password non corrette.' } }, 401),
+      )
+
+      await apiRequest('/api/auth/login', { method: 'POST', body: {} }).catch(() => undefined)
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('calls the handler also when the answer is not in the ApiResponse format, like a page of a gateway', async () => {
+      const handler = vi.fn()
+      setUnauthorizedHandler(handler)
+      fetchMock.mockResolvedValue(new Response('<html>Unauthorized</html>', { status: 401 }))
+
+      await apiRequest('/api/me', { token: 'old.token' }).catch(() => undefined)
+
+      expect(handler).toHaveBeenCalledExactlyOnceWith('old.token')
+    })
+
+    it('still fails with the ApiError when no handler is registered', async () => {
+      fetchMock.mockResolvedValue(unauthorized())
+
+      await expect(apiRequest('/api/me', { token: 'old.token' })).rejects.toBeInstanceOf(ApiError)
+    })
+  })
+})
+
+describe('describeError', () => {
+  it('keeps code, message, status and fields of an ApiError', () => {
+    const error = new ApiError('VALIDATION_ERROR', 'Alcuni campi non sono validi.', 400, { email: 'Inserisci l\x27email.' })
+
+    expect(describeError(error)).toEqual({
+      code: 'VALIDATION_ERROR',
+      message: 'Alcuni campi non sono validi.',
+      status: 400,
+      fields: { email: 'Inserisci l\x27email.' },
+    })
+  })
+
+  it('gives a generic message to anything else', () => {
+    expect(describeError(new TypeError('boom'))).toEqual({
+      code: 'INTERNAL_ERROR',
+      message: 'Si è verificato un errore imprevisto. Riprova più tardi.',
+      status: 0,
+    })
   })
 })

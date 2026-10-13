@@ -170,10 +170,12 @@ class UserControllerTest {
     void refusesAUsernameOfSomeoneElseAndTheUsernameOfTheAdmin() throws Exception {
         mockMvc.perform(as(rover, patchWith("{\"username\":\"other\"}")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."));
+                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."))
+                .andExpect(jsonPath("$.error.fields.username").value("Questo username è già in uso."));
         mockMvc.perform(as(rover, patchWith("{\"username\":\"ADMIN\"}")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."));
+                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."))
+                .andExpect(jsonPath("$.error.fields.username").value("Questo username è già in uso."));
 
         assertThat(usernameOf(rover)).isEqualTo("rover");
     }

@@ -90,6 +90,22 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void answersConflictWithoutFieldsWhenTheConflictIsNotAboutAField() throws Exception {
+        mockMvc.perform(get("/test/conflict"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.fields").doesNotExist());
+    }
+
+    @Test
+    void namesTheFieldOfAConflictThatIsAboutOne() throws Exception {
+        mockMvc.perform(get("/test/conflict-on-field"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code").value("CONFLICT"))
+                .andExpect(jsonPath("$.error.message").value("Nome già usato."))
+                .andExpect(jsonPath("$.error.fields.name").value("Nome già usato."));
+    }
+
+    @Test
     void answersBadRequestWithTheFieldWhenAServiceRejectsOneValue() throws Exception {
         mockMvc.perform(get("/test/field-validation"))
                 .andExpect(status().isBadRequest())

@@ -1,20 +1,25 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore, type ThunkAction, type UnknownAction } from '@reduxjs/toolkit'
+import authReducer from '../features/auth/authSlice'
 import catalogReducer from '../features/catalog/catalogSlice'
 import toastReducer from './toastSlice'
 
 const rootReducer = combineReducers({
   toast: toastReducer,
   catalog: catalogReducer,
+  auth: authReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>
 
 // A factory lets each test start from a fresh store
 export function setupStore(preloadedState?: Partial<RootState>) {
-  return configureStore({ reducer: rootReducer, preloadedState })
+  // No Redux DevTools in production: the actions of login and registration carry the password and the token
+  return configureStore({ reducer: rootReducer, preloadedState, devTools: import.meta.env.DEV })
 }
 
 export const store = setupStore()
 
 export type AppStore = ReturnType<typeof setupStore>
 export type AppDispatch = AppStore['dispatch']
+// A function that dispatches several actions, like logout
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, UnknownAction>

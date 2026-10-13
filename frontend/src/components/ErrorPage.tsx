@@ -1,7 +1,10 @@
 import { Link } from 'react-router'
+import { usePageTitle } from './usePageTitle'
 
 // Shown by the router when a page crashes, instead of React Router's default English stack trace
 function ErrorPage() {
+  usePageTitle('Errore')
+
   return (
     <main className="container py-4 text-center">
       <h1>Qualcosa è andato storto</h1>

@@ -60,6 +60,11 @@ class ErrorTestController {
         throw new UnauthorizedException();
     }
 
+    @GetMapping("/conflict-on-field")
+    ApiResponse<Void> conflictOnField() {
+        throw new ConflictException("Nome già usato.", "name");
+    }
+
     @GetMapping("/range")
     ApiResponse<Integer> range(@RequestParam @Min(value = 1, message = "Indica almeno un giorno.") @Max(62) int days) {
         return ApiResponse.success(days);

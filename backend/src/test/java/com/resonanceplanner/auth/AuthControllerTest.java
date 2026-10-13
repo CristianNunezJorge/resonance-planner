@@ -78,7 +78,8 @@ class AuthControllerTest {
         register("other", "ROVER@EXAMPLE.COM", PASSWORD)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("CONFLICT"))
-                .andExpect(jsonPath("$.error.message").value("Questa email è già registrata."));
+                .andExpect(jsonPath("$.error.message").value("Questa email è già registrata."))
+                .andExpect(jsonPath("$.error.fields.email").value("Questa email è già registrata."));
     }
 
     @Test
@@ -88,7 +89,8 @@ class AuthControllerTest {
         register("rover", "other@example.com", PASSWORD)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("CONFLICT"))
-                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."));
+                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."))
+                .andExpect(jsonPath("$.error.fields.username").value("Questo username è già in uso."));
     }
 
     @Test
@@ -134,10 +136,12 @@ class AuthControllerTest {
     void refusesToRegisterTheIdentityOfTheAdmin() throws Exception {
         register("Admin", "rover@example.com", PASSWORD)
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."));
+                .andExpect(jsonPath("$.error.message").value("Questo username è già in uso."))
+                .andExpect(jsonPath("$.error.fields.username").value("Questo username è già in uso."));
         register("rover", "ADMIN@example.com", PASSWORD)
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error.message").value("Questa email è già registrata."));
+                .andExpect(jsonPath("$.error.message").value("Questa email è già registrata."))
+                .andExpect(jsonPath("$.error.fields.email").value("Questa email è già registrata."));
     }
 
     @Test

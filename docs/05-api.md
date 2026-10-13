@@ -64,7 +64,7 @@ Errore:
 | 401 | Token mancante, scaduto o non valido; credenziali sbagliate | `UNAUTHORIZED`, `BAD_CREDENTIALS` |
 | 403 | Ruolo non sufficiente | `FORBIDDEN` |
 | 404 | Risorsa inesistente, o di un altro utente | `NOT_FOUND` |
-| 409 | Conflitto con lo stato attuale (email già usata, personaggio già nel roster, attività non modificabile) | `CONFLICT` |
+| 409 | Conflitto con lo stato attuale (email già usata, personaggio già nel roster, attività non modificabile). Se riguarda un campo (email o username già usati) c'è anche `fields`, come per la validazione | `CONFLICT` |
 | 429 | Troppe richieste o limite giornaliero dell'agente raggiunto | `RATE_LIMITED`, `AGENT_DAILY_LIMIT` |
 | 502 | L'API dell'IA non risponde o risponde con un errore | `AGENT_UNAVAILABLE` |
 | 500 | Errore imprevisto: dettagli solo nei log del server, mai nella risposta | `INTERNAL_ERROR` |

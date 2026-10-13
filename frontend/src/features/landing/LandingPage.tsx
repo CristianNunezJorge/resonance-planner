@@ -2,11 +2,13 @@ import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import ErrorState from '../../components/ErrorState'
 import LoadingState from '../../components/LoadingState'
+import { usePageTitle } from '../../components/usePageTitle'
 import { fetchCharacters } from '../catalog/catalogSlice'
 import CharacterCard from './CharacterCard'
 
 // Placeholder of the presentation page P1 (T16): for now it shows the characters read from the backend
 function LandingPage() {
+  usePageTitle('Presentazione')
   const dispatch = useAppDispatch()
   const { characters, charactersStatus, charactersError } = useAppSelector((state) => state.catalog)
   const headingRef = useRef<HTMLHeadingElement>(null)
