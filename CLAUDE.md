@@ -2,12 +2,13 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (11/10/2026)
+## Stato attuale (13/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 98 decisioni (D1-D98).
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 103 decisioni (D1-D103).
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
-- **Prossimo passo:** giorno 3, card T12-T16 (JWT, limiti di richieste, profilo, login e registrazione, presentazione). Prima leggere i promemoria in `docs/stato-del-progetto.md`.
+- **Giorno 3 (T12-T15):** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103). Online: backend e frontend. **Da fare:** pagina di presentazione (T16) e, su Render, la CSP e `nosniff` del sito statico (vedi `HANDOFF.md`).
+- **Prossimo passo:** leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -117,7 +118,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - Test prima del codice per tutti i calcoli; copertura minima dell'80% su service e logica.
 - Nessun segreto nel codice: solo variabili d'ambiente (elenco in `docs/08-regole-di-lavoro.md`). Nuove variabili obbligatorie vanno in `AppProperties`, con un messaggio che nomina la variabile.
 - Schema: una migrazione già unita a `main` non si modifica mai, se ne crea una nuova (`V2__...`). Le colonne intere sono `integer` (D98) e ogni `CHECK` controlla anche `IS NOT NULL`, perché un controllo che vale NULL viene considerato superato.
-- Backend: gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
+- Backend: un errore su un campo si lancia con `ConflictException(messaggio, campo)` o `FieldValidationException(campo, messaggio)` (risposta con `fields`); un service che scrive dati dell'utente risponde 401 con `UnauthorizedException` se l'utente del token non esiste più (D102). Gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
 - Frontend: tutte le chiamate passano da `api/client.ts`; ogni pagina usa `LoadingState` ed `ErrorState` (D69).
 - Definizione di "fatto" in 6 punti: `docs/08-regole-di-lavoro.md`.
 

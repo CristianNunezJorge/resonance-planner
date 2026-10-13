@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 all'11/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 13/10/2026, per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato, i giorni 1 e 2 di sviluppo sono completati (T01-T11) e l'app è online su Render: il catalogo dei personaggi arriva dal backend online. Il prossimo passo è il giorno 3, con login e registrazione.
+Il progetto è approvato e i giorni 1 e 2 (T01-T11) sono completati. Il giorno 3 è quasi finito: T12-T15 sono uniti e online (JWT, limiti di richieste, profilo, login e registrazione nel frontend); restano T16 (presentazione) e la CSP su Render. Dettagli e passi in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -23,6 +23,7 @@ Il progetto è approvato, i giorni 1 e 2 di sviluppo sono completati (T01-T11) e
 | 10/10 | **Giorno 1: T01-T06** | Repository pubblico, Docker Compose, backend Spring Boot 4.1.1, schema Flyway, frontend Vite |
 | 10/10 | Decisione nata dalla revisione dello schema | D98: colonne `integer` invece di `smallint`, medie dei drop con al massimo due decimali |
 | 11/10 | **Giorno 2: T07-T11** | Errori e `ApiResponse`, catalogo dai JSON, API pubbliche con sicurezza e CORS, primo deploy, client HTTP e tema |
+| 12/10 | **Giorno 3: T12-T15** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103). Backend 202 test, frontend 145 |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
