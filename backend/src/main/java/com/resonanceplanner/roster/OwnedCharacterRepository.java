@@ -2,16 +2,19 @@ package com.resonanceplanner.roster;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 /**
- * The roster of a user. Every query written here takes the user: nobody reads or changes the characters of another
- * one (D44). The methods that JpaRepository brings (findById, deleteById) take no user: do not use them for the roster.
+ * The roster of a user. It extends the bare Repository on purpose: JpaRepository would bring findAll, findById and
+ * deleteById, which take no user, and a later card could call them by mistake (D44). Every query here takes the user.
  */
-public interface OwnedCharacterRepository extends JpaRepository<OwnedCharacter, Long> {
+public interface OwnedCharacterRepository extends Repository<OwnedCharacter, Long> {
+
+    OwnedCharacter saveAndFlush(OwnedCharacter ownedCharacter);
+
 
     // In the order in which the characters were added
     List<OwnedCharacter> findAllByUserIdOrderByIdAsc(Long userId);
