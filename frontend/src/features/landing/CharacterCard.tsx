@@ -5,7 +5,7 @@ interface CharacterCardProps {
   character: CharacterSummary
 }
 
-// Test card for T11; the presentation page P1 (T16) and CharacterAvatar (T24) will replace it
+// Card of a demo character on the presentation page P1; CharacterAvatar (T24) will cover the other pages
 function CharacterCard({ character }: CharacterCardProps) {
   const stars = '★'.repeat(character.rarity)
 
