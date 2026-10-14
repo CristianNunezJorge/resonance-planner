@@ -101,6 +101,13 @@ const authSlice = createSlice({
       state.sessionStatus = 'ready'
       state.sessionError = null
     },
+    // New data of the user who is logged in (after the guided setup). An update for someone else is a late answer of
+    // a session that already ended: it must not bring that user back
+    userUpdated(state, action: PayloadAction<User>) {
+      if (state.user?.id === action.payload.id) {
+        state.user = action.payload
+      }
+    },
   },
   extraReducers: (builder) => {
     const signIn = (state: AuthState, action: PayloadAction<AuthResponse>) => {
@@ -131,7 +138,7 @@ const authSlice = createSlice({
   },
 })
 
-export const { sessionEnded } = authSlice.actions
+export const { sessionEnded, userUpdated } = authSlice.actions
 
 /** Logout (F11): the token disappears from the browser and from the memory. */
 export const logout = (): AppThunk => (dispatch) => {

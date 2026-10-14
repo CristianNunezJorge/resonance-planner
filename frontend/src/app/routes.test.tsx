@@ -1,14 +1,18 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../api/client'
 import { getProfile, login as loginRequest, register as registerRequest } from '../features/auth/authApi'
 import { expireSession, restoreSession } from '../features/auth/authSlice'
 import { readToken, saveToken } from '../features/auth/tokenStorage'
+import { getCharacters, getGameRules } from '../features/catalog/catalogApi'
+import { postOnboarding } from '../features/onboarding/onboardingApi'
+import { catalogCharacters, gameRules } from '../test/fixtures'
 import { rover, renderRoutes, signedIn } from '../test/utils'
 import { routes } from './routes'
 
-// The landing page loads the characters and the auth pages call the API: no real network in these tests
-vi.mock('../features/catalog/catalogApi', () => ({ getCharacters: vi.fn().mockResolvedValue([]) }))
+// The landing page and the guided setup load the catalog and the auth pages call the API: no real network in these tests
+vi.mock('../features/catalog/catalogApi', () => ({ getCharacters: vi.fn(), getGameRules: vi.fn() }))
+vi.mock('../features/onboarding/onboardingApi', () => ({ postOnboarding: vi.fn() }))
 vi.mock('../features/auth/authApi', () => ({ login: vi.fn(), register: vi.fn(), getProfile: vi.fn() }))
 
 function typeInto(label: string, value: string) {
@@ -16,8 +20,16 @@ function typeInto(label: string, value: string) {
 }
 
 describe('routes', () => {
+  beforeEach(() => {
+    vi.mocked(getCharacters).mockResolvedValue([])
+    vi.mocked(getGameRules).mockResolvedValue(gameRules)
+  })
+
   afterEach(() => {
     localStorage.clear()
+    vi.mocked(getCharacters).mockReset()
+    vi.mocked(getGameRules).mockReset()
+    vi.mocked(postOnboarding).mockReset()
     vi.mocked(loginRequest).mockReset()
     vi.mocked(registerRequest).mockReset()
     vi.mocked(getProfile).mockReset()
@@ -129,6 +141,44 @@ describe('routes', () => {
       expect(readToken()).toBe('new.jwt.token')
       // From the setup, the pages that need it complete send the user back to it
       expect(screen.getByRole('link', { name: 'Configurazione' })).toBeInTheDocument()
+    })
+  })
+
+  describe('F3 · guided setup', () => {
+    it('goes from the three steps to the calendar, with a notification', async () => {
+      vi.mocked(getCharacters).mockResolvedValue(catalogCharacters)
+      vi.mocked(postOnboarding).mockResolvedValue({ ...rover, onboardingCompleted: true, playTimeMinutes: 60 })
+      renderRoutes(routes, '/configurazione', signedIn({ onboardingCompleted: false }))
+
+      // Step 1: the characters
+      expect(await screen.findByRole('heading', { name: /Passo 1 di 3/ })).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('checkbox', { name: /Jinhsi/ }))
+      fireEvent.click(screen.getByRole('button', { name: 'Avanti' }))
+      // Step 2: levels and goals
+      expect(await screen.findByRole('heading', { name: /Passo 2 di 3/ })).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Avanti' }))
+      // Step 3: Waveplate and play time
+      expect(await screen.findByRole('heading', { name: /Passo 3 di 3/ })).toBeInTheDocument()
+      typeInto('Waveplate attuali', '180')
+      fireEvent.click(screen.getByRole('radio', { name: '1 ora' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Completa la configurazione' }))
+
+      // The setup is complete: the page of the setup is not for this user anymore, the calendar is
+      expect(await screen.findByRole('heading', { name: 'Calendario' })).toBeInTheDocument()
+      expect(screen.getByText('Configurazione completata.')).toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: 'Configurazione guidata' })).not.toBeInTheDocument()
+    })
+
+    it('sends someone who has finished the setup away from it, to the calendar', async () => {
+      renderRoutes(routes, '/configurazione', signedIn())
+
+      expect(await screen.findByRole('heading', { name: 'Calendario' })).toBeInTheDocument()
+    })
+
+    it('sends someone who has not finished it back to it from the calendar', async () => {
+      renderRoutes(routes, '/calendario', signedIn({ onboardingCompleted: false }))
+
+      expect(await screen.findByRole('heading', { name: 'Configurazione guidata' })).toBeInTheDocument()
     })
   })
 

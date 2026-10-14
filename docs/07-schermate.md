@@ -98,7 +98,8 @@ Passo 2, livelli e obiettivi:
 ```
 - **Passo 1:** griglia dei sei personaggi, selezionabili; serve almeno una scelta.
 - **Passo 3:** Waveplate e Crystals attuali, tempo di gioco (30 minuti, 1 ora, 2 ore).
-- Le caselle di ascensione compaiono solo quando il livello lo permette. Gli errori bloccano il passo e dicono cosa correggere.
+- Le caselle di ascensione compaiono solo quando il livello lo permette (D111). Gli errori bloccano il passo e dicono cosa correggere.
+- Il passo si controlla alla pressione di "Avanti"; il focus va al primo campo sbagliato, e al titolo del passo quando si cambia passo. Gli errori del server tornano al campo giusto, anche in un passo precedente. Alla fine l'utente aggiornato entra nello stato e si va al calendario con la notifica "Configurazione completata." (D109).
 
 ### P4 · Calendario `/calendario`
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../api/client'
 import { setupStore } from '../../app/store'
 import { getProfile, login as loginRequest, register as registerRequest } from './authApi'
-import { expireSession, login, logout, register, restoreSession, retrySession } from './authSlice'
+import { expireSession, login, logout, register, restoreSession, retrySession, userUpdated } from './authSlice'
 import { clearToken, readToken, saveToken } from './tokenStorage'
 import type { AuthResponse, User } from './types'
 
@@ -235,5 +235,36 @@ describe('authSlice', () => {
       expect(store.getState().auth.user).toBeNull()
       expect(readToken()).toBe('other.tab.token')
     })
+  })
+})
+
+describe('authSlice · userUpdated', () => {
+  const completed: User = { ...rover, onboardingCompleted: true, playTimeMinutes: 60 }
+
+  it('replaces the data of the user who is logged in and keeps the session', () => {
+    const store = setupStore({ auth: { token: 't', user: rover, sessionStatus: 'ready', sessionError: null } })
+
+    store.dispatch(userUpdated(completed))
+
+    expect(store.getState().auth.user).toEqual(completed)
+    expect(store.getState().auth.token).toBe('t')
+    expect(store.getState().auth.sessionStatus).toBe('ready')
+  })
+
+  it('ignores the update of another user: it is a late answer of a session that already ended', () => {
+    const store = setupStore({ auth: { token: 't', user: { ...rover, id: 8 }, sessionStatus: 'ready', sessionError: null } })
+
+    store.dispatch(userUpdated(completed))
+
+    expect(store.getState().auth.user?.onboardingCompleted).toBe(false)
+    expect(store.getState().auth.user?.id).toBe(8)
+  })
+
+  it('ignores the update when nobody is logged in', () => {
+    const store = setupStore()
+
+    store.dispatch(userUpdated(completed))
+
+    expect(store.getState().auth.user).toBeNull()
   })
 })

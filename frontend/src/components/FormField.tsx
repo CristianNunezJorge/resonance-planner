@@ -6,6 +6,8 @@ interface FormFieldProps {
   value: string
   onChange: (value: string) => void
   type?: 'text' | 'email' | 'password'
+  // The keyboard a phone shows: numbers without the "number" type, which changes the value with the mouse wheel
+  inputMode?: 'text' | 'numeric'
   autoComplete?: string
   // Tells the user, and the screen reader, that the field must be filled. The server checks it anyway (forms have noValidate).
   required?: boolean
@@ -23,6 +25,7 @@ function FormField({
   value,
   onChange,
   type = 'text',
+  inputMode,
   autoComplete,
   required,
   hint,
@@ -43,6 +46,7 @@ function FormField({
         name={id}
         ref={inputRef}
         type={type}
+        inputMode={inputMode}
         className={error ? 'form-control is-invalid' : 'form-control'}
         value={value}
         onChange={(event) => onChange(event.target.value)}
