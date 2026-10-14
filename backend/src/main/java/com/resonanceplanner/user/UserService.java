@@ -3,10 +3,10 @@ package com.resonanceplanner.user;
 import com.resonanceplanner.catalog.GameRules;
 import com.resonanceplanner.common.error.ConflictException;
 import com.resonanceplanner.common.error.FieldValidationException;
+import com.resonanceplanner.common.error.UniqueViolation;
 import com.resonanceplanner.common.error.UnauthorizedException;
 import com.resonanceplanner.user.dto.UpdateProfileRequest;
 import com.resonanceplanner.user.dto.UserResponse;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private static final String USERNAME_TAKEN = "Questo username è già in uso.";
-    private static final String UNIQUE_VIOLATION_SQL_STATE = "23505";
 
     private final UserRepository userRepository;
     private final GameRules gameRules;
@@ -62,7 +61,7 @@ public class UserService {
             // Writes now, to answer here if someone took the username a moment after the check
             userRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            if (!isUniqueViolation(e)) {
+            if (!UniqueViolation.isIn(e)) {
                 throw e;
             }
             throw new ConflictException(USERNAME_TAKEN, "username");
@@ -83,16 +82,6 @@ public class UserService {
         if (User.ADMIN_USERNAME.equalsIgnoreCase(username) || userRepository.existsByUsername(username)) {
             throw new ConflictException(USERNAME_TAKEN, "username");
         }
-    }
-
-    // PostgreSQL answers 23505 for a unique index; any other integrity error is a bug that must not look like a duplicate
-    private static boolean isUniqueViolation(Throwable error) {
-        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
-            if (cause instanceof SQLException sql && UNIQUE_VIOLATION_SQL_STATE.equals(sql.getSQLState())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private User requireUser(Long userId) {

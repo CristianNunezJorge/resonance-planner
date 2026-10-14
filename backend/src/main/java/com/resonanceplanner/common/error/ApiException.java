@@ -1,5 +1,7 @@
 package com.resonanceplanner.common.error;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -19,7 +21,8 @@ public class ApiException extends RuntimeException {
     public ApiException(ErrorCode errorCode, String message, Map<String, String> fields) {
         super(message);
         this.errorCode = errorCode;
-        this.fields = Map.copyOf(fields);
+        // A read-only copy that keeps the order: the fields are listed in the order of the form
+        this.fields = Collections.unmodifiableMap(new LinkedHashMap<>(fields));
     }
 
     public ErrorCode getErrorCode() {

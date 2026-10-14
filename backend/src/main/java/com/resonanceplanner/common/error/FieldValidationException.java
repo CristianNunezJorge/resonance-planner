@@ -12,4 +12,9 @@ public class FieldValidationException extends ApiException {
     public FieldValidationException(String field, String message) {
         super(ErrorCode.VALIDATION_ERROR, message, Map.of(field, message));
     }
+
+    /** Several fields are wrong at once: the user sees every message together instead of fixing one at a time. */
+    public FieldValidationException(Map<String, String> fields) {
+        super(ErrorCode.VALIDATION_ERROR, ErrorCode.VALIDATION_ERROR.defaultMessage(), fields);
+    }
 }

@@ -138,6 +138,12 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 
 Nel roster il personaggio si indica con il suo identificativo (`jinhsi`): ogni utente può averlo una volta sola.
 
+**Roster (T18).** `POST /api/me/roster` prende `{ "characterId", "currentLevel", "currentRank", "targetLevel", "targetRank" }`; `PUT /api/me/roster/{characterId}` prende gli stessi campi tranne `characterId`, che è quello dell'URL (se c'è anche nel corpo viene ignorato). La risposta di `GET`, `POST` e `PUT` ha `characterId`, i quattro valori e nient'altro: nome, elemento e icona sono nel catalogo pubblico. La lista è nell'ordine in cui i personaggi sono stati aggiunti.
+- **400** con `fields`, tutti i campi sbagliati insieme e sempre nello stesso ordine (`characterId`, `currentLevel`, `currentRank`, `targetLevel`, `targetRank`): personaggio che non esiste nel catalogo, livello e grado che non esistono nel gioco o obiettivo più basso della situazione attuale (D104). Il 400 viene prima del 409. Non si salva niente.
+- **409** con `fields.characterId` se il personaggio è già nel roster.
+- **404** (mai 403) se il personaggio non è nel roster dell'utente del token: vale anche per un personaggio che sta nel roster di un altro utente. Nei percorsi con `{characterId}` un identificativo che non esiste dà lo stesso 404.
+- **401** se l'utente del token non esiste più (D102).
+
 ### Calendario e attività
 | Metodo | Percorso | Cosa fa | Risposta |
 |---|---|---|---|
