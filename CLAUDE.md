@@ -2,13 +2,13 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (13/10/2026)
+## Stato attuale (14/10/2026)
 
 - **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 103 decisioni (D1-D103).
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
-- **Giorno 3 (T12-T15):** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103). Online: backend e frontend. **Da fare:** pagina di presentazione (T16) e, su Render, la CSP e `nosniff` del sito statico (vedi `HANDOFF.md`).
-- **Prossimo passo:** leggere `HANDOFF.md`.
+- **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
+- **Prossimo passo:** giorno 4 (T17-T21: Waveplate, roster, inventario, configurazione guidata). Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -104,7 +104,7 @@ frontend/
   src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
   src/features/catalog/       tipi, chiamate e catalogSlice (personaggi caricati una volta)
-  src/features/landing/       pagina di presentazione (oggi l'elenco dei personaggi, fino a T16)
+  src/features/landing/       pagina di presentazione P1 (T16): frase, pulsante, tre passi, personaggi
   src/components/             LoadingState, ErrorState, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
   public/characters/          6 icone WebP 256×256
@@ -138,4 +138,5 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
 - **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
-- Trello: il testo digitato in una card aperta può diventare una scorciatoia da tastiera. Le descrizioni si scrivono via JavaScript con `execCommand`, dopo aver verificato il focus sull'editor. Le etichette si possono applicare con i tasti 1-0 sulla card, uno alla volta e con una pausa. Il riepilogo `/b/JCkNlahy.json` può essere in ritardo di qualche secondo.
+- Docker Desktop può restare bloccato in avvio (i comandi `docker` non rispondono): Restart dal menu della balena, poi se serve `wsl --shutdown` da PowerShell e riaprire Docker Desktop.
+- Trello: per spostare le card con `fetch` serve il cookie `dsc` della pagina nel corpo (form-encoded), altrimenti 403 "CSRF detected". Il testo digitato in una card aperta può diventare una scorciatoia da tastiera. Le descrizioni si scrivono via JavaScript con `execCommand`, dopo aver verificato il focus sull'editor. Le etichette si possono applicare con i tasti 1-0 sulla card, uno alla volta e con una pausa. Il riepilogo `/b/JCkNlahy.json` può essere in ritardo di qualche secondo.
