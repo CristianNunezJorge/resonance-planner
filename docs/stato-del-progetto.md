@@ -4,7 +4,7 @@ Riepilogo delle sessioni dal 30/09 al 14/10/2026, per riprendere il lavoro in un
 
 ## In una frase
 
-Il progetto è approvato e i giorni 1, 2 e 3 (T01-T16) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login e registrazione nel frontend, pagina di presentazione. Il sito statico su Render manda CSP e `nosniff`. Il prossimo passo è il giorno 4 (T17-T21). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 4 (T01-T21) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login, registrazione, pagina di presentazione, contatore Waveplate, roster, inventario e configurazione guidata (backend e frontend). Il prossimo passo è il giorno 5 (T22-T24). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -24,6 +24,7 @@ Il progetto è approvato e i giorni 1, 2 e 3 (T01-T16) sono completati, uniti su
 | 10/10 | Decisione nata dalla revisione dello schema | D98: colonne `integer` invece di `smallint`, medie dei drop con al massimo due decimali |
 | 11/10 | **Giorno 2: T07-T11** | Errori e `ApiResponse`, catalogo dai JSON, API pubbliche con sicurezza e CORS, primo deploy, client HTTP e tema |
 | 12-14/10 | **Giorno 3: T12-T16** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103), pagina di presentazione (T16). CSP e `nosniff` impostati su Render. Backend 202 test, frontend 151 con il 98% di copertura |
+| 14/10 | **Giorno 4: T17-T21** | Waveplate e Crystals (D105), roster e regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109) con limite al corpo JSON (D110) e in frontend (D111). Backend 391 test, frontend 275 con il 98% di copertura. Trello T17-T21 in "Fatto" |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -94,14 +95,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 4: card T17-T21 di `docs/09-task.md` (Waveplate e Crystals, roster, inventario, configurazione guidata in backend e frontend).
+1. Giorno 5: card T22-T24 di `docs/09-task.md` (calcolo dei materiali mancanti e del piano di farming, eventi con date e giorni attivi, pagina roster e inventario).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 4 (card T17-T21). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 5 (card T22-T24). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
