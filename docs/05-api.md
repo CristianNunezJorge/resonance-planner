@@ -217,20 +217,36 @@ Il backend salva tutto in un'unica transazione: o va a buon fine tutto, o niente
 `fullAt` e `crystalsFullAt` sono i momenti in cui i due contatori sono pieni: se un contatore è già pieno sono nel passato (il momento in cui lo è diventato). I Crystals ripartono solo quando le Waveplate sono piene (D28, D105). Il momento della lettura (`recordedAt`) lo sceglie sempre il server.
 
 ### Calcolo del farming
-`GET /api/me/farming-plan` → `data`:
+`GET /api/me/farming-plan` → `data` (Jinhsi da livello 1 grado 0 a livello 40 grado 2, inventario vuoto, 60 minuti al giorno; elenchi accorciati):
 ```json
 {
   "materials": [
-    { "materialId": "lf-howler-core", "name": "LF Howler Core", "required": 8, "owned": 3, "missing": 5 }
+    { "materialId": "elegy-tacet-core", "name": "Elegy Tacet Core", "category": "BOSS_DROP", "required": 3, "owned": 0, "missing": 3 },
+    { "materialId": "character-exp", "name": "EXP personaggio", "category": "CHARACTER_EXP", "required": 208800, "owned": 0, "missing": 208800 },
+    { "materialId": "shell-credit", "name": "Shell Credit", "category": "CREDIT", "required": 88080, "owned": 0, "missing": 88080 }
   ],
   "sources": [
-    { "farmingSourceId": "sim-resonance-potion", "runs": 12, "waveplates": 480, "minutes": 36 }
+    { "farmingSourceId": "boss-mourning-aix", "name": "Boss Challenge: Mourning Aix", "runs": 2, "waveplates": 120, "minutes": 8 },
+    { "farmingSourceId": "sim-resonance-potion", "name": "Simulation Training: Resonance Potion", "runs": 3, "waveplates": 120, "minutes": 9 }
   ],
-  "totals": { "waveplates": 600, "minutes": 95, "estimatedDays": 3 },
+  "totals": { "waveplates": 280, "minutes": 50, "estimatedDays": 2 },
   "containsEstimates": true
 }
 ```
-Numeri di esempio. `containsEstimates` è `true` se il calcolo usa valori stimati (D25).
+Regole del calcolo in D112 (T22):
+- **Materiali:** solo quelli che servono, nell'ordine del calcolo (boss, nemici comuni, specialità, EXP, Shell Credit). L'EXP è una sola riga, `character-exp`, in punti: le Resonance Potion dell'inventario contano per la loro EXP e non compaiono come righe a parte. `missing` non è mai negativo.
+- **Fonti:** nell'ordine in cui il calcolo le sceglie; ogni run toglie dal fabbisogno anche i drop secondari. Le fonti senza costo in Waveplate (nemici comuni, specialità) hanno `waveplates: 0`.
+- **Totali:** `estimatedDays` è il più grande tra Waveplate ÷ 240 e minuti ÷ tempo di gioco, per eccesso; è `null` se l'utente non ha ancora scelto il tempo di gioco. Con il roster vuoto tutto vale 0.
+- `containsEstimates` è `true` se una fonte usata ha un drop stimato (D25, D97).
+- L'inventario si conta una volta sola per tutto il roster.
+
+`GET /api/me/roster/{characterId}/requirements` → `data`: lo stesso calcolo per un solo personaggio, come se tutto l'inventario fosse per lui, con in più `characterId` e `completionPercent` (da 0 a 100: per ogni materiale la parte già posseduta, poi la media, sempre per difetto; 100 se non manca niente).
+```json
+{ "characterId": "jinhsi", "completionPercent": 33, "materials": ["..."], "sources": ["..."], "totals": { "waveplates": 240, "minutes": 48, "estimatedDays": 1 }, "containsEstimates": true }
+```
+Esempio: Jinhsi come sopra, con 3 Elegy Tacet Core e 10 LF Howler Core già nell'inventario. Senza le run del boss servono 4 run di Resonance Potion invece di 3.
+- **404** se il personaggio non è nel roster dell'utente del token (anche se è nel roster di un altro o non esiste).
+- **401** se l'utente del token non esiste più (D102), per entrambi gli endpoint.
 
 ### Calendario
 `GET /api/me/calendar?from=2026-09-28&to=2026-10-04` → `data`:
