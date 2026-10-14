@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +42,25 @@ class UserPersistenceTest {
         assertThat(reloaded.getPlayTimeMinutes()).isNull();
         assertThat(reloaded.isOnboardingCompleted()).isFalse();
         assertThat(reloaded.getCreatedAt()).isNotNull();
+    }
+
+    // D36: the three columns of the Waveplate snapshot are one value in the entity, empty until the first reading
+    @Test
+    void savesAndReloadsTheWaveplateSnapshotAsOneValue() {
+        User user = User.create("rover", "rover@example.com", "hash", Role.USER);
+        Long id = userRepository.saveAndFlush(user).getId();
+        entityManager.clear();
+        assertThat(userRepository.findById(id).orElseThrow().getWaveplate()).isNull();
+
+        Instant recordedAt = Instant.parse("2026-10-01T12:00:00Z");
+        User loaded = userRepository.findById(id).orElseThrow();
+        loaded.recordWaveplate(new WaveplateSnapshot(180, 0, recordedAt));
+        userRepository.saveAndFlush(loaded);
+        entityManager.clear();
+
+        assertThat(userRepository.findById(id).orElseThrow().getWaveplate())
+                .isEqualTo(new WaveplateSnapshot(180, 0, recordedAt));
+        assertThat(jdbc.queryForObject("select waveplate_value from users where id = ?", Integer.class, id)).isEqualTo(180);
     }
 
     @Test

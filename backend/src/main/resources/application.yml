@@ -25,6 +25,9 @@ spring:
     locale: it
     locale-resolver: fixed
   jackson:
+    deserialization:
+      # 12.5 for a whole number is an error (400), not a silent 12: the quantities, levels and Waveplate are whole
+      accept-float-as-int: false
     factory:
       constraints:
         read:

@@ -922,3 +922,35 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - Il pulsante "Esci" non invalida il token sul server: resta valido fino alla scadenza (D45).
   - Caricare l'app con un token salvato costa una richiesta (`GET /api/me`) prima di mostrare le pagine private; con il backend gratuito appena svegliato può volerci del tempo, e `LoadingState` lo spiega.
 - **Scartate:** i cookie `httpOnly` e il refresh token (già scartati da D45); salvare nel browser tutto lo stato Redux con un pacchetto come `redux-persist` (complica, e l'utente andrebbe comunque riverificato); una libreria per i moduli (due moduli semplici); intestazioni di sicurezza in più oltre alla CSP (possibili in seguito: `X-Content-Type-Options` e `Referrer-Policy`).
+
+## D104 · Livello e grado di ascensione: intervalli validi
+**Stato:** Confermata · 14/10/2026
+
+- **Cosa:** il grado `r` ammette i livelli da `ascensionLevels[r-1]` (1 per il grado 0) a `ascensionLevels[r]`. Con i valori attuali: grado 0 = livelli 1-20, grado 1 = 20-40, grado 2 = solo 40. L'obiettivo di un personaggio deve essere uguale o superiore alla situazione attuale, confrontando prima il grado e poi il livello.
+- **Come:** una classe di regole pure `RosterRules` (T18), che legge `ascensionLevels` da `game-rules.json` e non ha database. Una combinazione non valida risponde 400 con il nome del campo (`FieldValidationException`).
+- **Perché:** D34 dice a che livello arriva ogni grado ma non il minimo. Il livello 20 esiste sia prima dell'ascensione (grado 0) sia dopo (grado 1): senza un minimo per grado, "livello 5 e grado 1" sarebbe accettato anche se nel gioco non esiste.
+- **Scartate:** controllare solo il massimo del grado (accetta combinazioni impossibili); grado ricavato dal livello (non distingue il prima e il dopo dell'ascensione, vedi D34).
+
+## D105 · Waveplate e Crystals sono due valori indipendenti
+**Stato:** Confermata · 14/10/2026
+
+- **Cosa:** l'utente può salvare qualsiasi coppia di valori con Waveplate da 0 a 240 e Crystals da 0 a 480. I Crystals restano accumulati quando le Waveplate vengono spese; ricominciano a crescere solo quando le Waveplate sono di nuovo al massimo.
+- **Come:** `WaveplateRules.requireValidReading` controlla i due intervalli e dà 400 con il campo (`value` o `crystals`). `WaveplateRules.stateAt` fa partire i Crystals dal momento in cui le Waveplate sono piene, non dalla lettura. Il momento della lettura lo sceglie sempre il server (`Clock`, arrotondato ai microsecondi), mai il client. `fullAt` e `crystalsFullAt` possono essere nel passato: sono il momento in cui il contatore è diventato pieno.
+- **Perché:** nel gioco chi ha speso le Waveplate conserva i Crystals (per esempio 100 Waveplate e 300 Crystals insieme). La prima versione di questa decisione, che accettava Crystals solo a Waveplate piene, avrebbe rifiutato letture reali: l'ha corretta l'utente durante la revisione di T17.
+- **Scartate:** vietare i Crystals a Waveplate non piene (rifiuta stati veri del gioco); far scegliere al client il momento della lettura (manipolabile e dipendente dall'orologio del dispositivo).
+
+## D106 · Configurazione guidata: regole di validazione
+**Stato:** Confermata · 14/10/2026
+
+- **Cosa:** `POST /api/me/onboarding` (T20) richiede almeno un personaggio, nessun personaggio ripetuto, un tempo di gioco tra le opzioni di `game-rules.json` e una lettura di Waveplate valida (D105). Ogni personaggio rispetta D104. L'inventario non fa parte della richiesta: parte vuoto (D21). `GET /api/me/inventory` restituisce solo i materiali già salvati.
+- **Come:** tutti i controlli prima di scrivere, poi un'unica transazione (D50): una richiesta non valida non salva niente e risponde 400 con tutti i campi sbagliati che riesce a indicare; se la configurazione è già completata risponde 409.
+- **Perché:** l'utente vede subito cosa correggere e il database non contiene mai configurazioni a metà.
+- **Scartate:** ignorare in silenzio i duplicati (l'utente non saprebbe quale valore è stato usato); permettere zero personaggi (il calendario e il piano non avrebbero niente da calcolare).
+
+## D107 · I numeri interi nell'API devono essere interi
+**Stato:** Confermata · 14/10/2026
+
+- **Cosa:** un valore con la virgola dove serve un numero intero (per esempio `12.5` o `100.0` per le Waveplate) viene rifiutato con 400, invece di essere troncato in silenzio.
+- **Come:** `spring.jackson.deserialization.accept-float-as-int: false` in `application.yml`: vale per tutta l'API. Il corpo illeggibile risponde "Richiesta non valida." senza il dettaglio di Jackson e senza il campo `fields`; il frontend deve mandare numeri interi (lo fa già). Le stringhe numeriche (`"180"`) restano accettate dalla coercizione predefinita di Jackson: se si vuole vietarle serve `allow-coercion-of-scalars: false`, che però agisce ovunque.
+- **Perché:** livelli, Waveplate e quantità sono sempre interi: accettare `12.5` come `12` nasconderebbe un errore del client. Il `playTimeMinutes: 60.0` del profilo ora dà 400 invece di essere accettato.
+- **Scartate:** controllare il decimale campo per campo (ripetuto in ogni DTO); lasciare il comportamento predefinito (troncamento silenzioso).

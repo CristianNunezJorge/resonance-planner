@@ -121,8 +121,8 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 ### Waveplate
 | Metodo | Percorso | Cosa fa |
 |---|---|---|
-| GET | `/api/me/waveplate` | Valori attuali calcolati e orari in cui saranno pieni |
-| PUT | `/api/me/waveplate` | Salva i valori letti nel gioco |
+| GET | `/api/me/waveplate` | Valori attuali calcolati e orari in cui saranno pieni; 404 se non hai ancora salvato nessuna lettura |
+| PUT | `/api/me/waveplate` | Salva i valori letti nel gioco (`{ "value": 180, "crystals": 0 }`, `crystals` facoltativo, vale 0); 400 con `fields` se un valore non è possibile (D105) |
 
 ### Roster, inventario e calcolo del farming
 | Metodo | Percorso | Cosa fa | Risposta |
@@ -195,6 +195,7 @@ Il backend salva tutto in un'unica transazione: o va a buon fine tutto, o niente
   "recordedAt": "2026-10-01T12:00:00Z"
 }
 ```
+`fullAt` e `crystalsFullAt` sono i momenti in cui i due contatori sono pieni: se un contatore è già pieno sono nel passato (il momento in cui lo è diventato). I Crystals ripartono solo quando le Waveplate sono piene (D28, D105). Il momento della lettura (`recordedAt`) lo sceglie sempre il server.
 
 ### Calcolo del farming
 `GET /api/me/farming-plan` → `data`:
