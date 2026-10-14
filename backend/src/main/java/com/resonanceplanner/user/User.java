@@ -1,6 +1,9 @@
 package com.resonanceplanner.user;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,7 +17,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * An account of the application. The table is called users because "user" is a reserved word of PostgreSQL.
- * The Waveplate snapshot (D36) joins this class with T17.
  */
 @Entity
 @Table(name = "users")
@@ -51,6 +53,15 @@ public class User {
     @Column(nullable = false)
     private boolean onboardingCompleted;
 
+    // The last Waveplate reading (D36): null until the user saves the first one. The three columns are one value.
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "value", column = @Column(name = "waveplate_value")),
+        @AttributeOverride(name = "crystals", column = @Column(name = "waveplate_crystals")),
+        @AttributeOverride(name = "recordedAt", column = @Column(name = "waveplate_recorded_at"))
+    })
+    private WaveplateSnapshot waveplate;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -83,6 +94,10 @@ public class User {
         this.playTimeMinutes = playTimeMinutes;
     }
 
+    public void recordWaveplate(WaveplateSnapshot waveplate) {
+        this.waveplate = waveplate;
+    }
+
     public Long getId() {
         return id;
     }
@@ -105,6 +120,10 @@ public class User {
 
     public Integer getPlayTimeMinutes() {
         return playTimeMinutes;
+    }
+
+    public WaveplateSnapshot getWaveplate() {
+        return waveplate;
     }
 
     public boolean isOnboardingCompleted() {
