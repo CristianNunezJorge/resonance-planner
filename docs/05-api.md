@@ -144,6 +144,12 @@ Nel roster il personaggio si indica con il suo identificativo (`jinhsi`): ogni u
 - **404** (mai 403) se il personaggio non è nel roster dell'utente del token: vale anche per un personaggio che sta nel roster di un altro utente. Nei percorsi con `{characterId}` un identificativo che non esiste dà lo stesso 404.
 - **401** se l'utente del token non esiste più (D102).
 
+**Inventario (T19).** `GET /api/me/inventory` restituisce `[{ "materialId", "quantity" }]` per i soli materiali che l'utente ha già salvato, in ordine di identificativo: l'inventario parte vuoto e un materiale che non c'è nell'elenco vale 0 (D21, D106). `PUT /api/me/inventory/{materialId}` prende `{ "quantity": 120 }` e risponde con `{ "materialId", "quantity" }`. La quantità sostituisce quella di prima (non si somma) e la prima volta crea la voce.
+- **400** con `fields.quantity` se manca, è negativa, supera 999.999.999 o non è un numero intero.
+- **404** se il materiale non è nel catalogo.
+- **401** se l'utente del token non esiste più (D102).
+- Le richieste mandate insieme per lo stesso materiale non danno errore: vince l'ultima (D108).
+
 ### Calendario e attività
 | Metodo | Percorso | Cosa fa | Risposta |
 |---|---|---|---|

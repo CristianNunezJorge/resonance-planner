@@ -7,7 +7,9 @@ import com.resonanceplanner.roster.dto.UpdateCharacterRequest;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
 import com.resonanceplanner.user.UserRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 // write that answers 200 and saves nothing.
 @SpringBootTest
 @ActiveProfiles("test")
+@Timeout(60)
 class RosterCommitTest {
 
     @Autowired
@@ -31,7 +34,9 @@ class RosterCommitTest {
 
     @Test
     void writesAddUpdateAndDeleteToTheDatabaseWhenEachCallEnds() {
-        User user = userRepository.saveAndFlush(User.create("roster.commit", "roster.commit@example.com", "hash", Role.USER));
+        // A name and an email that no earlier run can have left behind in the test database
+        String unique = "roster.commit." + UUID.randomUUID().toString().substring(0, 8);
+        User user = userRepository.saveAndFlush(User.create(unique, unique + "@example.com", "hash", Role.USER));
         try {
             rosterService.add(user.getId(), new AddCharacterRequest("jinhsi", 1, 0, 40, 2));
             assertThat(levelOf(user)).isEqualTo(1);
