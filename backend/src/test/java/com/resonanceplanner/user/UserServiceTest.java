@@ -38,7 +38,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, TestGameRules.withPlayTimeOptions(30, 60, 120));
+        userService = new UserService(userRepository, new PlayTimeRules(TestGameRules.withPlayTimeOptions(30, 60, 120)));
     }
 
     @Test
@@ -79,7 +79,7 @@ class UserServiceTest {
 
     @Test
     void namesAPlayTimeOptionAloneWithoutAnOr() {
-        UserService oneOption = new UserService(userRepository, TestGameRules.withPlayTimeOptions(60));
+        UserService oneOption = new UserService(userRepository, new PlayTimeRules(TestGameRules.withPlayTimeOptions(60)));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(rover()));
 
         assertThatThrownBy(() -> oneOption.update(USER_ID, new UpdateProfileRequest(null, 30)))

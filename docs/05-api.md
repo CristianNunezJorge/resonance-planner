@@ -92,7 +92,7 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 | GET | `/api/me` | Dati del profilo | 200 |
 | PATCH | `/api/me` | Modifica username o tempo di gioco | 200 |
 | DELETE | `/api/me` | Elimina account e dati (D42) | 204 |
-| POST | `/api/me/onboarding` | Salva tutta la configurazione guidata in una volta (D50) | 200; 409 se già completata |
+| POST | `/api/me/onboarding` | Salva tutta la configurazione guidata in una volta (D50) | 200 con l'utente aggiornato; 409 se già completata |
 
 - **Risposta di `GET` e `PATCH`:** lo stesso `user` della registrazione (`id`, `username`, `email`, `role`, `playTimeMinutes`, `onboardingCompleted`).
 - **`PATCH`:** `{ "username": "rover.new", "playTimeMinutes": 60 }`, tutti e due facoltativi (D102). Il tempo di gioco è 30, 60 o 120 (opzioni di `GET /api/game/rules`) e lo username segue le regole della registrazione. 400 con il campo sbagliato (`fields.username` o `fields.playTimeMinutes`), 409 se lo username è già usato. Se un valore non è valido non si salva niente. Email, ruolo e gli altri campi si ignorano.
@@ -192,7 +192,14 @@ Le proposte nascono solo dal pianificatore, attraverso l'agente o il piano base:
   "playTimeMinutes": 60
 }
 ```
-Il backend salva tutto in un'unica transazione: o va a buon fine tutto, o niente.
+Il backend salva tutto in un'unica transazione: o va a buon fine tutto, o niente. Risponde con l'utente aggiornato (lo stesso `user` della registrazione, con `onboardingCompleted: true` e `playTimeMinutes`).
+- Almeno un personaggio e al massimo 50 (nessuno ripetuto); ogni personaggio ha la forma e le regole di `POST /api/me/roster` (D104); `waveplate.crystals` è facoltativo e vale 0; `playTimeMinutes` è una delle opzioni di `GET /api/game/rules`.
+- **400** con `fields`, tutti i campi sbagliati insieme, in ordine di passo, con nomi come `characters[1].currentLevel`, `characters[1].characterId`, `waveplate.value`, `waveplate.crystals`, `playTimeMinutes`. Non si salva niente. Un corpo di forma sbagliata (valore mancante, numero con la virgola) è 400 senza il dettaglio dei campi che il servizio avrebbe controllato.
+- **409** se la configurazione è già completata, e anche se lo stesso utente cambia il roster da un'altra scheda nel momento del salvataggio (si riprova). Il 400 viene prima del 409.
+- **401** se l'utente del token non esiste più (D102).
+- Il roster già presente, le Waveplate e il tempo di gioco salvati prima vengono sostituiti; l'inventario resta (D109).
+- Due invii nello stesso momento: ne passa uno, l'altro riceve 409.
+- Un corpo JSON più lungo di 100.000 caratteri o con più di 5.000 elementi è rifiutato con 400 prima di essere letto (D110).
 
 ### Stato delle Waveplate
 `GET /api/me/waveplate` → `data`:

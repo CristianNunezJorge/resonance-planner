@@ -23,6 +23,11 @@ public interface OwnedCharacterRepository extends Repository<OwnedCharacter, Lon
 
     boolean existsByUserIdAndCharacterId(Long userId, String characterId);
 
+    /** Deletes the whole roster of a user with a single statement, for the guided setup (D109). */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from OwnedCharacter o where o.userId = :userId")
+    int deleteAllOf(@Param("userId") Long userId);
+
     /** Deletes with a single statement and returns how many rows it deleted (0 if the character was not in the roster). */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from OwnedCharacter o where o.userId = :userId and o.characterId = :characterId")
