@@ -1,14 +1,10 @@
 package com.resonanceplanner.user;
 
-import com.resonanceplanner.catalog.GameRules;
 import com.resonanceplanner.common.error.ConflictException;
-import com.resonanceplanner.common.error.FieldValidationException;
 import com.resonanceplanner.common.error.UniqueViolation;
 import com.resonanceplanner.common.error.UnauthorizedException;
 import com.resonanceplanner.user.dto.UpdateProfileRequest;
 import com.resonanceplanner.user.dto.UserResponse;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +20,11 @@ public class UserService {
     private static final String USERNAME_TAKEN = "Questo username è già in uso.";
 
     private final UserRepository userRepository;
-    private final GameRules gameRules;
+    private final PlayTimeRules playTimeRules;
 
-    public UserService(UserRepository userRepository, GameRules gameRules) {
+    public UserService(UserRepository userRepository, PlayTimeRules playTimeRules) {
         this.userRepository = userRepository;
-        this.gameRules = gameRules;
+        this.playTimeRules = playTimeRules;
     }
 
     public UserResponse getProfile(Long userId) {
@@ -45,7 +41,7 @@ public class UserService {
         // First all the checks, then the changes: if a value is not valid nothing is changed. The order matters also
         // for the query of the check, which would write the changes already made to the entity.
         if (playTime != null) {
-            requirePlayTimeOption(playTime);
+            playTimeRules.requireValid(playTime);
         }
         if (renaming) {
             requireUsernameAvailable(request.username());
@@ -86,23 +82,5 @@ public class UserService {
 
     private User requireUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(UnauthorizedException::new);
-    }
-
-    private void requirePlayTimeOption(int minutes) {
-        List<Integer> options = gameRules.playTimeOptionsMinutes();
-        if (!options.contains(minutes)) {
-            throw new FieldValidationException("playTimeMinutes",
-                    "Scegli un tempo di gioco tra " + describe(options) + " minuti.");
-        }
-    }
-
-    // [30, 60, 120] becomes "30, 60 o 120"
-    private static String describe(List<Integer> options) {
-        String last = String.valueOf(options.getLast());
-        if (options.size() == 1) {
-            return last;
-        }
-        String others = options.subList(0, options.size() - 1).stream().map(String::valueOf).collect(Collectors.joining(", "));
-        return others + " o " + last;
     }
 }

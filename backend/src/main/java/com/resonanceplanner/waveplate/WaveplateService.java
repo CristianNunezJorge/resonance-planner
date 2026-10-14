@@ -9,7 +9,6 @@ import com.resonanceplanner.waveplate.dto.UpdateWaveplateRequest;
 import com.resonanceplanner.waveplate.dto.WaveplateResponse;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +43,12 @@ public class WaveplateService {
     @Transactional
     public WaveplateResponse update(Long userId, UpdateWaveplateRequest request) {
         User user = requireUser(userId);
-        int crystals = request.crystals() == null ? 0 : request.crystals();
-        rules.requireValidReading(request.value(), crystals);
+        rules.requireValidReading(request.value(), request.crystalsOrZero());
 
-        // PostgreSQL keeps microseconds: cut here, so the answer of the PUT is the same as the next GET
-        Instant now = clock.instant().truncatedTo(ChronoUnit.MICROS);
-        WaveplateSnapshot snapshot = new WaveplateSnapshot(request.value(), crystals, now);
+        // The snapshot keeps microseconds, like the database: the answer of the PUT is the same as the next GET
+        WaveplateSnapshot snapshot = new WaveplateSnapshot(request.value(), request.crystalsOrZero(), clock.instant());
         user.recordWaveplate(snapshot);
-        return respond(snapshot, now);
+        return respond(snapshot, snapshot.recordedAt());
     }
 
     private WaveplateResponse respond(WaveplateSnapshot snapshot, Instant now) {

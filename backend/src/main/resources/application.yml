@@ -34,6 +34,11 @@ spring:
           # The public login and registration read a JSON body before any check: without a limit (the default is
           # 100 million characters) a single request could fill the 512 MB of the free server
           max-string-length: 20000
+          # The same for the whole body: @Size on a list runs only after Jackson created every element, so without these
+          # two limits a body of a few MB (millions of empty elements) could fill the 512 MB of the free server. A real
+          # request is a few KB: the biggest, the guided setup, is about 1 KB with the six characters of the demo
+          max-document-length: 100000
+          max-token-count: 5000
   # No spring.datasource here: the DataSource is built from app.database by DatabaseConfig
   jpa:
     # Flyway owns the schema; Hibernate only checks that the entities match it (D38)

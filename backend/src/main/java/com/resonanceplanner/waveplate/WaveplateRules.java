@@ -6,6 +6,8 @@ import com.resonanceplanner.common.error.FieldValidationException;
 import com.resonanceplanner.user.WaveplateSnapshot;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,15 +43,26 @@ public class WaveplateRules {
     }
 
     /**
-     * Refuses a reading that cannot exist in the game (D105), naming the field that is wrong. The two values are
-     * independent: the Crystals stay when the Waveplate are spent, and only grow again once the Waveplate are full.
+     * Every wrong field of a reading (D105) with its message; empty if the reading can exist in the game. The two
+     * values are independent: the Crystals stay when the Waveplate are spent, and only grow again once the Waveplate
+     * are full.
      */
-    public void requireValidReading(int value, int crystalsValue) {
+    public Map<String, String> problems(int value, int crystalsValue) {
+        Map<String, String> problems = new LinkedHashMap<>();
         if (value < 0 || value > waveplate.max()) {
-            throw new FieldValidationException("value", "Le Waveplate vanno da 0 a " + waveplate.max() + ".");
+            problems.put("value", "Le Waveplate vanno da 0 a " + waveplate.max() + ".");
         }
         if (crystalsValue < 0 || crystalsValue > crystals.max()) {
-            throw new FieldValidationException("crystals", "I Waveplate Crystals vanno da 0 a " + crystals.max() + ".");
+            problems.put("crystals", "I Waveplate Crystals vanno da 0 a " + crystals.max() + ".");
+        }
+        return problems;
+    }
+
+    /** Refuses a reading that cannot exist in the game, naming every wrong field in one answer. */
+    public void requireValidReading(int value, int crystalsValue) {
+        Map<String, String> problems = problems(value, crystalsValue);
+        if (!problems.isEmpty()) {
+            throw new FieldValidationException(problems);
         }
     }
 

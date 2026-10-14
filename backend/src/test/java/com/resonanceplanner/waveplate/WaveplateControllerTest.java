@@ -201,6 +201,14 @@ class WaveplateControllerTest {
     }
 
     @Test
+    void namesBothFieldsWhenBothValuesAreWrong() throws Exception {
+        mockMvc.perform(as(rover, putWith("{\"value\":241,\"crystals\":481}")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.fields.value").value("Le Waveplate vanno da 0 a 240."))
+                .andExpect(jsonPath("$.error.fields.crystals").value("I Waveplate Crystals vanno da 0 a 480."));
+    }
+
+    @Test
     void refusesAValueThatIsNotANumber() throws Exception {
         mockMvc.perform(as(rover, putWith("{\"value\":\"many\"}"))).andExpect(status().isBadRequest());
         // A whole number written with a decimal point is refused too, not cut (spring.jackson.deserialization)

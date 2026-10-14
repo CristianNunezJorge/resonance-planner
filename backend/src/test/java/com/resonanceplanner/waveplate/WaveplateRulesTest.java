@@ -105,6 +105,13 @@ class WaveplateRulesTest {
     }
 
     @Test
+    void problemsListsEveryWrongFieldAtOnceWithoutThrowing() {
+        assertThat(rules.problems(100, 300)).isEmpty();
+        assertThat(rules.problems(241, 481)).containsOnlyKeys("value", "crystals");
+        assertThat(rules.problems(-1, 0)).containsOnlyKeys("value");
+    }
+
+    @Test
     void keepsTheCrystalsOfTheReadingWhileTheWaveplateAreNotFull() {
         // 100 Waveplate and 300 Crystals together: the Crystals stay while the Waveplate are spent and refilled (D105)
         assertThat(at(100, 300, Duration.ofMinutes(60)).crystals()).isEqualTo(300);

@@ -8,4 +8,10 @@ import jakarta.validation.constraints.NotNull;
  */
 public record UpdateWaveplateRequest(
         @NotNull(message = "Inserisci le Waveplate che vedi nel gioco.") Integer value,
-        Integer crystals) {}
+        Integer crystals) {
+
+    /** The Crystals of the reading: the ones sent, or 0 if the user did not send any. */
+    public int crystalsOrZero() {
+        return crystals == null ? 0 : crystals;
+    }
+}
