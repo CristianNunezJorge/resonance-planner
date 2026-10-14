@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 13/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 14/10/2026, per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni 1 e 2 (T01-T11) sono completati. Il giorno 3 è quasi finito: T12-T15 sono uniti e online (JWT, limiti di richieste, profilo, login e registrazione nel frontend); restano T16 (presentazione) e la CSP su Render. Dettagli e passi in `HANDOFF.md`.
+Il progetto è approvato e i giorni 1, 2 e 3 (T01-T16) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login e registrazione nel frontend, pagina di presentazione. Il sito statico su Render manda CSP e `nosniff`. Il prossimo passo è il giorno 4 (T17-T21). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -23,7 +23,7 @@ Il progetto è approvato e i giorni 1 e 2 (T01-T11) sono completati. Il giorno 3
 | 10/10 | **Giorno 1: T01-T06** | Repository pubblico, Docker Compose, backend Spring Boot 4.1.1, schema Flyway, frontend Vite |
 | 10/10 | Decisione nata dalla revisione dello schema | D98: colonne `integer` invece di `smallint`, medie dei drop con al massimo due decimali |
 | 11/10 | **Giorno 2: T07-T11** | Errori e `ApiResponse`, catalogo dai JSON, API pubbliche con sicurezza e CORS, primo deploy, client HTTP e tema |
-| 12/10 | **Giorno 3: T12-T15** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103). Backend 202 test, frontend 145 |
+| 12-14/10 | **Giorno 3: T12-T16** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103), pagina di presentazione (T16). CSP e `nosniff` impostati su Render. Backend 202 test, frontend 151 con il 98% di copertura |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -45,7 +45,7 @@ Il progetto è approvato e i giorni 1 e 2 (T01-T11) sono completati. Il giorno 3
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D98) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D103) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -80,7 +80,6 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 | T17-T20, T25, T30 | Il token di un utente eliminato resta valido fino alla scadenza (D45): ogni service che scrive dati dell'utente deve prima controllare che esista e, se non c'è più, lanciare `UnauthorizedException` (401), come fa `UserService`; altrimenti la chiave esterna dà un 500 (D102). Gli errori su un campo scoperti dal service si lanciano con `FieldValidationException` (400 con `fields`). Nei test, dopo un'operazione che cancella righe, usare una query o `clearAutomatically`: dentro la transazione del test il contesto di persistenza nasconde la cancellazione |
 | T34-T36 | Se si usano risposte asincrone (flusso SSE, `Callable`, `DeferredResult`), il `JwtAuthenticationFilter` deve girare anche sul ridispatch asincrono (`shouldNotFilterAsyncDispatch()` che restituisce `false`), altrimenti la richiesta perde l'utente e riceve 401 |
 | Ricreare il database (entro il 10/11) | Cambiare anche `JWT_SECRET` su Render e farlo generare di nuovo: gli identificativi ripartono da 1 e un vecchio token ancora valido indicherebbe un altro utente (D100). Nessuno deve registrarsi prima della creazione dell'admin: `admin` e `ADMIN_EMAIL` sono comunque riservati |
-| T16 | Sostituire la favicon di Vite; la pagina di presentazione prende il posto dell'elenco di prova |
 | T17 | Fuso orario `Europe/Rome` in configurazione (D41). Se l'avviso "Mockito is currently self-attaching" disturba, aggiungere l'agente di Mockito all'`argLine` di Surefire |
 | T23 | Con più eventi e le loro collezioni, aggiungere `hibernate.default_batch_fetch_size` invece di molti `JOIN FETCH` |
 | T24 | `CharacterAvatar` con le iniziali come ripiego sostituisce l'immagine semplice della scheda di prova. Quando lo stato Redux contiene dati dell'utente (roster, inventario), `sessionEnded` deve azzerarli (D103) |
@@ -91,14 +90,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 3: card T12-T16 di `docs/09-task.md` (JWT e ruoli, limiti di richieste, profilo, login e registrazione nel frontend, pagina di presentazione).
+1. Giorno 4: card T17-T21 di `docs/09-task.md` (Waveplate e Crystals, roster, inventario, configurazione guidata in backend e frontend).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 3 (card T12-T16). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 4 (card T17-T21). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
@@ -113,4 +112,5 @@ Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`.
 - Una revisione del codice prima di ogni pull request ha trovato problemi veri in quasi tutte le card: vale la pena farla sempre.
 - I filtri di Spring Security lavorano prima dei controller: i loro errori non passano dal `@RestControllerAdvice`.
 - Provare l'immagine Docker in locale con i limiti di Render (`--memory=512m --cpus=0.1`) ha mostrato prima del deploy il rischio di memoria e l'avvio lento.
+- Le intestazioni di sicurezza del sito statico (CSP, `nosniff`) si impostano in Render > sito > Headers e non stanno nel repository: se il sito viene ricreato vanno rifatte. Il pulsante "Add Rule" della pagina Headers va premuto con un clic alle coordinate, non con il riferimento dell'elemento.
 - Su Render il piano preselezionato per un nuovo servizio web è a pagamento: va scelto Free a mano.
