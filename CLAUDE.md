@@ -4,11 +4,12 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 
 ## Stato attuale (14/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 103 decisioni (D1-D103).
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 111 decisioni (D1-D111).
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
-- **Prossimo passo:** giorno 4 (T17-T21: Waveplate, roster, inventario, configurazione guidata). Leggere `HANDOFF.md`.
+- **Giorno 4 (T17-T21) completato:** contatore Waveplate e Crystals (D105), roster con le regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109, D110: limite alla dimensione del corpo JSON) e in frontend (D111). Decisioni D1-D111. Tutto online; su Trello T01-T21 sono in "Fatto".
+- **Prossimo passo:** giorno 5 (T22-T24: materiali mancanti e piano di farming, eventi, pagina roster e inventario). Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -93,6 +94,11 @@ backend/
     common/security/          SecurityConfig (accessi e CORS), ApiSecurityErrorHandler (401/403)
     common/data/              DataFileReader: lettura rigorosa dei JSON di data/
     catalog/                  entità, repository, GameRules, CatalogService e CatalogController, dto/
+    user/                     User con WaveplateSnapshot, UserService, PlayTimeRules, profilo
+    waveplate/                WaveplateRules (calcolo puro), service e API (D28, D105)
+    roster/                   OwnedCharacter, RosterRules (livello e grado, D104), service e API
+    inventory/                InventoryItem (sola lettura), scrittura con un solo upsert (D108)
+    onboarding/               configurazione guidata in una transazione (D50, D109)
     event/                    GameEvent con effetto, attività, ricompense e giorni attivi
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
@@ -103,9 +109,10 @@ backend/
 frontend/
   src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
-  src/features/catalog/       tipi, chiamate e catalogSlice (personaggi caricati una volta)
+  src/features/catalog/       tipi, chiamate e catalogSlice (personaggi e regole di gioco caricati una volta)
   src/features/landing/       pagina di presentazione P1 (T16): frase, pulsante, tre passi, personaggi
-  src/components/             LoadingState, ErrorState, pagine 404 ed errore
+  src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
+  src/components/             LoadingState, ErrorState, FormField, SelectField, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
@@ -116,6 +123,8 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - Codice, nomi e commit in inglese; documentazione in italiano.
 - Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, ...), un ramo per attività, `main` sempre funzionante, almeno un push al giorno.
 - Test prima del codice per tutti i calcoli; copertura minima dell'80% su service e logica.
+- Backend, dati dell'utente: i repository estendono `Repository` (non `JpaRepository`) e ogni metodo prende l'utente (D44); le scritture che possono arrivare insieme sono un'unica istruzione (upsert, `update ... where`); gli errori su più campi usano `FieldValidationException(Map)`. Ogni service che scrive ha un test `*CommitTest` senza `@Transactional` sul test (commit vero, nomi utente unici, pulizia nel `finally`): verificare con una mutazione (togliere `@Transactional` dal service) che fallisca.
+- Frontend: la bozza di un modulo lungo sta in uno slice che si azzera con `sessionEnded` e con ogni nuovo login e ignora le risposte di richieste di una sessione finita (`requestId`); messaggi di errore con `text-danger-emphasis` (contrasto AA); per guidare il browser di prova senza screenshot si usano piccoli script con `javascript_tool` (il pannello può non essere visibile e i clic reali falliscono).
 - Nessun segreto nel codice: solo variabili d'ambiente (elenco in `docs/08-regole-di-lavoro.md`). Nuove variabili obbligatorie vanno in `AppProperties`, con un messaggio che nomina la variabile.
 - Schema: una migrazione già unita a `main` non si modifica mai, se ne crea una nuova (`V2__...`). Le colonne intere sono `integer` (D98) e ogni `CHECK` controlla anche `IS NOT NULL`, perché un controllo che vale NULL viene considerato superato.
 - Backend: un errore su un campo si lancia con `ConflictException(messaggio, campo)` o `FieldValidationException(campo, messaggio)` (risposta con `fields`); un service che scrive dati dell'utente risponde 401 con `UnauthorizedException` se l'utente del token non esiste più (D102). Gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
