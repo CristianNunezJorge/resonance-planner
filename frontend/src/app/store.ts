@@ -1,12 +1,14 @@
 import { combineReducers, configureStore, type ThunkAction, type UnknownAction } from '@reduxjs/toolkit'
 import authReducer from '../features/auth/authSlice'
 import catalogReducer from '../features/catalog/catalogSlice'
+import onboardingReducer from '../features/onboarding/onboardingSlice'
 import toastReducer from './toastSlice'
 
 const rootReducer = combineReducers({
   toast: toastReducer,
   catalog: catalogReducer,
   auth: authReducer,
+  onboarding: onboardingReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

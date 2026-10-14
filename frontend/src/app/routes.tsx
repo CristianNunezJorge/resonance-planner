@@ -7,6 +7,7 @@ import LoginPage from '../features/auth/LoginPage'
 import ProtectedRoute from '../features/auth/ProtectedRoute'
 import RegisterPage from '../features/auth/RegisterPage'
 import LandingPage from '../features/landing/LandingPage'
+import OnboardingPage from '../features/onboarding/OnboardingPage'
 import RootLayout from './RootLayout'
 
 // Route list shared by the browser router and the tests (paths in Italian, D71).
@@ -27,9 +28,9 @@ export const routes: RouteObject[] = [
         ],
       },
       {
-        // Only for who still has the guided setup to do (T21)
+        // Only for who still has the guided setup to do
         element: <ProtectedRoute onboarding="incomplete" />,
-        children: [{ path: 'configurazione', element: <ComingSoonPage title="Configurazione guidata" /> }],
+        children: [{ path: 'configurazione', element: <OnboardingPage /> }],
       },
       {
         // Only after the guided setup (T24, T26)

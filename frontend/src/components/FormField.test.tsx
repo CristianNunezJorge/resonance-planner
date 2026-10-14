@@ -33,6 +33,15 @@ describe('FormField', () => {
     expect(screen.getByText('Inserisci la password.')).toHaveClass('invalid-feedback')
   })
 
+  it('can ask a phone for the numeric keyboard while the input stays a text input', () => {
+    render(<FormField id="waveplate" label="Waveplate" value="" onChange={vi.fn()} inputMode="numeric" autoComplete="off" />)
+
+    const input = screen.getByLabelText('Waveplate')
+    expect(input).toHaveAttribute('inputmode', 'numeric')
+    expect(input).toHaveAttribute('type', 'text')
+    expect(input).toHaveAttribute('autocomplete', 'off')
+  })
+
   it('marks a required field, so the screen reader says it', () => {
     render(<FormField id="email" label="Email" value="" onChange={vi.fn()} required />)
 
