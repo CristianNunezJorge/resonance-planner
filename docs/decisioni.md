@@ -1053,3 +1053,30 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Come:** il componente usa le classi `.modal` e `.modal-backdrop`, senza stili inline (CSP, D103). Quando si apre il focus va su "Annulla", Tab resta dentro la finestra, Esc la chiude e alla chiusura il focus torna al pulsante che l'ha aperta (WCAG 2.1.2, 2.4.3).
 - **Perché:** il progetto importa solo gli stili di Bootstrap. Il suo JavaScript cambia il DOM per conto suo, mentre in React è React a decidere cosa c'è nella pagina: due padroni dello stesso elemento creano errori difficili da trovare.
 - **Scartate:** `window.confirm` (esclusa da D69, non personalizzabile); `react-bootstrap` (una libreria in più, fuori dal programma del corso); l'elemento nativo `<dialog>` (l'ambiente dei test, jsdom, non lo gestisce del tutto).
+
+## D117 · Attività manuali e calendario
+**Stato:** Confermata · 15/10/2026 · nata da T25
+
+- **Cosa:** `POST`, `PUT` e `DELETE /api/me/tasks` gestiscono le attività manuali (D24); `GET /api/me/calendar` restituisce eventi e attività di un intervallo in una sola risposta (D51).
+- **Come:**
+  - **Campi di un'attività manuale:** titolo da 1 a 120 caratteri (senza spazi ai lati), giorno tra il 01/01/2000 e il 31/12/2100 (la stessa finestra degli eventi), durata da 1 a 1440 minuti, note facoltative fino a 1000 caratteri (vuote = nessuna nota). Origine, tipo e stato non arrivano dal corpo: un'attività manuale è sempre `MANUAL`, `CUSTOM` e nasce `CONFIRMED`.
+  - **Modifica e cancellazione:** solo per le attività manuali (409 per quelle dell'agente), anche quando sono già fatte; la modifica sostituisce tutti i campi e lascia lo stato com'è. Un'attività di un altro utente risponde 404.
+  - **Limite:** al massimo 500 attività manuali per utente (409 oltre). La creazione blocca la riga dell'utente (vedi D118), così due richieste nello stesso momento non superano il limite.
+  - **Calendario:** `events` sono le stesse voci di `/api/events` (una per edizione, con `activeDates`, D113); `tasks` sono le attività `CONFIRMED` e `DONE` dell'intervallo, per giorno e poi in ordine di creazione, con le Waveplate già calcolate (run × costo della fonte, 0 per gli altri tipi). Le date seguono le regole di `/api/events` (al massimo 62 giorni). La proposta in attesa si aggiungerà con le proposte (T30).
+- **Perché:** il form del calendario chiede titolo, giorno, durata e note (P4); i limiti sono larghi per l'uso vero ma impediscono testi enormi e milioni di righe per un solo account. Riusare le voci degli eventi evita una seconda forma degli stessi dati: la finestra di dettaglio dell'evento ha già tutto.
+- **Scartate:** personaggio collegato all'attività manuale (non è nel form di P4); nessun limite al numero di attività; un campo `pendingProposal` sempre vuoto fino a T30 (un campo senza dati da spiegare).
+
+## D118 · Completamento di un'attività
+**Stato:** Confermata · 15/10/2026 · nata da T25
+
+- **Cosa:** `POST /api/me/tasks/{id}/complete` segna come fatta un'attività del calendario; un'attività di farming aggiunge all'inventario quello che le sue run danno in media (D21), con il moltiplicatore di un evento solo per le run entro il limite giornaliero (D94).
+- **Come:**
+  1. si può completare solo un'attività `CONFIRMED` (409 se è già `DONE` o se è una proposta, scartata o sostituita); non si può annullare (l'inventario si corregge a mano);
+  2. per ogni drop della fonte: quantità media × run normali + quantità media × moltiplicatore × run potenziate, **arrotondata per difetto** sul totale dell'attività; un materiale che arriva a 0 non si aggiunge. Tutti i drop contano, anche quelli secondari (pozioni e crediti), come nel calcolo del farming (D112);
+  3. il moltiplicatore è quello di un evento **attivo nel giorno dell'attività** (D96) con un effetto sul tipo della fonte; se ce ne sono più di uno vale il più forte (moltiplicatore più alto, poi limite più alto), senza sommarli;
+  4. le run potenziate sono le prime del giorno fino al limite: le run dello stesso tipo di fonte già fatte quel giorno (altre attività `DONE`) lo consumano per prime; senza limite tutte le run sono potenziate;
+  5. l'inventario si aggiorna con un'istruzione sola per materiale (insert o somma), che si ferma a 999.999.999 (D108);
+  6. ogni scrittura delle attività (creazione, modifica, cancellazione, completamento) blocca la riga dell'utente (`SELECT ... FOR NO KEY UPDATE`) fino alla fine della transazione: due completamenti della stessa attività nello stesso momento ne fanno uno (l'altro riceve 409), due attività dello stesso giorno si dividono il limite e una modifica non può riportare indietro un'attività appena completata. Il blocco non ferma le altre scritture dell'utente (inventario, roster);
+  7. la risposta contiene l'attività aggiornata e `addedToInventory`, con la quantità che le run hanno dato per ogni materiale, così il frontend può mostrarla. Vicino al massimo l'inventario cresce di meno, perché si ferma a 999.999.999.
+- **Perché:** il giorno dell'attività è quello per cui il piano è stato calcolato, e dà un risultato che non dipende da quando l'utente preme il pulsante. L'arrotondamento per difetto non promette materiali che il gioco potrebbe non aver dato, ed è lo stesso criterio delle percentuali (D112). Il blocco sulla riga dell'utente è la soluzione più semplice per due richieste in gara, e una prova con 6 richieste insieme lo verifica.
+- **Scartate:** il moltiplicatore del giorno in cui si preme "Segna come fatta" (un'attività segnata in ritardo perderebbe l'evento, e i test dipenderebbero dall'orologio); arrotondare ogni run (con medie sotto 1 un'attività non darebbe mai niente); sommare gli effetti di più eventi (nei dati della demo non succede, e scegliere il più forte non promette materiali in più); impedire di completare un'attività di un giorno futuro (una regola in più, poco utile in una demo).

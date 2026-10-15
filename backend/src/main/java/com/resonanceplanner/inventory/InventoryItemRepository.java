@@ -28,4 +28,20 @@ public interface InventoryItemRepository extends Repository<InventoryItem, Long>
             """, nativeQuery = true)
     void saveQuantity(@Param("userId") Long userId, @Param("materialId") String materialId,
             @Param("quantity") int quantity);
+
+    /**
+     * Adds a quantity to a material, creating the row the first time, in one statement (D118): an addition that
+     * arrives together with a correction of the same material never loses one of the two, and the total stops at
+     * {@code maxQuantity}. The quantity must already be between 0 and maxQuantity, so the sum fits in an integer.
+     * Same note as {@link #saveQuantity} about the persistence context.
+     */
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+            insert into inventory_item (user_id, material_id, quantity)
+            values (:userId, :materialId, :quantity)
+            on conflict (user_id, material_id)
+            do update set quantity = least(inventory_item.quantity + excluded.quantity, :maxQuantity)
+            """, nativeQuery = true)
+    void addQuantity(@Param("userId") Long userId, @Param("materialId") String materialId,
+            @Param("quantity") int quantity, @Param("maxQuantity") int maxQuantity);
 }
