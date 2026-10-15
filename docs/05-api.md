@@ -182,7 +182,19 @@ Nel roster il personaggio si indica con il suo identificativo (`jinhsi`): ogni u
 | DELETE | `/api/me/tasks/{id}` | Cancella un'attività manuale | 204; 409 se non è manuale |
 | POST | `/api/me/tasks/{id}/complete` | Segna come fatta; aggiorna l'inventario se è di farming (D21) | 200 |
 
-L'intervallo del calendario può coprire al massimo 62 giorni.
+**Attività manuali (T25, D117).** `POST` (201) e `PUT /{id}` (200) prendono `{ "title": "Giro dei boss", "taskDate": "2026-10-20", "minutes": 30, "notes": "Prima Mourning Aix" }` e rispondono con l'attività. Titolo da 1 a 120 caratteri (gli spazi ai lati si tolgono), giorno tra il 01/01/2000 e il 31/12/2100, durata da 1 a 1440 minuti, note facoltative fino a 1000 caratteri (vuote = `null`). Origine, tipo e stato non si mandano: un'attività manuale è `MANUAL`, `CUSTOM` e nasce `CONFIRMED`. `PUT` sostituisce tutti i campi e lascia lo stato com'è; `DELETE` risponde 204.
+- **400** con `fields`, tutti i campi sbagliati insieme (`title`, `taskDate`, `minutes`, `notes`); senza `fields` se il corpo non ha la forma giusta (una data scritta male, un numero con la virgola).
+- **404** se l'attività non è dell'utente del token (anche se esiste per un altro), prima del 400 delle date e del 409.
+- **409** su `PUT` e `DELETE` se l'attività è dell'agente; su `POST` se l'utente ha già 500 attività manuali.
+- **401** se l'utente del token non esiste più (D102), per tutti gli endpoint.
+
+Ogni attività nelle risposte ha `id`, `origin`, `kind`, `status`, `taskDate`, `title`, `notes`, `minutes`, `farmingSourceId` e `runs` (solo `FARMING`), `waveplates` (run × costo della fonte, 0 per gli altri tipi), `eventId` (solo `EVENT`), `characterId` e `completedAt` (`null` finché non è fatta).
+
+**Completamento (T25, D118).** `POST /api/me/tasks/{id}/complete` vale per un'attività `CONFIRMED` e risponde con `{ "task": { ... }, "addedToInventory": [{ "materialId", "quantity" }] }`. Un'attività di farming aggiunge all'inventario, per ogni drop della fonte, la quantità media delle sue run arrotondata per difetto; se nel giorno dell'attività un evento attivo potenzia quel tipo di fonte, il moltiplicatore vale per le prime run del giorno fino al limite giornaliero, contando prima le run già fatte quel giorno. Le altre attività diventano solo `DONE` (`addedToInventory` vuoto). La somma nell'inventario si ferma a 999.999.999: in quel caso `addedToInventory` dice quanto hanno dato le run, non quanto è entrato.
+- **409** se l'attività è già fatta o non è nel calendario (proposta, scartata o sostituita).
+- **404** e **401** come sopra.
+
+**Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. Le proposte in attesa (T30) non ci sono ancora.
 
 ### Proposte dell'agente
 | Metodo | Percorso | Cosa fa | Risposta |
@@ -272,7 +284,7 @@ Esempio: Jinhsi come sopra, con 3 Elegy Tacet Core e 10 LF Howler Core già nell
 - **401** se l'utente del token non esiste più (D102), per entrambi gli endpoint.
 
 ### Calendario
-`GET /api/me/calendar?from=2026-09-28&to=2026-10-04` → `data`:
+`GET /api/me/calendar?from=2026-09-28&to=2026-10-04` → `data` (eventi accorciati: ogni voce ha anche `description`, `rewards` e `activities`, come in `/api/events`):
 ```json
 {
   "events": [
@@ -294,14 +306,29 @@ Esempio: Jinhsi come sopra, con 3 Elegy Tacet Core e 10 LF Howler Core già nell
   "tasks": [
     {
       "id": 40, "origin": "AGENT", "kind": "FARMING", "status": "CONFIRMED",
-      "taskDate": "2026-10-01", "title": "Simulation Training: Resonance Potion ×3",
-      "minutes": 9, "waveplates": 120, "characterId": "jinhsi"
+      "taskDate": "2026-10-01", "title": "Simulation Training: Resonance Potion ×3", "notes": null,
+      "minutes": 9, "farmingSourceId": "sim-resonance-potion", "runs": 3, "waveplates": 120,
+      "eventId": null, "characterId": "jinhsi", "completedAt": null
     }
-  ],
-  "pendingProposal": null
+  ]
 }
 ```
 Il secondo evento è attivo solo nel weekend: anche se l'edizione va dal 28 settembre all'11 ottobre, `activeDates` contiene solo sabato e domenica, e il calendario lo disegna solo in quei giorni (D96).
+
+### Completamento di un'attività di farming
+`POST /api/me/tasks/40/complete` (l'attività qui sopra, il 01/10 con Bountiful Crescendo attivo e nessun'altra run di Simulation Training fatta quel giorno) → `data`:
+```json
+{
+  "task": { "id": 40, "status": "DONE", "completedAt": "2026-10-01T18:20:00Z", "...": "..." },
+  "addedToInventory": [
+    { "materialId": "premium-resonance-potion", "quantity": 6 },
+    { "materialId": "advanced-resonance-potion", "quantity": 30 },
+    { "materialId": "medium-resonance-potion", "quantity": 14 },
+    { "materialId": "shell-credit", "quantity": 21600 }
+  ]
+}
+```
+Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 = 6,6 Premium Resonance Potion, arrotondate per difetto a 6 (D118).
 
 ### Messaggio all'agente
 `POST /api/me/agent/messages`

@@ -34,4 +34,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update User u set u.onboardingCompleted = true where u.id = :id and u.onboardingCompleted = false")
     int claimOnboarding(@Param("id") Long id);
+
+    /**
+     * Locks the row of the user until the end of the transaction and returns its id, or nothing if the user does not
+     * exist (D118): the operations of one user that must not overlap, such as completing two tasks against the same
+     * daily limit, wait for each other. FOR NO KEY UPDATE does not block the foreign key checks, so the other writes
+     * of the user (inventory, roster) go on. It needs a read-write transaction.
+     */
+    @Query(value = "select id from users where id = :id for no key update", nativeQuery = true)
+    Optional<Long> lockById(@Param("id") Long id);
 }
