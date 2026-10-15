@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 14/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 15/10/2026, per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 4 (T01-T21) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login, registrazione, pagina di presentazione, contatore Waveplate, roster, inventario e configurazione guidata (backend e frontend). Il prossimo passo è il giorno 5 (T22-T24). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 5 (T01-T24) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login, registrazione, pagina di presentazione, contatore Waveplate, roster, inventario, configurazione guidata, calcolo del farming, eventi (pubblici e admin) e pagina roster e inventario. Il prossimo passo è il giorno 6 (T25-T28). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -25,6 +25,7 @@ Il progetto è approvato e i giorni da 1 a 4 (T01-T21) sono completati, uniti su
 | 11/10 | **Giorno 2: T07-T11** | Errori e `ApiResponse`, catalogo dai JSON, API pubbliche con sicurezza e CORS, primo deploy, client HTTP e tema |
 | 12-14/10 | **Giorno 3: T12-T16** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103), pagina di presentazione (T16). CSP e `nosniff` impostati su Render. Backend 202 test, frontend 151 con il 98% di copertura |
 | 14/10 | **Giorno 4: T17-T21** | Waveplate e Crystals (D105), roster e regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109) con limite al corpo JSON (D110) e in frontend (D111). Backend 391 test, frontend 275 con il 98% di copertura. Trello T17-T21 in "Fatto" |
+| 14-15/10 | **Giorno 5: T22-T24** | Calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni, giorni attivi e area admin (D113, D114), pagina roster e inventario (D115, D116). Backend 496 test (copertura 98,5%), frontend 336 (98,6%). Un incidente di Render ha fermato i deploy gratuiti per alcune ore: T22 è andata online con un deploy manuale. Trello T22-T24 in "Fatto" |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -46,7 +47,7 @@ Il progetto è approvato e i giorni da 1 a 4 (T01-T21) sono completati, uniti su
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D103) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D116) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -98,14 +99,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 5: card T22-T24 di `docs/09-task.md` (calcolo dei materiali mancanti e del piano di farming, eventi con date e giorni attivi, pagina roster e inventario).
+1. Giorno 6: card T25-T28 di `docs/09-task.md` (attività e calendario in backend, pagina calendario, profilo e gestione eventi, rilascio v1 con tag `v1.0.0`).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 5 (card T22-T24). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 6 (card T25-T28). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
@@ -122,3 +123,5 @@ Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`.
 - Provare l'immagine Docker in locale con i limiti di Render (`--memory=512m --cpus=0.1`) ha mostrato prima del deploy il rischio di memoria e l'avvio lento.
 - Le intestazioni di sicurezza del sito statico (CSP, `nosniff`) si impostano in Render > sito > Headers e non stanno nel repository: se il sito viene ricreato vanno rifatte. Il pulsante "Add Rule" della pagina Headers va premuto con un clic alle coordinate, non con il riferimento dell'elemento.
 - Su Render il piano preselezionato per un nuovo servizio web è a pagamento: va scelto Free a mano.
+- Se un deploy di Render non parte o risponde "Service Unavailable", il problema può essere della piattaforma: guardare https://status.render.com prima di cercare l'errore nel codice (incidente del 14/10).
+- Le revisioni del codice del giorno 5 hanno trovato soprattutto casi limite: date estreme che davano 500, un evento che non sarebbe mai stato attivo, il focus perso dopo un'azione, due salvataggi sovrapposti nello stesso campo. Vale la pena chiedere sempre ai revisori i casi di concorrenza e di accessibilità.
