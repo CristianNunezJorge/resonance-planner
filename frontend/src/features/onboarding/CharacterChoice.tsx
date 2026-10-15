@@ -1,4 +1,5 @@
 import { formatGameTerm } from '../catalog/format'
+import { characterIconUrl } from '../catalog/icons'
 import type { CharacterSummary } from '../catalog/types'
 
 interface CharacterChoiceProps {
@@ -14,6 +15,7 @@ interface CharacterChoiceProps {
 // reader work as with any checkbox, and the state is the tick, not only a colour
 function CharacterChoice({ character, checked, onToggle, invalid, describedBy }: CharacterChoiceProps) {
   const inputId = `character-${character.id}`
+  const iconUrl = characterIconUrl(character.icon)
 
   return (
     <label htmlFor={inputId} className="card character-choice h-100">
@@ -27,9 +29,9 @@ function CharacterChoice({ character, checked, onToggle, invalid, describedBy }:
         aria-describedby={describedBy}
       />
       {/* Empty alt: the name is in the label, so the image would be read twice */}
-      {character.icon && (
+      {iconUrl && (
         <img
-          src={`/${character.icon}`}
+          src={iconUrl}
           alt=""
           className="card-img-top h-auto"
           width={256}

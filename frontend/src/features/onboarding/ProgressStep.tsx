@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { formatGameTerm } from '../catalog/format'
 import type { CharacterSummary, GameRules } from '../catalog/types'
-import LevelPicker from './LevelPicker'
+import LevelPicker from '../progress/LevelPicker'
 import { ascensionChanged, levelChanged } from './onboardingSlice'
 import { progressKey } from './validation'
 

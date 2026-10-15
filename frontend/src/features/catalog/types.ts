@@ -16,6 +16,17 @@ export interface CharacterSummary {
   icon: string | null
 }
 
+export type MaterialCategory = 'CREDIT' | 'CHARACTER_EXP' | 'ENEMY_DROP' | 'BOSS_DROP' | 'LOCAL_SPECIALTY'
+
+export interface MaterialSummary {
+  id: string
+  name: string
+  category: MaterialCategory
+  // Only for the Resonance Potions: the EXP of one potion
+  exp: number | null
+  icon: string | null
+}
+
 // Rules of the game that the frontend needs (GET /api/game/rules): the same numbers the backend checks with
 export interface Regeneration {
   max: number

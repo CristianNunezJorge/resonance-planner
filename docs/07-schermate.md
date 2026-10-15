@@ -196,8 +196,9 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 | TOTALE STIMATO  ~1.200 Waveplate · ~6 ore · ~5 giorni          |
 +----------------------------------------------------------------+
 ```
-- **Scheda Inventario:** tabella dei materiali con quantità modificabile; il salvataggio avviene quando si esce dal campo, con conferma visiva.
-- **Rimuovi** chiede conferma; il personaggio esce dal roster ma le attività già fatte restano.
+- **Scheda Inventario:** tabella dei materiali con quantità modificabile, divisa per tipo (crediti, pozioni EXP, drop dei nemici comuni, drop dei boss, specialità locali); il salvataggio avviene quando si esce dal campo, solo se il valore è cambiato ed è un intero da 0 a 999.999.999, con "Salvato" accanto al campo.
+- **Dati (D115):** requisiti chiesti personaggio per personaggio; dopo ogni modifica la pagina ricarica tutto dal server, mostrando "Aggiornamento dei calcoli…". La barra dei materiali è un `<progress>` nativo (niente stili inline, CSP).
+- **Rimuovi** chiede conferma in una `ConfirmModal` (D116); il personaggio esce dal roster ma le attività già fatte restano.
 - **Stato vuoto:** "Nessun personaggio: aggiungine uno per iniziare".
 
 ### P6 · Profilo `/profilo`

@@ -1,13 +1,8 @@
 // Shapes of the guided setup (D20, D50) and of its request (docs/05-api.md)
 
-export type Step = 1 | 2 | 3
+import type { LevelDraft } from '../progress/types'
 
-// A level and, only at a level where an ascension is needed, whether that ascension is done (D104): together they
-// say the rank, which the user never sees
-export interface LevelDraft {
-  level: number
-  ascended: boolean
-}
+export type Step = 1 | 2 | 3
 
 export interface CharacterDraft {
   current: LevelDraft

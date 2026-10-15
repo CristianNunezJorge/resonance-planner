@@ -1,5 +1,5 @@
 import type { CharacterSummary, GameRules } from '../catalog/types'
-import { rankOf } from './levels'
+import { rankOf } from '../progress/levels'
 import type { CharacterRequest, DraftState, OnboardingRequest } from './types'
 
 /**

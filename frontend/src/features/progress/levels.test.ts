@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { gameRules } from '../../test/fixtures'
-import { formatPlayTime, isAscensionCap, isLowerThan, levelsOf, rankOf } from './levels'
+import { draftOf, formatPlayTime, isAscensionCap, isLowerThan, levelsOf, rankOf } from './levels'
 
 // Level and ascension rank (D34, D104): rank 0 = levels 1-20, rank 1 = 20-40, rank 2 = only 40. The user picks a
 // level and, only at a level where an ascension is needed, says whether it is done: the rank follows from the two.
@@ -79,5 +79,22 @@ describe('formatPlayTime', () => {
     [150, '2 ore e 30 minuti'],
   ])('writes %i minutes as "%s"', (minutes, text) => {
     expect(formatPlayTime(minutes)).toBe(text)
+  })
+})
+
+describe('draftOf', () => {
+  it('ticks the ascension only at a cap whose ascension is done', () => {
+    expect(draftOf(1, 0, gameRules)).toEqual({ level: 1, ascended: false })
+    expect(draftOf(20, 0, gameRules)).toEqual({ level: 20, ascended: false })
+    expect(draftOf(20, 1, gameRules)).toEqual({ level: 20, ascended: true })
+    expect(draftOf(30, 1, gameRules)).toEqual({ level: 30, ascended: false })
+    expect(draftOf(40, 1, gameRules)).toEqual({ level: 40, ascended: false })
+    expect(draftOf(40, 2, gameRules)).toEqual({ level: 40, ascended: true })
+  })
+
+  it('gives back the same rank through rankOf', () => {
+    for (const [level, rank] of [[1, 0], [20, 0], [20, 1], [35, 1], [40, 1], [40, 2]]) {
+      expect(rankOf(draftOf(level, rank, gameRules), gameRules)).toBe(rank)
+    }
   })
 })

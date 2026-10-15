@@ -1037,3 +1037,19 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Perché:** i limiti sono larghi per l'uso vero della demo, ma impediscono date fuori scala, corpi enormi e un effetto su un evento che non lo prevede (D94). Un evento di ricompense doppie senza effetto non direbbe al pianificatore cosa raddoppiare.
 - **Scartate:** nessun limite oltre a quelli del database (un admin distratto potrebbe creare un evento di 100 anni o con migliaia di attività); effetto facoltativo per tutti i tipi (un effetto su un evento a punti non ha senso nel gioco).
 - **Limiti noti:** un corpo di forma sbagliata riceve il 400 prima del controllo dell'admin nel database, come negli altri endpoint (la validazione del DTO avviene prima del service), quindi un token di un admin cancellato con un corpo sbagliato riceve 400 e non 401; il messaggio non rivela dati. Due modifiche dello stesso evento nello stesso momento non sono protette (nessun `@Version`): vince l'ultima, e in casi rari una delle due può dare 500. Per un solo admin della demo basta.
+
+## D115 · La pagina del roster chiede i requisiti personaggio per personaggio
+**Stato:** Confermata · 15/10/2026
+
+- **Cosa:** la pagina P5 (T24) carica il roster, l'inventario, il piano complessivo (`/api/me/farming-plan`) e i requisiti di ogni personaggio (`/api/me/roster/{id}/requirements`), una richiesta per personaggio. Dopo ogni modifica (personaggio aggiunto, cambiato o tolto, quantità dell'inventario) ricarica tutto dal server.
+- **Come:** un `rosterSlice` tiene questi dati; le richieste partono insieme (`Promise.all`). Al primo caricamento la pagina mostra `LoadingState`; dopo una modifica i dati restano visibili mentre arrivano quelli nuovi. Lo slice si azzera con `sessionEnded` e con ogni nuovo login e ignora le risposte di un caricamento superato (`requestId`), come `onboardingSlice` (D103).
+- **Perché:** le API esistono già e i numeri li calcola sempre Java (D3): ricaricare dopo una modifica evita di rifare i conti nel browser. Con i 6 personaggi della demo sono 9 richieste piccole.
+- **Scartate:** un nuovo endpoint con i requisiti di tutti i personaggi insieme (altro backend per un guadagno piccolo); aggiornare i numeri nel browser dopo una modifica (calcoli duplicati, che potrebbero dare risultati diversi da quelli del server).
+
+## D116 · Finestra di conferma senza il JavaScript di Bootstrap
+**Stato:** Confermata · 15/10/2026
+
+- **Cosa:** le azioni irreversibili (per prima "Rimuovi" nel roster) chiedono conferma in una finestra `ConfirmModal` con gli stili delle modali di Bootstrap (D69), gestita da React.
+- **Come:** il componente usa le classi `.modal` e `.modal-backdrop`, senza stili inline (CSP, D103). Quando si apre il focus va su "Annulla", Tab resta dentro la finestra, Esc la chiude e alla chiusura il focus torna al pulsante che l'ha aperta (WCAG 2.1.2, 2.4.3).
+- **Perché:** il progetto importa solo gli stili di Bootstrap. Il suo JavaScript cambia il DOM per conto suo, mentre in React è React a decidere cosa c'è nella pagina: due padroni dello stesso elemento creano errori difficili da trovare.
+- **Scartate:** `window.confirm` (esclusa da D69, non personalizzabile); `react-bootstrap` (una libreria in più, fuori dal programma del corso); l'elemento nativo `<dialog>` (l'ambiente dei test, jsdom, non lo gestisce del tutto).
