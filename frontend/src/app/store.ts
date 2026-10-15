@@ -2,6 +2,7 @@ import { combineReducers, configureStore, type ThunkAction, type UnknownAction }
 import authReducer from '../features/auth/authSlice'
 import catalogReducer from '../features/catalog/catalogSlice'
 import onboardingReducer from '../features/onboarding/onboardingSlice'
+import rosterReducer from '../features/roster/rosterSlice'
 import toastReducer from './toastSlice'
 
 const rootReducer = combineReducers({
@@ -9,6 +10,7 @@ const rootReducer = combineReducers({
   catalog: catalogReducer,
   auth: authReducer,
   onboarding: onboardingReducer,
+  roster: rosterReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

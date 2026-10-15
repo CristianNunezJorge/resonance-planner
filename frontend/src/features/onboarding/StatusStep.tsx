@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import FormField from '../../components/FormField'
 import type { GameRules } from '../catalog/types'
-import { formatPlayTime } from './levels'
+import { formatPlayTime } from '../progress/levels'
 import { crystalsTyped, playTimeChosen, waveplateTyped } from './onboardingSlice'
 import { CRYSTALS_KEY, PLAY_TIME_KEY, WAVEPLATE_KEY } from './validation'
 

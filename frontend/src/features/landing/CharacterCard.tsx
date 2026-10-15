@@ -1,21 +1,23 @@
 import { formatGameTerm } from '../catalog/format'
+import { characterIconUrl } from '../catalog/icons'
 import type { CharacterSummary } from '../catalog/types'
 
 interface CharacterCardProps {
   character: CharacterSummary
 }
 
-// Card of a demo character on the presentation page P1; CharacterAvatar (T24) will cover the other pages
+// Card of a demo character on the presentation page P1, with the large icon (CharacterAvatar is the small one)
 function CharacterCard({ character }: CharacterCardProps) {
   const stars = '★'.repeat(character.rarity)
+  const iconUrl = characterIconUrl(character.icon)
 
   return (
     <article className="card h-100">
       {/* Empty alt: the name follows right after, so it is not read twice. h-auto keeps the
           proportions, while width and height reserve the space before the image arrives */}
-      {character.icon && (
+      {iconUrl && (
         <img
-          src={`/${character.icon}`}
+          src={iconUrl}
           alt=""
           className="card-img-top h-auto"
           width={256}

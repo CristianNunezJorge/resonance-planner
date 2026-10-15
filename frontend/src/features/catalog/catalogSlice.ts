@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { ApiError } from '../../api/client'
 import type { RootState } from '../../app/store'
-import { getCharacters, getGameRules } from './catalogApi'
-import type { CharacterSummary, GameRules } from './types'
+import { getCharacters, getGameRules, getMaterials } from './catalogApi'
+import type { CharacterSummary, GameRules, MaterialSummary } from './types'
 
 // Catalog data shared by several pages (presentation, guided setup, roster): loaded once, kept in the store
 
@@ -16,6 +16,10 @@ interface CatalogState {
   rules: GameRules | null
   rulesStatus: LoadStatus
   rulesError: string | null
+  // The materials, for the inventory of the roster page
+  materials: MaterialSummary[]
+  materialsStatus: LoadStatus
+  materialsError: string | null
 }
 
 const initialState: CatalogState = {
@@ -25,6 +29,9 @@ const initialState: CatalogState = {
   rules: null,
   rulesStatus: 'idle',
   rulesError: null,
+  materials: [],
+  materialsStatus: 'idle',
+  materialsError: null,
 }
 
 const UNEXPECTED_ERROR_MESSAGE = 'Si è verificato un errore imprevisto. Riprova più tardi.'
@@ -69,6 +76,23 @@ export const fetchRules = createAsyncThunk<GameRules, void, { state: RootState; 
   },
 )
 
+export const fetchMaterials = createAsyncThunk<MaterialSummary[], void, { state: RootState; rejectValue: string }>(
+  'catalog/fetchMaterials',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getMaterials()
+    } catch (error) {
+      return rejectWithValue(error instanceof ApiError ? error.message : UNEXPECTED_ERROR_MESSAGE)
+    }
+  },
+  {
+    condition: (_, { getState }) => {
+      const status = getState().catalog.materialsStatus
+      return status !== 'loading' && status !== 'succeeded'
+    },
+  },
+)
+
 const catalogSlice = createSlice({
   name: 'catalog',
   initialState,
@@ -98,6 +122,18 @@ const catalogSlice = createSlice({
       .addCase(fetchRules.rejected, (state, action) => {
         state.rulesStatus = 'failed'
         state.rulesError = action.payload ?? UNEXPECTED_ERROR_MESSAGE
+      })
+      .addCase(fetchMaterials.pending, (state) => {
+        state.materialsStatus = 'loading'
+        state.materialsError = null
+      })
+      .addCase(fetchMaterials.fulfilled, (state, action) => {
+        state.materialsStatus = 'succeeded'
+        state.materials = action.payload
+      })
+      .addCase(fetchMaterials.rejected, (state, action) => {
+        state.materialsStatus = 'failed'
+        state.materialsError = action.payload ?? UNEXPECTED_ERROR_MESSAGE
       })
   },
 })

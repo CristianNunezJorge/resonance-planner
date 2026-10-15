@@ -1,5 +1,5 @@
 import type { GameRules } from '../catalog/types'
-import { isLowerThan } from './levels'
+import { isLowerThan } from '../progress/levels'
 import type { DraftState, Step } from './types'
 
 // The checks that the page does before each step, so the user sees what to fix without waiting for the server.

@@ -26,9 +26,10 @@ $element-colors: (
   outline: none;
 }
 
-// The progress of the guided setup: a native <progress>, so it needs no inline style (D103) and a screen reader
-// announces it; the colours are those of the theme
-.onboarding-progress {
+// The progress of the guided setup and the materials of a roster character: a native <progress>, so it needs no
+// inline style (D103) and a screen reader announces it; the colours are those of the theme
+.onboarding-progress,
+.completion-progress {
   display: block;
   width: 100%;
   height: 0.75rem;
@@ -50,6 +51,25 @@ $element-colors: (
   &::-moz-progress-bar {
     background-color: var(--bs-primary);
   }
+}
+
+// The avatar of a character (D30): the official icon, or its initials on the colour of the element
+.character-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+// The column of the quantities in the inventory: wide enough for 999.999.999
+.inventory-quantity {
+  width: 12rem;
 }
 
 // A character to choose in step 1: the whole card is the label of a real checkbox in its corner. The tick says

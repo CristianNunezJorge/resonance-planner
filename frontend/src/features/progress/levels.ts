@@ -15,6 +15,12 @@ export function rankOf({ level, ascended }: LevelDraft, rules: GameRules): numbe
   return capsBelow + (ascended && isAscensionCap(level, rules) ? 1 : 0)
 }
 
+/** The opposite of rankOf: the level and rank saved by the API become the level and the tick of the ascension. */
+export function draftOf(level: number, rank: number, rules: GameRules): LevelDraft {
+  const capsBelow = rules.ascensionLevels.filter((cap) => cap < level).length
+  return { level, ascended: isAscensionCap(level, rules) && rank > capsBelow }
+}
+
 /** A goal is lower than the present when its rank is lower, or the rank is the same and the level is lower. */
 export function isLowerThan(target: LevelDraft, current: LevelDraft, rules: GameRules): boolean {
   const targetRank = rankOf(target, rules)
