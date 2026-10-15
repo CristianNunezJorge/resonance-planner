@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { describeError, type RequestFailure } from '../../api/client'
 import type { RootState } from '../../app/store'
 import { login, register, restoreSession, sessionEnded } from '../auth/authSlice'
+import { completeCalendarTask } from '../calendar/calendarSlice'
 import {
   addToRoster,
   getFarmingPlan,
@@ -159,6 +160,8 @@ const rosterSlice = createSlice({
       .addCase(login.fulfilled, () => initialState)
       .addCase(register.fulfilled, () => initialState)
       .addCase(restoreSession.fulfilled, () => initialState)
+      // A done farming task added materials to the inventory (D118): the page asks for everything again
+      .addCase(completeCalendarTask.fulfilled, () => initialState)
       .addCase(loadRoster.pending, (state, action) => {
         state.loadRequestId = action.meta.requestId
         if (state.status === 'succeeded') {

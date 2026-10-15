@@ -1,5 +1,6 @@
 import { combineReducers, configureStore, type ThunkAction, type UnknownAction } from '@reduxjs/toolkit'
 import authReducer from '../features/auth/authSlice'
+import calendarReducer from '../features/calendar/calendarSlice'
 import catalogReducer from '../features/catalog/catalogSlice'
 import onboardingReducer from '../features/onboarding/onboardingSlice'
 import rosterReducer from '../features/roster/rosterSlice'
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   onboarding: onboardingReducer,
   roster: rosterReducer,
+  calendar: calendarReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>
