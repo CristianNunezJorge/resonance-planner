@@ -2,14 +2,15 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (14/10/2026)
+## Stato attuale (15/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi e 111 decisioni (D1-D111).
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D116.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
 - **Giorno 4 (T17-T21) completato:** contatore Waveplate e Crystals (D105), roster con le regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109, D110: limite alla dimensione del corpo JSON) e in frontend (D111). Decisioni D1-D111. Tutto online; su Trello T01-T21 sono in "Fatto".
-- **Prossimo passo:** giorno 5 (T22-T24: materiali mancanti e piano di farming, eventi, pagina roster e inventario). Leggere `HANDOFF.md`.
+- **Giorno 5 (T22-T24) completato:** calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni e giorni attivi, API pubbliche e admin (D113, D114), pagina roster e inventario (D115, D116). Decisioni D1-D116. Tutto online; su Trello T01-T24 sono in "Fatto".
+- **Prossimo passo:** giorno 6 (T25-T28: attività e calendario in backend, pagina calendario, profilo e gestione eventi, rilascio v1). Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -90,16 +91,17 @@ backend/
   src/main/java/com/resonanceplanner/
     common/api/               ApiResponse, ApiError (D46)
     common/error/             ErrorCode, eccezioni, GlobalExceptionHandler
-    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig
+    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig, ClockConfig, Today ("oggi" in ora italiana, D41)
     common/security/          SecurityConfig (accessi e CORS), ApiSecurityErrorHandler (401/403)
     common/data/              DataFileReader: lettura rigorosa dei JSON di data/
     catalog/                  entità, repository, GameRules, CatalogService e CatalogController, dto/
-    user/                     User con WaveplateSnapshot, UserService, PlayTimeRules, profilo
+    user/                     User con WaveplateSnapshot, UserService (anche requireAdmin), PlayTimeRules, profilo
     waveplate/                WaveplateRules (calcolo puro), service e API (D28, D105)
     roster/                   OwnedCharacter, RosterRules (livello e grado, D104), service e API
     inventory/                InventoryItem (sola lettura), scrittura con un solo upsert (D108)
     onboarding/               configurazione guidata in una transazione (D50, D109)
-    event/                    GameEvent con effetto, attività, ricompense e giorni attivi
+    farming/                  NeedCalculator e FarmingCalculator (calcolo puro su FarmingCatalog), service e API (D112)
+    event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
@@ -109,10 +111,12 @@ backend/
 frontend/
   src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
-  src/features/catalog/       tipi, chiamate e catalogSlice (personaggi e regole di gioco caricati una volta)
+  src/features/catalog/       tipi, chiamate e catalogSlice (personaggi, regole e materiali caricati una volta), icons.ts
   src/features/landing/       pagina di presentazione P1 (T16): frase, pulsante, tre passi, personaggi
   src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
-  src/components/             LoadingState, ErrorState, FormField, SelectField, pagine 404 ed errore
+  src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
+  src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
+  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, ConfirmModal (D116), pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
@@ -145,7 +149,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
-- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
+- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
 - Docker Desktop può restare bloccato in avvio (i comandi `docker` non rispondono): Restart dal menu della balena, poi se serve `wsl --shutdown` da PowerShell e riaprire Docker Desktop.
 - Trello: per spostare le card con `fetch` serve il cookie `dsc` della pagina nel corpo (form-encoded), altrimenti 403 "CSRF detected". Il testo digitato in una card aperta può diventare una scorciatoia da tastiera. Le descrizioni si scrivono via JavaScript con `execCommand`, dopo aver verificato il focus sull'editor. Le etichette si possono applicare con i tasti 1-0 sulla card, uno alla volta e con una pausa. Il riepilogo `/b/JCkNlahy.json` può essere in ritardo di qualche secondo.
