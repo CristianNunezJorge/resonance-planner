@@ -6,6 +6,7 @@ import GuestOnly from '../features/auth/GuestOnly'
 import LoginPage from '../features/auth/LoginPage'
 import ProtectedRoute from '../features/auth/ProtectedRoute'
 import RegisterPage from '../features/auth/RegisterPage'
+import CalendarPage from '../features/calendar/CalendarPage'
 import LandingPage from '../features/landing/LandingPage'
 import OnboardingPage from '../features/onboarding/OnboardingPage'
 import RosterPage from '../features/roster/RosterPage'
@@ -37,7 +38,7 @@ export const routes: RouteObject[] = [
         // Only after the guided setup (T26 for the calendar)
         element: <ProtectedRoute onboarding="complete" />,
         children: [
-          { path: 'calendario', element: <ComingSoonPage title="Calendario" /> },
+          { path: 'calendario', element: <CalendarPage /> },
           { path: 'roster', element: <RosterPage /> },
         ],
       },

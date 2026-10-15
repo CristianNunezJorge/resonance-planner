@@ -1,0 +1,34 @@
+// Colours of the calendar (D65, D120). FullCalendar reads them through the color fields of the items
+// (calendarItems.ts); every background is light and the text on it is night blue, so the contrast stays AA:
+// about 11:1 on gold, 8.6:1 on red, 10:1 on green and blue, 6:1 for a done task.
+:root {
+  --rp-on-event: #{$night-blue};
+  --rp-event-double-drop: #{$gold-light};
+  --rp-event-combat-stages: #f19a9a;
+  --rp-event-points-shop: #8fd19e;
+  --rp-task: #9cc3ff;
+  --rp-task-done: #3a4566;
+  --rp-on-task-done: #c9cfe0;
+}
+
+// A done task is marked with ✓ in its title (D70) and crossed out
+.calendar-task--done {
+  text-decoration: line-through;
+}
+
+// The type of an event in its window, with the colour it has in the calendar
+.calendar-badge {
+  color: var(--rp-on-event);
+
+  &--double-drop {
+    background-color: var(--rp-event-double-drop);
+  }
+
+  &--combat-stages {
+    background-color: var(--rp-event-combat-stages);
+  }
+
+  &--points-shop {
+    background-color: var(--rp-event-points-shop);
+  }
+}

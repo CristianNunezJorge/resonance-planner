@@ -1,5 +1,6 @@
 import type { GameRules } from '../catalog/types'
 import { isLowerThan } from '../progress/levels'
+import { CRYSTALS_KEY, WAVEPLATE_KEY, validateWaveplate } from '../waveplate/validation'
 import type { DraftState, Step } from './types'
 
 // The checks that the page does before each step, so the user sees what to fix without waiting for the server.
@@ -9,15 +10,13 @@ import type { DraftState, Step } from './types'
 export type FieldErrors = Record<string, string>
 
 export const CHARACTERS_KEY = 'characters'
-export const WAVEPLATE_KEY = 'waveplate'
-export const CRYSTALS_KEY = 'crystals'
+// The keys of the Waveplate fields are shared with the calendar (validation of the waveplate feature)
+export { CRYSTALS_KEY, WAVEPLATE_KEY }
 export const PLAY_TIME_KEY = 'playTimeMinutes'
 
 export function progressKey(characterId: string, side: 'current' | 'target'): string {
   return `progress.${characterId}.${side}`
 }
-
-const WHOLE_NUMBER = /^\d+$/
 
 /** Step 1: at least one character. */
 export function validateSelection(selected: string[]): FieldErrors {
@@ -45,17 +44,7 @@ export function validateStatus(
   draft: Pick<DraftState, 'waveplate' | 'crystals' | 'playTimeMinutes'>,
   rules: GameRules,
 ): FieldErrors {
-  const errors: FieldErrors = {}
-  const waveplate = draft.waveplate.trim()
-  if (waveplate === '') {
-    errors[WAVEPLATE_KEY] = 'Inserisci le Waveplate che vedi nel gioco.'
-  } else if (!isWholeNumberUpTo(waveplate, rules.waveplate.max)) {
-    errors[WAVEPLATE_KEY] = `Inserisci un numero intero da 0 a ${rules.waveplate.max}.`
-  }
-  const crystals = draft.crystals.trim()
-  if (crystals !== '' && !isWholeNumberUpTo(crystals, rules.waveplateCrystals.max)) {
-    errors[CRYSTALS_KEY] = `Inserisci un numero intero da 0 a ${rules.waveplateCrystals.max}.`
-  }
+  const errors: FieldErrors = validateWaveplate(draft, rules)
   if (draft.playTimeMinutes === null) {
     errors[PLAY_TIME_KEY] = 'Scegli quanto giochi al giorno.'
   }
@@ -71,9 +60,4 @@ export function validateStep(step: Step, draft: DraftState, rules: GameRules): F
     case 3:
       return validateStatus(draft, rules)
   }
-}
-
-// Only digits: no sign, no decimals, no exponent. Number() of a very long text is a huge number, so it fails the limit.
-function isWholeNumberUpTo(text: string, max: number): boolean {
-  return WHOLE_NUMBER.test(text) && Number(text) <= max
 }

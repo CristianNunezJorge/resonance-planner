@@ -176,6 +176,8 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 
 **Stato vuoto:** nessuna attività in settimana → "Non hai ancora un piano. Chiedi all'agente di organizzarti la settimana" con il pulsante suggerito.
 
+**Nella v1 (T26, D119, D120):** calendario con FullCalendar 7 (settimana e mese su computer, elenco per giorno su telefono), eventi solo nei giorni attivi, attività con lo stato scritto, finestre di dettaglio, modulo dell'attività manuale, "Segna come fatta" ed "Elimina" con conferma, riquadro Waveplate con "Aggiorna". Finché l'agente non c'è, lo stato vuoto invita a usare "+ Attività", e gli eventi con un limite giornaliero mostrano il limite ("per le prime 3 run del giorno") invece di quante doppie restano. Barra della proposta, avviso di cambiamento, chat, "Genera piano base" e "Spiegamelo" arrivano con la v2.
+
 ### P5 · Roster e inventario `/roster`
 
 **Scopo:** vedere e modificare personaggi, obiettivi e materiali.
