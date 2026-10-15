@@ -1003,3 +1003,37 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   9. il catalogo si legge dal database a ogni richiesta (quattro query piccole); un dato mancante (ascensione, livello, fonte di un materiale) è un errore dei dati e dà 500 senza dettagli. Un test calcola tutti i personaggi del catalogo reale da 1 a 40, così l'errore si scopre prima.
 - **Perché:** le quattro Resonance Potion si possono scambiare tra loro: contando i punti non serve decidere quali usare. Ricavare la fonte dai dati evita una tabella scritta nel codice. Contare i drop secondari dà un numero vicino a quello che farà il pianificatore (fase 6, passo 5), che a ogni run toglie tutto quello che la run dà; l'ordine fisso mette prima le fonti i cui drop secondari (pozioni e crediti) riducono le run successive. I conti interi evitano gli errori di arrotondamento della virgola mobile.
 - **Scartate:** EXP espressa in pozioni di un solo tipo (bisogna scegliere quali usare e quelle già possedute di altri tipi non conterebbero); ignorare i drop secondari (con Jinhsi da 1 a 40 servirebbero 4 run di pozioni invece di 3, 2 di crediti invece di 1 e 3 di Howler invece di 2); una fonte scritta nel codice per ogni materiale; giorni calcolati con le Waveplate attuali e i Crystals (è il lavoro del pianificatore: qui basta una stima); per ora, il catalogo tenuto in memoria (una copia costruita prima del caricamento all'avvio resterebbe vecchia, e quattro query piccole non pesano per la demo).
+
+## D113 · Edizioni degli eventi nell'API
+**Stato:** Confermata · 15/10/2026
+
+- **Cosa:** `GET /api/events?from=&to=` (T23) restituisce una voce per ogni edizione che tocca l'intervallo, con le date intere dell'edizione e `activeDates`, i giorni attivi dentro l'intervallo (D96). `GET /api/events/{id}` restituisce l'edizione in corso oppure la prossima.
+- **Come:**
+  1. l'edizione numero *k* di un evento ricorrente inizia alla data di riferimento (`demoEventsAnchorDate`) + `startOffsetDays` + *k* × `repeatEveryDays` e dura `durationDays` giorni, fine compresa (D29); *k* si ricava con una divisione, senza cicli sugli anni. Un evento `FIXED` ha una sola edizione, con le sue date;
+  2. `from` e `to` sono obbligatori, stanno tra il 01/01/2000 e il 31/12/2100, `to` non può venire prima di `from` e l'intervallo copre al massimo 62 giorni, come il calendario; altrimenti 400 con il campo. La finestra di date tiene i calcoli lontani dai limiti di `LocalDate`, dove una data come l'anno 999999999 darebbe un errore 500;
+  3. un'edizione senza giorni attivi nell'intervallo (per esempio un evento del weekend in un intervallo dal lunedì al mercoledì) non compare;
+  4. le voci sono in ordine di inizio, poi di nome; lo stesso evento può comparire più volte, con date diverse;
+  5. "oggi" si calcola con il fuso `Europe/Rome` (D41), nella configurazione `app.time-zone`; l'orologio dell'app resta UTC. Per un evento `FIXED` già finito il dettaglio restituisce comunque le sue date.
+- **Perché:** FullCalendar vuole un oggetto per ogni blocco da disegnare: in 62 giorni Bountiful Crescendo ha fino a 5 edizioni. Le date intere dell'edizione dicono quando l'evento inizia e finisce davvero, anche se l'intervallo ne mostra solo una parte. Il limite di 62 giorni tiene piccola la risposta.
+- **Scartate:** una voce per evento con l'elenco delle edizioni (il frontend dovrebbe spezzarla da solo); date tagliate all'intervallo (si perderebbe la fine vera dell'evento); `from` e `to` facoltativi con un valore predefinito (una regola in più da spiegare, senza un uso concreto).
+- **Limite noto:** non c'è un tetto al numero di eventi. Ogni richiesta pubblica li legge tutti e ripete descrizione, ricompense e attività per ogni edizione: con i pochi eventi della demo la risposta è piccola, ma con centinaia di eventi creati dall'admin andrebbe aggiunto un tetto o una cache.
+
+## D114 · Regole degli eventi creati e modificati dall'admin
+**Stato:** Confermata · 15/10/2026
+
+- **Cosa:** `POST` e `PUT /api/admin/events` (T23) accettano un evento solo se rispetta queste regole:
+
+  | Campo | Regole |
+  |---|---|
+  | Nome e descrizione | Nome da 1 a 120 caratteri, descrizione da 1 a 2.000 |
+  | Evento `FIXED` | Inizio e fine obbligatori, tra il 01/01/2000 e il 31/12/2100, fine ≥ inizio, al massimo 366 giorni |
+  | Evento `RECURRING` | Scostamento da −3650 a 3650, durata da 1 a 366, ripetizione ≥ durata e ≤ 3650 |
+  | Giorni della settimana | Facoltativi: nessuno o tutti e sette = tutti i giorni (D96). Un evento `FIXED` deve avere almeno un giorno scelto tra l'inizio e la fine; un evento `RECURRING` di meno di 7 giorni non può sceglierli, perché le sue edizioni scorrono nella settimana e in alcune i giorni scelti mancherebbero |
+  | Ricompense | Al massimo 10, ognuna da 1 a 120 caratteri |
+  | Attività | Al massimo 20; titolo da 1 a 120 caratteri; minuti da 1 a 600; `unlockDay` vuoto o da 1 alla durata dell'evento |
+  | Effetto | Obbligatorio per `DOUBLE_DROP`, vietato per gli altri tipi; moltiplicatore > 1 e ≤ 10 con al massimo due decimali; limite giornaliero vuoto o da 1 a 100 |
+
+- **Come:** gli errori di forma (campo mancante, testo troppo lungo) li controlla la validazione dei DTO; quelli che dipendono da più campi (date, effetto e tipo, `unlockDay` e durata) una classe di regole pure. Il 400 elenca tutti i campi sbagliati insieme, con nomi come `schedule.endDate`, `activities[0].unlockDay`, `effect.multiplier`. `PUT` sostituisce tutto, anche negli eventi della demo, che conservano il loro `code` (D39). `DELETE` cancella l'evento; le attività del calendario collegate restano, senza il collegamento (`ON DELETE SET NULL`). Ogni endpoint controlla che l'utente del token esista ancora (401) e sia ancora ADMIN (403), perché il token vale 24 ore (D45, D102). Lo scostamento di un evento `RECURRING` si conta dalla data di riferimento degli eventi della demo (`demoEventsAnchorDate`, 01/10/2026).
+- **Perché:** i limiti sono larghi per l'uso vero della demo, ma impediscono date fuori scala, corpi enormi e un effetto su un evento che non lo prevede (D94). Un evento di ricompense doppie senza effetto non direbbe al pianificatore cosa raddoppiare.
+- **Scartate:** nessun limite oltre a quelli del database (un admin distratto potrebbe creare un evento di 100 anni o con migliaia di attività); effetto facoltativo per tutti i tipi (un effetto su un evento a punti non ha senso nel gioco).
+- **Limiti noti:** un corpo di forma sbagliata riceve il 400 prima del controllo dell'admin nel database, come negli altri endpoint (la validazione del DTO avviene prima del service), quindi un token di un admin cancellato con un corpo sbagliato riceve 400 e non 401; il messaggio non rivela dati. Due modifiche dello stesso evento nello stesso momento non sono protette (nessun `@Version`): vince l'ultima, e in casi rari una delle due può dare 500. Per un solo admin della demo basta.

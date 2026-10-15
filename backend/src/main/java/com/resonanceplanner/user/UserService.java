@@ -1,6 +1,7 @@
 package com.resonanceplanner.user;
 
 import com.resonanceplanner.common.error.ConflictException;
+import com.resonanceplanner.common.error.ForbiddenException;
 import com.resonanceplanner.common.error.UniqueViolation;
 import com.resonanceplanner.common.error.UnauthorizedException;
 import com.resonanceplanner.user.dto.UpdateProfileRequest;
@@ -77,6 +78,16 @@ public class UserService {
     public void requireUsernameAvailable(String username) {
         if (User.ADMIN_USERNAME.equalsIgnoreCase(username) || userRepository.existsByUsername(username)) {
             throw new ConflictException(USERNAME_TAKEN, "username");
+        }
+    }
+
+    /**
+     * The user of a token on /api/admin must still exist (401) and still be ADMIN (403): Spring Security checks only the
+     * role written in the token, which stays valid for 24 hours (D45, D102).
+     */
+    public void requireAdmin(Long userId) {
+        if (requireUser(userId).getRole() != Role.ADMIN) {
+            throw new ForbiddenException();
         }
     }
 

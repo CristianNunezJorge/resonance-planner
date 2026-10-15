@@ -103,12 +103,53 @@ public class GameEvent {
         return event;
     }
 
+    /**
+     * An event created by the admin (D14): no code, because it is not in events.json. The schedule must be set with
+     * {@link #scheduleFixed} or {@link #scheduleRecurring} before it is saved.
+     */
+    public static GameEvent custom(String name, EventType type, String description) {
+        return new GameEvent(null, name, type, description, ScheduleType.FIXED);
+    }
+
+    public void changeDetails(String name, EventType type, String description) {
+        this.name = name;
+        this.type = type;
+        this.description = description;
+    }
+
+    /** Real dates, last day included; the values of a recurring event are cleared, as the database requires. */
+    public void scheduleFixed(LocalDate startDate, LocalDate endDate) {
+        this.scheduleType = ScheduleType.FIXED;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startOffsetDays = null;
+        this.durationDays = null;
+        this.repeatEveryDays = null;
+    }
+
+    /** Editions computed from the anchor date (D29); the real dates are cleared, as the database requires. */
+    public void scheduleRecurring(int startOffsetDays, int durationDays, int repeatEveryDays) {
+        this.scheduleType = ScheduleType.RECURRING;
+        this.startDate = null;
+        this.endDate = null;
+        this.startOffsetDays = startOffsetDays;
+        this.durationDays = durationDays;
+        this.repeatEveryDays = repeatEveryDays;
+    }
+
     public void setEffect(EventEffect effect) {
         this.effect = effect;
     }
 
+    // No days or all seven mean the same, every day (D96): both are stored as no rows
     public void setActiveWeekdays(Set<DayOfWeek> weekdays) {
-        this.activeWeekdays = weekdays.isEmpty() ? new HashSet<>() : EnumSet.copyOf(weekdays);
+        boolean everyDay = weekdays.isEmpty() || weekdays.size() == DayOfWeek.values().length;
+        this.activeWeekdays = everyDay ? new HashSet<>() : EnumSet.copyOf(weekdays);
+    }
+
+    /** Removes every activity; the database deletes them at the next flush (orphan removal). */
+    public void removeActivities() {
+        activities.clear();
     }
 
     public void setRewards(List<String> rewards) {
