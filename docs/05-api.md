@@ -118,6 +118,29 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 | PUT | `/api/admin/events/{id}` | ADMIN | Modifica un evento |
 | DELETE | `/api/admin/events/{id}` | ADMIN | Cancella un evento |
 
+**Eventi pubblici (T23, D113).** `GET /api/events?from=2026-10-01&to=2026-10-31` restituisce una voce per ogni edizione con giorni attivi nell'intervallo, in ordine di inizio e poi di nome; lo stesso evento può comparire più volte (Bountiful Crescendo dal 4 al 10 e dal 18 al 24 ottobre). Ogni voce ha `id`, `name`, `type`, `description`, `startDate` ed `endDate` (le date intere dell'edizione, fine compresa), `activeWeekdays` (`null` = tutti i giorni), `activeDates` (i giorni attivi dentro l'intervallo), `rewards`, `activities` (`title`, `minutes`, `frequency`, `unlockDay`) ed `effect` (`null` se non c'è). `GET /api/events/{id}` restituisce la stessa voce per l'edizione in corso oggi (ora italiana, D41) oppure per la prossima, con tutti i suoi giorni attivi; un evento a date fisse già finito mantiene le sue date.
+- **400** con `fields.from` o `fields.to` se una data è fuori dalla finestra dal 01/01/2000 al 31/12/2100; con `fields.to` se `to` viene prima di `from` o se l'intervallo supera 62 giorni; **400** senza `fields` se manca una data o non è nel formato `AAAA-MM-GG`.
+- **404** se l'evento non esiste.
+
+**Eventi dell'admin (T23, D114).** `GET /api/admin/events` restituisce gli eventi con la programmazione com'è salvata: `id`, `code` (l'identificativo degli eventi della demo, `null` per quelli creati dall'admin), `name`, `type`, `description`, `schedule` (`type`, `startDate`, `endDate`, `startOffsetDays`, `durationDays`, `repeatEveryDays`), `activeWeekdays`, `rewards`, `activities`, `effect`. `POST` (201) e `PUT /{id}` (200) prendono lo stesso corpo e rispondono con l'evento salvato:
+```json
+{
+  "name": "Torneo del weekend", "type": "COMBAT_STAGES", "description": "Solo sabato e domenica.",
+  "schedule": { "type": "FIXED", "startDate": "2026-10-12", "endDate": "2026-10-18" },
+  "activeWeekdays": ["SATURDAY", "SUNDAY"],
+  "rewards": ["Astrite"],
+  "activities": [{ "title": "Livello 1", "minutes": 20, "frequency": "ONCE", "unlockDay": 6 }],
+  "effect": null
+}
+```
+- Un evento `RECURRING` usa `startOffsetDays` (contato dalla data di riferimento `demoEventsAnchorDate` di `game-rules.json`, 01/10/2026), `durationDays` e `repeatEveryDays` al posto delle date; i valori dell'altro tipo vengono ignorati. Le date di un evento `FIXED` stanno tra il 01/01/2000 e il 31/12/2100.
+- Nessun giorno della settimana, o tutti e sette, vuol dire tutti i giorni. Un evento `FIXED` deve avere almeno un giorno scelto tra le sue date; un evento `RECURRING` di meno di 7 giorni non può sceglierli (400 su `activeWeekdays`).
+- `effect` (`type`, `sourceType`, `multiplier`, `dailyLimit`) è obbligatorio per `DOUBLE_DROP` e vietato per gli altri tipi.
+- **400** con `fields`, tutti i campi sbagliati insieme, con nomi come `name`, `schedule.endDate`, `rewards[0]`, `activities[0].unlockDay`, `effect.multiplier`; non si salva niente. I limiti sono in D114.
+- `PUT` sostituisce tutto; un evento della demo conserva il suo `code`. **404** se l'evento non esiste (prima del 400 delle regole).
+- `DELETE` risponde 204; le attività del calendario collegate restano, senza il collegamento. Un evento della demo cancellato ricompare al riavvio (D39). **404** se non esiste.
+- **401** se l'utente del token non esiste più, **403** se non è ADMIN, anche se il token dice ADMIN (D102). Un corpo di forma sbagliata riceve il 400 prima di questo controllo.
+
 ### Waveplate
 | Metodo | Percorso | Cosa fa |
 |---|---|---|

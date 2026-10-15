@@ -13,6 +13,8 @@ app:
     password: ${ADMIN_PASSWORD:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  # "Today" for the whole app: event editions, calendar days, daily limits (D41). Moments stay in UTC
+  time-zone: Europe/Rome
 
 spring:
   application:
@@ -50,6 +52,8 @@ spring:
         jdbc:
           # Moments are stored in UTC (D41, D43)
           time_zone: UTC
+        # The collections of many events (days, rewards, activities) load in one query each, not one per event
+        default_batch_fetch_size: 16
 
 # Swagger stays public, also in production (D53)
 springdoc:
