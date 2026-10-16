@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 15/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 16/10/2026, per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 5 (T01-T24) sono completati, uniti su `main` e online: JWT e ruoli, limiti di richieste, profilo, login, registrazione, pagina di presentazione, contatore Waveplate, roster, inventario, configurazione guidata, calcolo del farming, eventi (pubblici e admin) e pagina roster e inventario. Il prossimo passo è il giorno 6 (T25-T28). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 6 (T01-T28) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 7 (T29-T31: pianificatore e proposte). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -26,6 +26,7 @@ Il progetto è approvato e i giorni da 1 a 5 (T01-T24) sono completati, uniti su
 | 12-14/10 | **Giorno 3: T12-T16** | JWT (D99-D100), limiti di richieste e correzione per Cloudflare (D101), API del profilo (D102), frontend di login, registrazione, sessione e accesso alle pagine (D103), pagina di presentazione (T16). CSP e `nosniff` impostati su Render. Backend 202 test, frontend 151 con il 98% di copertura |
 | 14/10 | **Giorno 4: T17-T21** | Waveplate e Crystals (D105), roster e regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109) con limite al corpo JSON (D110) e in frontend (D111). Backend 391 test, frontend 275 con il 98% di copertura. Trello T17-T21 in "Fatto" |
 | 14-15/10 | **Giorno 5: T22-T24** | Calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni, giorni attivi e area admin (D113, D114), pagina roster e inventario (D115, D116). Backend 496 test (copertura 98,5%), frontend 336 (98,6%). Un incidente di Render ha fermato i deploy gratuiti per alcune ore: T22 è andata online con un deploy manuale. Trello T22-T24 in "Fatto" |
+| 15-16/10 | **Giorno 6: T25-T28 · v1** | Attività manuali, completamento con l'inventario e calendario in backend (D117, D118); pagina calendario con FullCalendar 7, che rispetta la CSP, e riquadro Waveplate (D119, D120); profilo e gestione eventi admin (D121, D122); README e checklist di rilascio, 9 punti su 9 ✓ online; tag `v1.0.0`. Backend 554 test (copertura 98,5%), frontend 478 (97,9%). Trello T25-T28 in "Fatto" |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -103,7 +104,7 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 6: card T25-T28 di `docs/09-task.md` (attività e calendario in backend, pagina calendario, profilo e gestione eventi, rilascio v1 con tag `v1.0.0`).
+1. Giorno 7: card T29-T31 di `docs/09-task.md` (pianificatore giorno per giorno, proposte e piano base in backend, barra della proposta e avviso di cambiamento nel calendario).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
