@@ -323,7 +323,7 @@ Indice unico parziale: un solo `PENDING` per utente (D37).
 
 Controlli: `FARMING` richiede fonte e numero di run; `MANUAL` richiede `kind = CUSTOM` e nessuna proposta. Indici su (`user_id`, `task_date`), su `proposal_id` e su `event_id`.
 
-Corrispondenza con gli stati della fase 2: `PROPOSED` = proposta, `CONFIRMED` = confermata, `DONE` = fatta, `REJECTED` = scartata, `REPLACED` = sostituita.
+Corrispondenza con gli stati della fase 2: `PROPOSED` = proposta, `CONFIRMED` = confermata, `DONE` = fatta, `REJECTED` = scartata, `REPLACED` = sostituita. Dal T30 le attività di una proposta scartata o sostituita si cancellano (D124): nelle righe restano `REPLACED` solo le attività confermate sostituite da un piano nuovo, e `REJECTED` non si usa.
 
 **`agent_message`**: la chat con l'agente, solo testo (D40).
 | Colonna | Tipo | Regole |

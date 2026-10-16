@@ -1163,3 +1163,20 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - le run della stessa fonte nello stesso giorno restano attribuite al primo personaggio per cui sono state pianificate;
   - le attività di un evento già fatte si riconoscono dal titolo ("Evento: attività"): se l'admin rinomina l'evento o l'attività, il piano la ripropone.
 - **Parametri:** `excludedDates` contiene al massimo 14 date, come i giorni di un piano, così una richiesta non può mandare elenchi enormi.
+
+## D124 · Regole delle proposte
+**Stato:** Confermata · 16/10/2026 · nata da T30 · precisa D22, D37, D64 e D68
+
+- **Cosa:** come nasce, si conferma e si scarta una proposta (D22), e come il calendario mostra quella in attesa (D51, D68).
+- **Come:**
+  1. **piano vuoto:** se il pianificatore non trova nessuna attività, né run né attività degli eventi (per esempio roster vuoto o obiettivi raggiunti senza eventi in corso, oppure giorni tutti esclusi), il piano base risponde 409 con l'avviso del pianificatore e non crea una proposta. Se ci sono attività degli eventi la proposta nasce, e l'avviso ("Il roster è vuoto…") finisce nel testo;
+  2. **testo del piano base:** `summary` è un testo standard ("Piano base di 7 giorni, 18 attività.") seguito dagli avvisi del pianificatore, che così si vedono nella barra della proposta;
+  3. **la proposta si conferma solo nel giorno in cui è nata** (ora italiana, D41): una proposta di un giorno precedente risponde 409, perché è stata calcolata con le Waveplate e le attività di quel giorno;
+  4. **conferma (D22):** le attività della proposta passano da `PROPOSED` a `CONFIRMED`; le attività dell'agente `CONFIRMED` da oggi in poi diventano `REPLACED`. Restano come sono le attività fatte, quelle manuali e quelle dei giorni passati. È la regola su cui conta il pianificatore (D123, punto 3);
+  5. **scarto e sostituzione:** la riga della proposta resta con lo stato `REJECTED` o `REPLACED` (è lo storico, e i messaggi della chat la collegano), ma le sue attività `PROPOSED` si cancellano;
+  6. **calendario:** `GET /api/me/calendar` restituisce anche `pendingProposal` (`null` se non c'è) con `id`, `summary`, `createdAt` e tutte le sue attività, anche fuori dall'intervallo richiesto (al massimo 14 giorni). `GET /api/me/proposals/pending` restituisce lo stesso oggetto;
+  7. **errori:** 404 se la proposta non è dell'utente; 409 se non è più in attesa; 401 se l'utente del token non esiste più (D102);
+  8. **richieste insieme:** ogni scrittura blocca la riga dell'utente (`lockById`, come D118); se scatta comunque l'indice di D37, la risposta è 409 e non 500. Prima di inserire la nuova proposta, la vecchia viene segnata `REPLACED` e scritta subito nel database (`flush`), perché Hibernate esegue gli inserimenti prima degli aggiornamenti;
+  9. **un solo punto di salvataggio:** `ProposalService` salva una bozza del pianificatore (`ScheduleDraft`) con il suo testo. Lo usano il piano base e, in T33, lo strumento `create_plan_proposal` dell'agente (D56).
+- **Perché:** una barra "Conferma / Scarta" senza attività confonde; una proposta vecchia conterrebbe giorni passati e risorse che non ci sono più. Cancellare le attività mai entrate nel calendario evita che ogni clic su "Genera piano base" lasci decine di righe per sempre, mentre la riga della proposta conserva lo storico.
+- **Scartate:** proposta vuota con il solo avviso; confermare una proposta di un altro giorno togliendo i giorni passati (più regole da spiegare per un caso raro); tenere le attività scartate e sostituite con il loro stato (righe che crescono a ogni prova); mandare nel calendario solo le attività della proposta dentro l'intervallo (la barra ha bisogno del riassunto di tutta la proposta).

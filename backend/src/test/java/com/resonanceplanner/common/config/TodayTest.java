@@ -28,4 +28,11 @@ class TodayTest {
 
         assertThat(today.date()).isEqualTo(LocalDate.of(2026, 12, 14));
     }
+
+    @Test
+    void givesTheItalianDayOfAnyMoment() {
+        Today today = new Today(new MutableClock(Instant.parse("2026-12-14T10:00:00Z")), ROME);
+
+        assertThat(today.dateOf(Instant.parse("2026-10-14T22:30:00Z"))).isEqualTo(LocalDate.of(2026, 10, 15));
+    }
 }

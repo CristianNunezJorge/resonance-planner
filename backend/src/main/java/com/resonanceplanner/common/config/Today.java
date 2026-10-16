@@ -1,6 +1,7 @@
 package com.resonanceplanner.common.config;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,11 @@ public class Today {
     }
 
     public LocalDate date() {
-        return LocalDate.ofInstant(clock.instant(), zone);
+        return dateOf(clock.instant());
+    }
+
+    /** The day of a moment in the time zone of the app, for example the day a proposal was made (D124). */
+    public LocalDate dateOf(Instant instant) {
+        return LocalDate.ofInstant(instant, zone);
     }
 }

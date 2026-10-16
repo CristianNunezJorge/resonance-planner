@@ -103,7 +103,7 @@ backend/
     onboarding/               configurazione guidata in una transazione (D50, D109)
     farming/                  NeedCalculator e FarmingCalculator (calcolo puro su FarmingCatalog), service e API (D112)
     event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
-    planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118)
+    planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118), proposte (ProposalService, D124)
     planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123)
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/

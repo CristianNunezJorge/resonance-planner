@@ -194,7 +194,7 @@ Ogni attività nelle risposte ha `id`, `origin`, `kind`, `status`, `taskDate`, `
 - **409** se l'attività è già fatta o non è nel calendario (proposta, scartata o sostituita).
 - **404** e **401** come sopra.
 
-**Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. Le proposte in attesa (T30) non ci sono ancora.
+**Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. `pendingProposal` è la proposta in attesa con tutte le sue attività `PROPOSED`, anche fuori dall'intervallo, oppure `null` (T30, D124).
 
 ### Proposte dell'agente
 | Metodo | Percorso | Cosa fa | Risposta |
@@ -205,6 +205,11 @@ Ogni attività nelle risposte ha `id`, `origin`, `kind`, `status`, `taskDate`, `
 | POST | `/api/me/proposals/basic` | Crea una proposta con il pianificatore e i parametri predefiniti, senza IA (D64) | 201 |
 
 Le proposte nascono solo dal pianificatore, attraverso l'agente o il piano base: non c'è un endpoint per scriverle a mano.
+
+**Proposte (T30, D124).** Una proposta è `{ "id", "summary", "createdAt", "tasks": [...] }`, con le attività nella stessa forma di `/api/me/tasks` (stato `PROPOSED`). `GET /pending` restituisce la proposta in attesa o `data` vuoto. `POST /basic` (201) chiama il pianificatore con i parametri predefiniti e sostituisce la proposta in attesa; il testo è standard, seguito dagli avvisi del pianificatore. `POST /{id}/confirm` risponde con la proposta confermata (attività `CONFIRMED`) e sostituisce le attività dell'agente confermate da oggi in poi (D22); `POST /{id}/reject` risponde con la proposta scartata e senza attività, perché quelle proposte si cancellano.
+- **409** se il pianificatore non trova niente da fare (con il suo avviso), se la proposta non è più in attesa o se è di un giorno precedente.
+- **404** se la proposta non è dell'utente del token.
+- **401** se l'utente del token non esiste più (D102).
 
 ### Agente
 | Metodo | Percorso | Cosa fa | Risposta |
