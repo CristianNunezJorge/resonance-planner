@@ -27,12 +27,14 @@ public class CalendarService {
     private final EventService eventService;
     private final PlannedTaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final ProposalService proposalService;
 
     public CalendarService(EventService eventService, PlannedTaskRepository taskRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, ProposalService proposalService) {
         this.eventService = eventService;
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.proposalService = proposalService;
     }
 
     public CalendarResponse between(Long userId, LocalDate from, LocalDate to) {
@@ -44,6 +46,6 @@ public class CalendarService {
         List<TaskResponse> tasks = taskRepository.findInRange(userId, from, to, IN_CALENDAR).stream()
                 .map(TaskResponse::from)
                 .toList();
-        return new CalendarResponse(events, tasks);
+        return new CalendarResponse(events, tasks, proposalService.pendingOf(userId).orElse(null));
     }
 }

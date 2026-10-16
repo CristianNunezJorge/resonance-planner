@@ -1,6 +1,7 @@
 package com.resonanceplanner.planning;
 
 import com.resonanceplanner.catalog.FarmingSource;
+import com.resonanceplanner.planner.ScheduleDraft.DraftTask;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -98,12 +99,45 @@ public class PlannedTask {
         return task;
     }
 
+    /**
+     * A task of a proposal (D22, D56): it comes from the planner and waits as PROPOSED until the user confirms the
+     * proposal. The source is set only for FARMING and the event only for EVENT, as the checks of the table require.
+     */
+    public static PlannedTask proposed(Long userId, Long proposalId, LocalDate taskDate, DraftTask draft,
+            FarmingSource farmingSource, Instant now) {
+        PlannedTask task = new PlannedTask();
+        task.userId = userId;
+        task.proposalId = proposalId;
+        task.origin = TaskOrigin.AGENT;
+        task.kind = draft.kind();
+        task.status = TaskStatus.PROPOSED;
+        task.taskDate = taskDate;
+        task.title = draft.title();
+        task.minutes = draft.minutes();
+        task.farmingSource = farmingSource;
+        task.runs = draft.runs();
+        task.eventId = draft.eventId();
+        task.characterId = draft.characterId();
+        task.createdAt = now;
+        return task;
+    }
+
     /** The fields of the form of a manual task; the status stays as it is, also when the task is done. */
     public void changeManual(String title, LocalDate taskDate, int minutes, String notes) {
         this.title = title;
         this.taskDate = taskDate;
         this.minutes = minutes;
         this.notes = notes;
+    }
+
+    /** A proposed task enters the calendar when its proposal is confirmed. */
+    public void confirm() {
+        this.status = TaskStatus.CONFIRMED;
+    }
+
+    /** A confirmed task of the agent that a newer plan replaces (D22). */
+    public void replace() {
+        this.status = TaskStatus.REPLACED;
     }
 
     public void markDone(Instant now) {
@@ -121,6 +155,10 @@ public class PlannedTask {
 
     public Long getUserId() {
         return userId;
+    }
+
+    public Long getProposalId() {
+        return proposalId;
     }
 
     public TaskOrigin getOrigin() {

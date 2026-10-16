@@ -20,6 +20,20 @@ public interface PlannedTaskRepository extends Repository<PlannedTask, Long> {
 
     void delete(PlannedTask task);
 
+    void deleteAll(Iterable<? extends PlannedTask> tasks);
+
+    /** The tasks of a proposal, by day and then in the order of the plan, with their sources. */
+    @EntityGraph(attributePaths = "farmingSource")
+    List<PlannedTask> findAllByUserIdAndProposalIdOrderByTaskDateAscIdAsc(Long userId, Long proposalId);
+
+    /** The tasks of the agent in the calendar from that day on, not done yet: a confirmed new plan replaces them (D22). */
+    @Query("""
+            select t from PlannedTask t
+            where t.userId = :userId and t.origin = com.resonanceplanner.planning.TaskOrigin.AGENT
+              and t.status = com.resonanceplanner.planning.TaskStatus.CONFIRMED and t.taskDate >= :from
+            """)
+    List<PlannedTask> findReplaceable(@Param("userId") Long userId, @Param("from") LocalDate from);
+
     Optional<PlannedTask> findByIdAndUserId(Long id, Long userId);
 
     long countByUserIdAndOrigin(Long userId, TaskOrigin origin);
