@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 16/10/2026, per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 16/10/2026 (giorno 7 compreso), per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 6 (T01-T28) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 7 (T29-T31: pianificatore e proposte). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata) e il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento. Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 8 (T32-T34: l'agente in backend). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -27,6 +27,7 @@ Il progetto è approvato e i giorni da 1 a 6 (T01-T28) sono completati, uniti su
 | 14/10 | **Giorno 4: T17-T21** | Waveplate e Crystals (D105), roster e regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109) con limite al corpo JSON (D110) e in frontend (D111). Backend 391 test, frontend 275 con il 98% di copertura. Trello T17-T21 in "Fatto" |
 | 14-15/10 | **Giorno 5: T22-T24** | Calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni, giorni attivi e area admin (D113, D114), pagina roster e inventario (D115, D116). Backend 496 test (copertura 98,5%), frontend 336 (98,6%). Un incidente di Render ha fermato i deploy gratuiti per alcune ore: T22 è andata online con un deploy manuale. Trello T22-T24 in "Fatto" |
 | 15-16/10 | **Giorno 6: T25-T28 · v1** | Attività manuali, completamento con l'inventario e calendario in backend (D117, D118); pagina calendario con FullCalendar 7, che rispetta la CSP, e riquadro Waveplate (D119, D120); profilo e gestione eventi admin (D121, D122); README e checklist di rilascio, 9 punti su 9 ✓ online; tag `v1.0.0`. Backend 554 test (copertura 98,5%), frontend 478 (97,9%). Trello T25-T28 in "Fatto" |
+| 16/10 | **Giorno 7: T29-T31** | Pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Punto 6 della checklist verificato in locale. Backend 626 test (copertura 98,2%), frontend 492 (97,9%). PR #35-#38 |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -48,7 +49,7 @@ Il progetto è approvato e i giorni da 1 a 6 (T01-T28) sono completati, uniti su
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D116) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D125) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -70,6 +71,7 @@ Il progetto è approvato e i giorni da 1 a 6 (T01-T28) sono completati, uniti su
 4. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide.
 5. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
 6. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
+7. **Limite apposito per il piano base:** da decidere in T35 insieme al limite giornaliero dell'agente (vedi i promemoria).
 
 ## Promemoria per le prossime card
 
@@ -108,7 +110,7 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 7: card T29-T31 di `docs/09-task.md` (pianificatore giorno per giorno, proposte e piano base in backend, barra della proposta e avviso di cambiamento nel calendario).
+1. Giorno 8: card T32-T34 di `docs/09-task.md` (client dell'API Claude, i cinque strumenti, ciclo dell'agente con un finto client nei test). Serve la chiave API di Anthropic, che inserisce l'utente.
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
