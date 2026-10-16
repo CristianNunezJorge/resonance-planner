@@ -1,12 +1,12 @@
-# Handoff · giorno 7
+# Handoff · giorno 8
 
-Passaggio di consegne del 16/10/2026, a fine giorno 6 (v1 rilasciata), per riprendere lo sviluppo in una nuova sessione di Claude Code.
+Passaggio di consegne del 16/10/2026, a fine giorno 7 (pianificatore e proposte), per riprendere lo sviluppo in una nuova sessione di Claude Code.
 
 ## Messaggio da incollare nella nuova sessione
 
 ```text
 Leggi HANDOFF.md, CLAUDE.md e docs/stato-del-progetto.md.
-Iniziamo il giorno 7 (T29-T31): pianificatore, proposte e piano base in backend, barra della proposta nel calendario.
+Iniziamo il giorno 8 (T32-T34): client dell'API Claude, i cinque strumenti e il ciclo dell'agente in backend.
 Prima di scrivere codice riassumimi il piano e le eventuali decisioni nuove, e chiedimi conferma.
 ```
 
@@ -14,31 +14,34 @@ Prima di scrivere codice riassumimi il piano e le eventuali decisioni nuove, e c
 
 | Cosa | Stato |
 |---|---|
-| Giorni completati | **1-6** (T01-T28), tutti su `main` e online; su Trello sono in "Fatto" |
-| Rilascio | **v1** con tag `v1.0.0`; checklist online superata (`docs/rilascio-v1.md`, 9 punti su 9) |
-| Ultimo commit su `main` | `c255984`, T28 (PR #34), più il commit di questa chiusura |
-| Test | Backend 554 (`./mvnw verify`, copertura 98,5%), frontend 478 (`npm test`, copertura 97,9%) |
-| Decisioni | D1-D122, tutte *Confermate* (D117-D122 nate nel giorno 6) |
+| Giorni completati | **1-7** (T01-T31), tutti su `main` e online |
+| Rilascio | **v1** con tag `v1.0.0`; la v2 (agente) è prevista a fine giorno 10 |
+| Ultimo commit su `main` | `17ea229`, T31 (PR #38), più il commit di questa chiusura |
+| Test | Backend 626 (`./mvnw verify`, copertura 98,2%), frontend 492 (`npm test`, copertura 97,9%) |
+| Decisioni | D1-D125, tutte *Confermate* (D123-D125 nate nel giorno 7) |
+| Schema | Migrazioni `V1__schema.sql` e `V2__plan_inputs.sql` (impronta del piano, D125), applicate anche online |
 | App online | https://resonance-planner.onrender.com · API https://resonance-planner-api.onrender.com/swagger-ui.html |
-| Render | Sito statico con CSP e `nosniff` (Headers, fuori dal repository). Dopo ogni merge controllare che il deploy parta (sito e API); se il deploy risponde "Service Unavailable", guardare prima https://status.render.com |
-| Account di prova in locale | Nessuno fisso: si crea un account dal browser con una password casuale e lo si cancella alla fine (`DELETE /api/me`). Per provare l'admin senza usare le credenziali del `.env`: promuovere l'account di prova con SQL (`update users set role = 'ADMIN' ...`) e rifare il login, perché il ruolo è nel token |
+| Render | Deploy di T31 verificato con richieste pubbliche (endpoint delle proposte e `planOutdated` nello Swagger, testi nuovi nel bundle del sito). Se il deploy risponde "Service Unavailable", guardare prima https://status.render.com |
+| Trello | T29-T31 da spostare in "Fatto" se non è già stato fatto a fine sessione (serve Claude in Chrome) |
+| Account di prova in locale | Nessuno fisso: si crea un account con una password casuale (script o `javascript_tool`) e lo si cancella alla fine (`DELETE /api/me`). Online non si creano account di prova |
 | Ramo in corso | nessuno: `main` è pulito |
 
-## Giorno 7 · Pianificatore e proposte (T29-T31)
+## Giorno 8 · Agente: backend (T32-T34)
 
-Dettagli in `docs/09-task.md` e in `docs/06-agente.md` (sezione "Il pianificatore").
+Dettagli in `docs/09-task.md` e in `docs/06-agente.md`.
 
 | Card | Cosa | Decisioni |
 |---|---|---|
-| T29 | Pianificatore giorno per giorno, test prima del codice | D57 |
-| T30 | Proposte: piano base, conferma, scarto, sostituzione, indice parziale | D22, D37, D64 |
-| T31 | Barra della proposta, attività tratteggiate, "Genera piano base", avviso di cambiamento | D23, D68 |
+| T32 | Client dell'API Claude dietro un'interfaccia, configurazione di chiave e modello | D54, D59 |
+| T33 | I cinque strumenti, limitati all'utente del token, con validazione dei parametri | D55, D56 |
+| T34 | Ciclo dell'agente: massimo 6 giri, errori, passaggi, cache dei prompt; test con finto client | D54, D61, D62, D63 |
 
 ## Cosa esiste già nel codice
 
-- **Backend:** `auth/`, `user/`, `waveplate/`, `roster/`, `inventory/`, `onboarding/`, `catalog/`, `farming/` (calcolo del farming, D112), `event/` (edizioni e API admin, D113-D114), `planning/` (attività, completamento e calendario, D117-D118), `common/` (`Today`, errori, limiti).
-- **API pronte:** `/api/auth/**`, `/api/me` (profilo, `PATCH`, `DELETE`), `/api/me/waveplate`, `/api/me/roster`, `/api/me/inventory`, `/api/me/onboarding`, `/api/me/farming-plan`, `/api/me/tasks` (con `/complete`), `/api/me/calendar`, `/api/game/**` (le regole hanno anche `demoEventsAnchorDate`), `/api/events`, `/api/admin/events`.
-- **Frontend:** tutte le pagine della v1. `features/calendar/` (P4), `waveplate/`, `profile/` (P6), `adminEvents/` (P7), oltre a quelle dei giorni precedenti. Componenti comuni: `Modal` (anche `size="lg"`), `ConfirmModal`, `FormField` (anche `type="date"`), `SelectField`, `EmptyState`, `LoadingState`, `ErrorState`. Hook `useLogout` per uscire.
+- **Backend:** `auth/`, `user/`, `waveplate/`, `roster/`, `inventory/`, `onboarding/`, `catalog/`, `farming/` (calcolo del farming e `FarmingYields`, D112), `event/` (edizioni e API admin, D113-D114), `planner/` (pianificatore puro `Planner` e `NeedPool`, `PlannerService`, impronta `PlanInputs`, D123, D125), `planning/` (attività, completamento, calendario, proposte con `ProposalService`, D117, D118, D124), `common/` (`Today` con `dateOf`, errori, limiti).
+- **API pronte:** `/api/auth/**`, `/api/me` (profilo, `PATCH`, `DELETE`), `/api/me/waveplate`, `/api/me/roster`, `/api/me/inventory`, `/api/me/onboarding`, `/api/me/farming-plan`, `/api/me/tasks` (con `/complete`), `/api/me/calendar` (con `pendingProposal` e `planOutdated`), `/api/me/proposals` (`pending`, `basic`, `{id}/confirm`, `{id}/reject`), `/api/game/**`, `/api/events`, `/api/admin/events`.
+- **Frontend:** tutte le pagine della v1; nel calendario la barra della proposta (`ProposalBar`), le attività proposte tratteggiate, "Genera piano base" e l'avviso di cambiamento.
+- **Non c'è ancora:** l'SDK di Anthropic nel `pom.xml`, i valori di `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL` (in `.env.example` sono vuoti), la tabella `agent_message` usata da un service (esiste solo nello schema).
 
 ## Come lavoriamo (flusso approvato, invariato)
 
@@ -58,23 +61,20 @@ Altre regole:
 - Online non si creano account di prova. Il backend online blocca `localhost` per CORS.
 - Se l'utente rifiuta un agente, non rilanciarlo: dirgli cosa si fa al suo posto.
 
-## Promemoria per il giorno 7
+## Promemoria per il giorno 8
 
 Sono anche in `docs/stato-del-progetto.md`, tabella "Promemoria per le prossime card".
 
-- **T29 (pianificatore):**
-  - riusare `NeedCalculator` e la resa per run di `FarmingCalculator` (D112);
-  - per le ricompense doppie riusare `CompletionRewards.strongest` e `boostedRuns` (D118), così piano e completamento contano allo stesso modo;
-  - i giorni attivi degli eventi vengono da `EventCalendar`, "oggi" da `Today` (D41).
-- **T30 (proposte):**
-  - un'attività dell'agente ha bisogno di una proposta (vincolo del database), e `PlannedTask` oggi ha solo il costruttore delle attività manuali: serve un costruttore per quelle proposte;
-  - quando si sostituisce la proposta in attesa, fare `flush()` dopo averla segnata `REPLACED`: Hibernate esegue gli INSERT prima degli UPDATE e l'indice di D37 scatterebbe;
-  - la conferma può bloccare la riga dell'utente con `UserRepository.lockById`, come le scritture delle attività (D118);
-  - `GET /api/me/calendar` va esteso con la proposta in attesa (D51, D68). Il campo oggi non c'è, ed è scritto in D117.
-- **T31 (frontend):**
-  - la barra della proposta e le attività `PROPOSED` tratteggiate si aggiungono a `CalendarPage` e `calendarItems.ts`. I colori vanno in `styles/_calendar.scss`, con il contrasto AA;
-  - l'avviso di cambiamento (D23) va progettato: serve sapere quando roster, obiettivi o eventi sono cambiati dopo l'ultimo piano;
-  - "2 / 3 doppie oggi" della schermata P4 può arrivare qui, dal pianificatore (D120).
+- **Prima di T32:** serve la **chiave API di Anthropic** con un po' di credito (circa 9 $ per 300 richieste, D59). La crea l'utente nella console di Anthropic e la mette nel `.env` e su Render: Claude non inserisce chiavi. Va aggiunta ad `AppProperties` come variabile obbligatoria, con un messaggio che la nomina. Lo strumento (SDK Java ufficiale di Anthropic) va confermato come scelta del corso o segnalato come fuori programma (D54).
+- **T32 (client):** il client sta dietro un'interfaccia, così i test di T34 usano un finto client senza rete e senza costi (D63). Modello `claude-haiku-4-5` letto dalla configurazione (D59); timeout di 60 secondi per chiamata.
+- **T33 (strumenti):**
+  - `plan_schedule` = `PlannerService.draft(userId, ScheduleRequest)`. I parametri arrivano dal modello: vanno convertiti in `ScheduleRequest` e ogni errore (400 con `fields`, data scritta male) torna al modello come risultato di errore, non come 500 (D61). `excludedDates` ha al massimo 14 date (D123);
+  - `create_plan_proposal` = `ProposalService.save(userId, draft, summary)` con l'**ultima bozza del turno** (D56). Per non salvare una bozza calcolata su dati superati, bloccare l'utente (`UserRepository.lockById`) prima di calcolarla, come fa `createBasic`. Il 409 di un piano senza attività torna al modello con l'avviso del pianificatore;
+  - nessuno strumento ha un parametro `userId`: l'utente viene sempre dal token (D44, D55);
+  - `ScheduleDraft` ha già copertura e avvisi in italiano da dare al modello.
+- **T34 (ciclo):** massimo 6 giri; i passaggi ("Ho letto il tuo roster"...) li ricava il backend dagli strumenti chiamati (D62); le parti fisse (strumenti, istruzioni) all'inizio per la cache dei prompt; nei log niente testo dei messaggi (D60).
+- **T35 (giorno 9):** decidere il limite apposito per `POST /api/me/proposals/basic` insieme al limite giornaliero dell'agente (D48).
+- **T36 (giorno 9):** `summary` delle proposte va sempre mostrato come testo (lo scrive il modello); l'avviso di cambiamento può proporre anche di chiedere all'agente.
 - **Database di Render: scade il 10/11/2026.** Ricrearlo prima e **cambiare anche `JWT_SECRET`** (D100).
 
 ## Questioni aperte
@@ -85,7 +85,8 @@ Sono anche in `docs/stato-del-progetto.md`, tabella "Promemoria per le prossime 
 4. Nome definitivo del progetto (provvisorio).
 5. Controllare ogni tanto gli intervalli di Cloudflare in `application-prod.yml` e in D101.
 6. Bundle JavaScript di circa 630 KB per FullCalendar: se la presentazione diventa lenta, caricare la pagina del calendario solo quando serve (`lazy`, D119).
-7. Limiti noti annotati nelle decisioni: catalogo del farming letto a ogni richiesta (D112), nessun tetto al numero di eventi (D113), nessun `@Version` sugli eventi (D114), la bozza dell'evento si perde chiudendo la finestra (D122).
+7. Limiti noti annotati nelle decisioni: catalogo del farming letto a ogni richiesta (D112), nessun tetto al numero di eventi (D113), nessun `@Version` sugli eventi (D114), la bozza dell'evento si perde chiudendo la finestra (D122), limiti del pianificatore (D123: copertura in centesimi contro il completamento arrotondato, due eventi potenziati nello stesso giorno, attività già fatte riconosciute dal titolo).
+8. Limite apposito per il piano base: da decidere in T35.
 
 ## Note pratiche
 
