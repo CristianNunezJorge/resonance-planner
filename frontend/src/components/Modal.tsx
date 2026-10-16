@@ -11,6 +11,8 @@ interface ModalProps {
   initialFocusRef?: RefObject<HTMLElement | null>
   // The id of the text that describes the window, read by screen readers after the title
   describedBy?: string
+  // 'lg' for a long form
+  size?: 'lg'
   footer: ReactNode
   children: ReactNode
 }
@@ -22,7 +24,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), selec
 // is open (WCAG 2.1.2) and goes back to the element that opened it when it closes, if it is still there (WCAG 2.4.3).
 // The keys are heard on the whole document: a click on the backdrop moves the focus to the body, and Esc and Tab
 // must still work. While it is open the page behind does not scroll (modal-open of Bootstrap).
-function Modal({ open, title, onClose, busy = false, initialFocusRef, describedBy, footer, children }: ModalProps) {
+function Modal({ open, title, onClose, busy = false, initialFocusRef, describedBy, size, footer, children }: ModalProps) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
 
@@ -92,6 +94,10 @@ function Modal({ open, title, onClose, busy = false, initialFocusRef, describedB
     return null
   }
 
+  const dialogClass = ['modal-dialog modal-dialog-centered modal-dialog-scrollable', size && `modal-${size}`]
+    .filter(Boolean)
+    .join(' ')
+
   return createPortal(
     <>
       <div className="modal-backdrop fade show" />
@@ -104,7 +110,7 @@ function Modal({ open, title, onClose, busy = false, initialFocusRef, describedB
         aria-describedby={describedBy}
         aria-busy={busy || undefined}
       >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div className={dialogClass}>
           <div className="modal-content">
             <div className="modal-header">
               <h2 id={titleId} className="modal-title h5">

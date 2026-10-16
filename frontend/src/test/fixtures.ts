@@ -8,6 +8,7 @@ export const gameRules: GameRules = {
   ascensionLevels: [20, 40],
   maxLevel: 40,
   playTimeOptionsMinutes: [30, 60, 120],
+  demoEventsAnchorDate: '2026-10-01',
 }
 
 export const jinhsi: CharacterSummary = {

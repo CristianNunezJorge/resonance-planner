@@ -188,7 +188,9 @@ describe('routes', () => {
       renderRoutes(routes, '/profilo', signedIn())
       expect(await screen.findByRole('heading', { name: 'Profilo' })).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: 'Esci' }))
+      // The button of the navigation bar: the profile page has one of its own too
+      const navigation = screen.getByRole('navigation', { name: 'Navigazione principale' })
+      fireEvent.click(within(navigation).getByRole('button', { name: 'Esci' }))
 
       expect(await screen.findByRole('heading', { name: 'Resonance Planner' })).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Accedi' })).toBeInTheDocument()

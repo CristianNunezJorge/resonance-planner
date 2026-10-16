@@ -1,7 +1,7 @@
 import type { RouteObject } from 'react-router'
-import ComingSoonPage from '../components/ComingSoonPage'
 import ErrorPage from '../components/ErrorPage'
 import NotFoundPage from '../components/NotFoundPage'
+import AdminEventsPage from '../features/adminEvents/AdminEventsPage'
 import GuestOnly from '../features/auth/GuestOnly'
 import LoginPage from '../features/auth/LoginPage'
 import ProtectedRoute from '../features/auth/ProtectedRoute'
@@ -9,11 +9,12 @@ import RegisterPage from '../features/auth/RegisterPage'
 import CalendarPage from '../features/calendar/CalendarPage'
 import LandingPage from '../features/landing/LandingPage'
 import OnboardingPage from '../features/onboarding/OnboardingPage'
+import ProfilePage from '../features/profile/ProfilePage'
 import RosterPage from '../features/roster/RosterPage'
 import RootLayout from './RootLayout'
 
 // Route list shared by the browser router and the tests (paths in Italian, D71).
-// The access rules are in docs/07-schermate.md (D73); the pages marked ComingSoonPage arrive with later cards.
+// The access rules are in docs/07-schermate.md (D73).
 export const routes: RouteObject[] = [
   {
     path: '/',
@@ -44,12 +45,12 @@ export const routes: RouteObject[] = [
       },
       {
         element: <ProtectedRoute />,
-        children: [{ path: 'profilo', element: <ComingSoonPage title="Profilo" /> }],
+        children: [{ path: 'profilo', element: <ProfilePage /> }],
       },
       {
         // Admin only (T27)
         element: <ProtectedRoute role="ADMIN" />,
-        children: [{ path: 'admin/eventi', element: <ComingSoonPage title="Gestione eventi" /> }],
+        children: [{ path: 'admin/eventi', element: <AdminEventsPage /> }],
       },
       { path: '*', element: <NotFoundPage /> },
     ],

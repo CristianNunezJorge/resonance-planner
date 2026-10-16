@@ -40,4 +40,6 @@ export interface GameRules {
   ascensionLevels: number[]
   maxLevel: number
   playTimeOptionsMinutes: number[]
+  // The day from which the offset of a recurring event is counted (D29), as "2026-10-01"
+  demoEventsAnchorDate: string
 }

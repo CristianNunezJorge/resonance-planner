@@ -1,15 +1,13 @@
 import { useState, type MouseEvent } from 'react'
-import { Link, NavLink, useLocation, useNavigate } from 'react-router'
-import { useAppDispatch, useAppSelector } from '../app/hooks'
-import { toastShown } from '../app/toastSlice'
-import { logout } from '../features/auth/authSlice'
+import { Link, NavLink, useLocation } from 'react-router'
+import { useAppSelector } from '../app/hooks'
+import { useLogout } from '../features/auth/useLogout'
 
 const MENU_ID = 'main-menu'
 
 // Navigation bar of every page (docs/07-schermate.md). It collapses into a menu on small screens.
 function NavBar() {
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
+  const logout = useLogout()
   const { pathname } = useLocation()
   const { user, sessionStatus } = useAppSelector((state) => state.auth)
   // The menu is open only for the page where it was opened. When the page changes (also with the Back button) it is
@@ -27,17 +25,8 @@ function NavBar() {
     }
   }
 
-  // F11: first back to the presentation, then the token goes away; in the opposite order the page being left would see
-  // a visitor and send them to the login. flushSync makes the new page appear before the await ends: without it, a
-  // real browser logs out while the old page is still on screen. The token goes away in any case.
-  const handleLogout = async () => {
-    try {
-      await navigate('/', { flushSync: true })
-    } finally {
-      dispatch(logout())
-      dispatch(toastShown('Sei uscito dall\'account.', 'info'))
-    }
-  }
+  // F11, in the same order as the profile page (useLogout)
+  const handleLogout = () => logout('Sei uscito dall\'account.')
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'nav-link active' : 'nav-link')
 
