@@ -1,5 +1,6 @@
 package com.resonanceplanner.farming;
 
+import com.resonanceplanner.catalog.FarmingSourceType;
 import com.resonanceplanner.catalog.MaterialCategory;
 import com.resonanceplanner.farming.FarmingCatalog.Ascension;
 import com.resonanceplanner.farming.FarmingCatalog.Drop;
@@ -15,17 +16,17 @@ import java.util.stream.Collectors;
  * A catalog for the unit tests: materials, sources and ascensions of Jinhsi and Yinlin with the real values of the
  * JSON files, but a simple EXP table (1000 EXP for every level), so the expected numbers are easy to check by hand.
  */
-final class TestFarmingCatalog {
+public final class TestFarmingCatalog {
 
-    static final String CREDIT = "shell-credit";
+    public static final String CREDIT = "shell-credit";
 
     private TestFarmingCatalog() {}
 
-    static FarmingCatalog standard() {
+    public static FarmingCatalog standard() {
         return withSources(standardSources());
     }
 
-    static FarmingCatalog withSources(List<Source> sources) {
+    public static FarmingCatalog withSources(List<Source> sources) {
         Map<Integer, Integer> expToNext = new HashMap<>();
         for (int level = 1; level < 40; level++) {
             expToNext.put(level, 1000);
@@ -33,11 +34,11 @@ final class TestFarmingCatalog {
         return new FarmingCatalog(expToNext, ascensions(), materials(), sources, new BigDecimal("0.35"), 240);
     }
 
-    static FarmingCatalog withExpToNext(Map<Integer, Integer> expToNext) {
+    public static FarmingCatalog withExpToNext(Map<Integer, Integer> expToNext) {
         return new FarmingCatalog(expToNext, ascensions(), materials(), standardSources(), new BigDecimal("0.35"), 240);
     }
 
-    static List<Source> standardSources() {
+    public static List<Source> standardSources() {
         return List.of(
                 source("sim-resonance-potion", 40, 3,
                         drop("premium-resonance-potion", "1.10"), drop("advanced-resonance-potion", "5.04"),
@@ -55,15 +56,28 @@ final class TestFarmingCatalog {
                 source("collect-coriolus", 0, 10, estimated("coriolus", "6")));
     }
 
-    static Source source(String id, int waveplateCost, int minutesPerRun, Drop... drops) {
-        return new Source(id, "Fonte " + id, waveplateCost, minutesPerRun, List.of(drops));
+    // The type follows the prefix of the id, like in the JSON file
+    public static Source source(String id, int waveplateCost, int minutesPerRun, Drop... drops) {
+        return new Source(id, "Fonte " + id, typeOf(id), waveplateCost, minutesPerRun, List.of(drops));
     }
 
-    static Drop drop(String materialId, String avgQuantity) {
+    private static FarmingSourceType typeOf(String id) {
+        if (id.startsWith("sim-")) {
+            return FarmingSourceType.SIMULATION_TRAINING;
+        }
+        if (id.startsWith("boss-")) {
+            return FarmingSourceType.BOSS_CHALLENGE;
+        }
+        return id.startsWith("collect-")
+                ? FarmingSourceType.OVERWORLD_COLLECTION
+                : FarmingSourceType.OVERWORLD_ENEMIES;
+    }
+
+    public static Drop drop(String materialId, String avgQuantity) {
         return new Drop(materialId, new BigDecimal(avgQuantity), false);
     }
 
-    static Drop estimated(String materialId, String avgQuantity) {
+    public static Drop estimated(String materialId, String avgQuantity) {
         return new Drop(materialId, new BigDecimal(avgQuantity), true);
     }
 
