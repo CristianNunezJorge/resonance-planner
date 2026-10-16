@@ -24,6 +24,8 @@ Le fasi vanno fatte in quest'ordine: ognuna usa le decisioni di quella prima.
 
 La raccolta dei dati reali è stata completata il 02/10/2026: i file sono in `backend/src/main/resources/data/`, con fonti e stime nel loro README. Ha portato alle decisioni D92-D97.
 
+**Rilasci:** la checklist della v1, da seguire sul sito online, e il suo esito sono in [rilascio-v1.md](rilascio-v1.md).
+
 ## Registro delle decisioni
 
 Tutte le scelte sono in [decisioni.md](decisioni.md). Ogni decisione ha un codice (D1, D2, ...) che gli altri documenti citano, e riporta cosa abbiamo scelto, come lo implementiamo, perché e quali alternative abbiamo scartato.
