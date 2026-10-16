@@ -48,6 +48,11 @@ class ProposalCommitTest {
         try {
             ProposalResponse first = proposalService.createBasic(user.getId());
             assertThat(proposalStatus(first.id())).isEqualTo("PENDING");
+            // The fingerprint and the days of the plan are saved with it (D125)
+            assertThat(jdbc.queryForObject("select length(inputs_hash) from plan_proposal where id = ?",
+                    Integer.class, first.id())).isEqualTo(64);
+            assertThat(jdbc.queryForObject("select last_day - first_day from plan_proposal where id = ?",
+                    Integer.class, first.id())).isEqualTo(6);
             assertThat(taskCount(first.id(), "PROPOSED")).isEqualTo(first.tasks().size()).isPositive();
 
             proposalService.confirm(user.getId(), first.id());

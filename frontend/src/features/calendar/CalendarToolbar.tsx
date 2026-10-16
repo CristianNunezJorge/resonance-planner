@@ -10,6 +10,9 @@ interface CalendarToolbarProps {
   onNext: () => void
   onViewChange: (view: CalendarViewName) => void
   onAddTask: () => void
+  // The basic plan without AI (D64), disabled while a request on the plan is running
+  onGeneratePlan: () => void
+  isPlanning: boolean
 }
 
 const VIEWS: { view: CalendarViewName; label: string }[] = [
@@ -27,6 +30,8 @@ function CalendarToolbar({
   onNext,
   onViewChange,
   onAddTask,
+  onGeneratePlan,
+  isPlanning,
 }: CalendarToolbarProps) {
   return (
     <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -61,6 +66,9 @@ function CalendarToolbar({
           ))}
         </div>
       )}
+      <button type="button" className="btn btn-outline-light" onClick={onGeneratePlan} disabled={isPlanning}>
+        Genera piano base
+      </button>
       <button type="button" className="btn btn-primary" onClick={onAddTask}>
         + Attività
       </button>

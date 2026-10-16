@@ -98,3 +98,8 @@ export function addedText(added: AddedMaterial[], materials: MaterialSummary[]):
   const items = added.map(({ materialId, quantity }) => `${formatNumber(quantity)} ${names.get(materialId) ?? materialId}`)
   return `Aggiunti all’inventario: ${items.join(', ')}.`
 }
+
+/** "2026-10-17" as "17/10", for a short span of days. */
+export function shortDayText(day: string): string {
+  return `${day.slice(8, 10)}/${day.slice(5, 7)}`
+}

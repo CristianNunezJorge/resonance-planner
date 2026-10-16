@@ -194,7 +194,7 @@ Ogni attività nelle risposte ha `id`, `origin`, `kind`, `status`, `taskDate`, `
 - **409** se l'attività è già fatta o non è nel calendario (proposta, scartata o sostituita).
 - **404** e **401** come sopra.
 
-**Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. `pendingProposal` è la proposta in attesa con tutte le sue attività `PROPOSED`, anche fuori dall'intervallo, oppure `null` (T30, D124).
+**Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. `pendingProposal` è la proposta in attesa con tutte le sue attività `PROPOSED`, anche fuori dall'intervallo, oppure `null` (T30, D124). `planOutdated` è `true` quando roster, obiettivi o eventi dei giorni dell'ultimo piano sono cambiati dopo che è stato fatto (T31, D125).
 
 ### Proposte dell'agente
 | Metodo | Percorso | Cosa fa | Risposta |

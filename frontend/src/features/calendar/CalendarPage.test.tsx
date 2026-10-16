@@ -9,9 +9,18 @@ import { rover, signedIn } from '../../test/utils'
 import { restoreSession } from '../auth/authSlice'
 import { getCharacters, getGameRules, getMaterials } from '../catalog/catalogApi'
 import { getWaveplate } from '../waveplate/waveplateApi'
-import { completeTask, createTask, deleteTask, getCalendar, updateTask } from './calendarApi'
+import {
+  completeTask,
+  confirmProposal,
+  createBasicPlan,
+  createTask,
+  deleteTask,
+  getCalendar,
+  rejectProposal,
+  updateTask,
+} from './calendarApi'
 import CalendarPage from './CalendarPage'
-import type { CalendarData, CalendarTask, GameEvent } from './types'
+import type { CalendarData, CalendarTask, GameEvent, Proposal } from './types'
 
 vi.mock('../catalog/catalogApi', () => ({ getCharacters: vi.fn(), getGameRules: vi.fn(), getMaterials: vi.fn() }))
 vi.mock('../waveplate/waveplateApi', () => ({ getWaveplate: vi.fn(), saveWaveplate: vi.fn() }))
@@ -21,6 +30,9 @@ vi.mock('./calendarApi', () => ({
   updateTask: vi.fn(),
   deleteTask: vi.fn(),
   completeTask: vi.fn(),
+  createBasicPlan: vi.fn(),
+  confirmProposal: vi.fn(),
+  rejectProposal: vi.fn(),
 }))
 // FullCalendar needs a real browser to measure its grid: here a list of buttons stands in for it, with the same
 // props. It reports the week of 12 October as the range on the screen, like FullCalendar does when it is drawn.
@@ -107,7 +119,26 @@ const farmingTask: CalendarTask = {
   characterId: 'jinhsi',
 }
 
-const week: CalendarData = { events: [moonsGrace], tasks: [manualTask, farmingTask] }
+const week: CalendarData = { events: [moonsGrace], tasks: [manualTask, farmingTask], pendingProposal: null, planOutdated: false }
+
+const proposedTask: CalendarTask = {
+  ...farmingTask,
+  id: 50,
+  status: 'PROPOSED',
+  taskDate: '2026-10-17',
+  title: 'Simulation Training',
+  farmingSourceId: 'sim-resonance-potion',
+  runs: 3,
+  waveplates: 120,
+}
+
+const proposal: Proposal = {
+  id: 7,
+  status: 'PENDING',
+  summary: 'Piano base di 7 giorni, 1 attività.',
+  createdAt: '2026-10-16T09:00:00Z',
+  tasks: [proposedTask],
+}
 
 function stubScreen(isPhone: boolean) {
   vi.stubGlobal('matchMedia', (query: string) => ({
@@ -205,11 +236,121 @@ describe('CalendarPage', () => {
     expect(screen.queryByRole('button', { name: 'Mese' })).not.toBeInTheDocument()
   })
 
-  it('says when there are no tasks in the period', async () => {
-    vi.mocked(getCalendar).mockResolvedValue({ events: [moonsGrace], tasks: [] })
+  it('says when there is no plan in the period, and points to the basic plan', async () => {
+    vi.mocked(getCalendar).mockResolvedValue({ ...week, tasks: [] })
     renderPage()
 
-    expect(await screen.findByText(/Nessuna attività in questo periodo/)).toBeInTheDocument()
+    expect(await screen.findByText(/Non hai ancora un piano in questo periodo/)).toBeInTheDocument()
+    // One button for one action: the one of the toolbar
+    expect(screen.getAllByRole('button', { name: 'Genera piano base' })).toHaveLength(1)
+  })
+
+  describe('proposals (D68, D124)', () => {
+    beforeEach(() => {
+      vi.mocked(getCalendar).mockResolvedValue({ ...week, pendingProposal: proposal })
+    })
+
+    it('shows the pending proposal in a bar and its tasks as proposed in the calendar', async () => {
+      renderPage()
+
+      const bar = await screen.findByRole('region', { name: 'Proposta in attesa' })
+      expect(within(bar).getByText('Piano base di 7 giorni, 1 attività.')).toBeInTheDocument()
+      expect(within(bar).getByText('1 attività il 17/10')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Proposta: Simulation Training' })).toBeInTheDocument()
+      // With a proposal on the screen the empty state is not needed
+      expect(screen.queryByText(/Non hai ancora un piano/)).not.toBeInTheDocument()
+    })
+
+    it('confirms the proposal at once', async () => {
+      vi.mocked(confirmProposal).mockResolvedValue({ ...proposal, status: 'CONFIRMED' })
+      const store = renderPage()
+      const bar = await screen.findByRole('region', { name: 'Proposta in attesa' })
+
+      fireEvent.click(within(bar).getByRole('button', { name: 'Conferma' }))
+
+      await waitFor(() => expect(lastToast(store)?.message).toBe('Piano confermato: le attività sono nel calendario.'))
+      expect(confirmProposal).toHaveBeenCalledWith(TOKEN, 7)
+      expect(getCalendar).toHaveBeenCalledTimes(2)
+      // The bar is gone with its button: the focus is on the title of the page
+      expect(screen.getByRole('heading', { level: 1, name: 'Calendario' })).toHaveFocus()
+    })
+
+    it('rejects the proposal at once', async () => {
+      vi.mocked(rejectProposal).mockResolvedValue({ ...proposal, status: 'REJECTED', tasks: [] })
+      const store = renderPage()
+      const bar = await screen.findByRole('region', { name: 'Proposta in attesa' })
+
+      fireEvent.click(within(bar).getByRole('button', { name: 'Scarta' }))
+
+      await waitFor(() => expect(lastToast(store)?.message).toBe('Proposta scartata.'))
+      expect(rejectProposal).toHaveBeenCalledWith(TOKEN, 7)
+    })
+
+    it('says why a proposal could not be confirmed', async () => {
+      vi.mocked(confirmProposal).mockRejectedValue(
+        new ApiError('CONFLICT', 'La proposta è di un altro giorno: generane una nuova.', 409),
+      )
+      const store = renderPage()
+      const bar = await screen.findByRole('region', { name: 'Proposta in attesa' })
+
+      fireEvent.click(within(bar).getByRole('button', { name: 'Conferma' }))
+
+      await waitFor(() =>
+        expect(lastToast(store)?.message).toBe('La proposta è di un altro giorno: generane una nuova.'),
+      )
+      expect(lastToast(store)?.variant).toBe('danger')
+    })
+
+    it('opens a proposed task without the actions of the calendar', async () => {
+      renderPage()
+
+      const dialog = await openItem('Proposta: Simulation Training')
+
+      expect(within(dialog).getByText(/Fa parte della proposta in attesa/)).toBeInTheDocument()
+      expect(within(dialog).queryByRole('button', { name: 'Segna come fatta' })).not.toBeInTheDocument()
+      expect(within(dialog).queryByRole('button', { name: 'Modifica' })).not.toBeInTheDocument()
+      expect(within(dialog).queryByRole('button', { name: 'Elimina' })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('basic plan (D64)', () => {
+    it('is made from the toolbar, which waits for the answer', async () => {
+      let resolvePlan: (value: Proposal) => void = () => undefined
+      vi.mocked(createBasicPlan).mockReturnValue(new Promise((resolve) => (resolvePlan = resolve)))
+      const store = renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Genera piano base' }))
+      expect(screen.getByRole('button', { name: 'Genera piano base' })).toBeDisabled()
+      resolvePlan(proposal)
+
+      await waitFor(() => expect(lastToast(store)?.message).toBe('Piano base pronto: controllalo e confermalo.'))
+      expect(createBasicPlan).toHaveBeenCalledWith(TOKEN)
+    })
+
+    it('says why there is nothing to plan', async () => {
+      vi.mocked(createBasicPlan).mockRejectedValue(
+        new ApiError('CONFLICT', 'Il roster è vuoto: aggiungi un personaggio con un obiettivo per pianificare il farming.', 409),
+      )
+      const store = renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Genera piano base' }))
+
+      await waitFor(() => expect(lastToast(store)?.variant).toBe('danger'))
+      expect(lastToast(store)?.message).toMatch(/^Il roster è vuoto/)
+    })
+  })
+
+  it('warns when roster, goals or events changed after the last plan (D23, D125)', async () => {
+    vi.mocked(getCalendar).mockResolvedValue({ ...week, planOutdated: true })
+    vi.mocked(createBasicPlan).mockResolvedValue(proposal)
+    renderPage()
+
+    expect(await screen.findByText('Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Genera un nuovo piano' }))
+
+    await waitFor(() => expect(createBasicPlan).toHaveBeenCalledWith(TOKEN))
   })
 
   it('shows why the calendar could not be loaded, and tries again', async () => {
@@ -268,7 +409,7 @@ describe('CalendarPage', () => {
     })
 
     it('has no "Segna come fatta" for a task already done', async () => {
-      vi.mocked(getCalendar).mockResolvedValue({ events: [], tasks: [{ ...manualTask, status: 'DONE' }] })
+      vi.mocked(getCalendar).mockResolvedValue({ ...week, events: [], tasks: [{ ...manualTask, status: 'DONE' }] })
       renderPage()
 
       const dialog = await openItem('✓ Giro dei boss')

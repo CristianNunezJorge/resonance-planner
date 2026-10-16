@@ -2,10 +2,20 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { describeError, type RequestFailure } from '../../api/client'
 import type { RootState } from '../../app/store'
 import { login, register, restoreSession, sessionEnded } from '../auth/authSlice'
-import { completeTask, createTask, deleteTask, getCalendar, updateTask } from './calendarApi'
-import type { CalendarData, CalendarTask, Completion, DateRange, GameEvent, TaskForm } from './types'
+import {
+  completeTask,
+  confirmProposal,
+  createBasicPlan,
+  createTask,
+  deleteTask,
+  getCalendar,
+  rejectProposal,
+  updateTask,
+} from './calendarApi'
+import type { CalendarData, CalendarTask, Completion, DateRange, GameEvent, Proposal, TaskForm } from './types'
 
-// The data of the calendar page (D120): the events and the tasks of the range on the screen. Only loadCalendar writes
+// The data of the calendar page (D120): the events and the tasks of the range on the screen, the pending proposal
+// and whether the last plan is out of date (D68, D125). Only loadCalendar writes
 // them; a change asks the server again for the same range, because the server decides what a change means (D3).
 // They belong to the user of the session: they are forgotten when it ends or another user logs in (D103).
 
@@ -23,6 +33,8 @@ interface CalendarState {
   range: DateRange | null
   events: GameEvent[]
   tasks: CalendarTask[]
+  pendingProposal: Proposal | null
+  planOutdated: boolean
 }
 
 const initialState: CalendarState = {
@@ -33,6 +45,8 @@ const initialState: CalendarState = {
   range: null,
   events: [],
   tasks: [],
+  pendingProposal: null,
+  planOutdated: false,
 }
 
 const NO_SESSION_MESSAGE = 'Devi accedere per vedere il tuo calendario.'
@@ -117,6 +131,47 @@ export const completeCalendarTask = createAsyncThunk<Completion, number, ChangeC
   },
 )
 
+/** The basic plan without AI (D64); a plan with nothing to do answers 409 with the warning of the planner. */
+export const generateBasicPlan = createAsyncThunk<Proposal, void, ChangeConfig>(
+  'calendar/generateBasicPlan',
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    const outcome = await change(getState, dispatch, (token) => createBasicPlan(token))
+    return 'failure' in outcome ? rejectWithValue(outcome.failure) : outcome.result
+  },
+)
+
+// A proposal that the server refuses was probably closed elsewhere (another tab, a newer plan): the range is asked
+// again, so the bar shows what is really pending instead of a proposal that cannot be decided anymore
+async function decide(
+  getState: () => RootState,
+  dispatch: (action: ReturnType<typeof loadCalendar>) => Promise<unknown>,
+  request: (token: string) => Promise<Proposal>,
+): Promise<{ result: Proposal } | { failure: RequestFailure }> {
+  const outcome = await change(getState, dispatch, request)
+  const { range } = getState().calendar
+  if ('failure' in outcome && outcome.failure.code !== 'NO_SESSION' && range) {
+    await dispatch(loadCalendar(range))
+  }
+  return outcome
+}
+
+/** The tasks of the proposal enter the calendar and replace the plan before (D22). */
+export const confirmPendingProposal = createAsyncThunk<Proposal, number, ChangeConfig>(
+  'calendar/confirmProposal',
+  async (id, { getState, dispatch, rejectWithValue }) => {
+    const outcome = await decide(getState, dispatch, (token) => confirmProposal(token, id))
+    return 'failure' in outcome ? rejectWithValue(outcome.failure) : outcome.result
+  },
+)
+
+export const rejectPendingProposal = createAsyncThunk<Proposal, number, ChangeConfig>(
+  'calendar/rejectProposal',
+  async (id, { getState, dispatch, rejectWithValue }) => {
+    const outcome = await decide(getState, dispatch, (token) => rejectProposal(token, id))
+    return 'failure' in outcome ? rejectWithValue(outcome.failure) : outcome.result
+  },
+)
+
 const calendarSlice = createSlice({
   name: 'calendar',
   initialState,
@@ -148,6 +203,8 @@ const calendarSlice = createSlice({
         state.loadRequestId = null
         state.events = action.payload.events
         state.tasks = action.payload.tasks
+        state.pendingProposal = action.payload.pendingProposal
+        state.planOutdated = action.payload.planOutdated
       })
       .addCase(loadCalendar.rejected, (state, action) => {
         if (action.meta.requestId !== state.loadRequestId) {

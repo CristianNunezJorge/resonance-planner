@@ -178,6 +178,8 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 
 **Nella v1 (T26, D119, D120):** calendario con FullCalendar 7 (settimana e mese su computer, elenco per giorno su telefono), eventi solo nei giorni attivi, attività con lo stato scritto, finestre di dettaglio, modulo dell'attività manuale, "Segna come fatta" ed "Elimina" con conferma, riquadro Waveplate con "Aggiorna". Finché l'agente non c'è, lo stato vuoto invita a usare "+ Attività", e gli eventi con un limite giornaliero mostrano il limite ("per le prime 3 run del giorno") invece di quante doppie restano. Barra della proposta, avviso di cambiamento, chat, "Genera piano base" e "Spiegamelo" arrivano con la v2.
 
+**Nel giorno 7 (T31, D124, D125):** barra "Proposta in attesa" con il testo del piano, il numero di attività e i giorni, "Scarta" e "Conferma" che agiscono subito; attività proposte tratteggiate con la scritta "Proposta:"; pulsante "Genera piano base" nella barra dei comandi; avviso "Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano" con "Genera un nuovo piano"; lo stato vuoto propone il piano base. Il dettaglio di un'attività proposta non ha "Segna come fatta": ricorda di confermare la proposta.
+
 ### P5 · Roster e inventario `/roster`
 
 **Scopo:** vedere e modificare personaggi, obiettivi e materiali.

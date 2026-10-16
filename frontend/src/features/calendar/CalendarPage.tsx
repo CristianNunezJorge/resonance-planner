@@ -1,4 +1,5 @@
 import { useCalendarController } from '@fullcalendar/react'
+import { isFulfilled, isRejectedWithValue, type UnknownAction } from '@reduxjs/toolkit'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { describeError, type RequestFailure } from '../../api/client'
 import { useAppDispatch, useAppSelector, useAppStore } from '../../app/hooks'
@@ -13,9 +14,12 @@ import WaveplatePanel from '../waveplate/WaveplatePanel'
 import { eventKey, toCalendarItems, type ItemProps } from './calendarItems'
 import {
   completeCalendarTask,
+  confirmPendingProposal,
   createCalendarTask,
   deleteCalendarTask,
+  generateBasicPlan,
   loadCalendar,
+  rejectPendingProposal,
   updateCalendarTask,
 } from './calendarSlice'
 import CalendarToolbar from './CalendarToolbar'
@@ -25,6 +29,7 @@ import { addedText, dayText } from './format'
 import TaskDetailModal from './TaskDetailModal'
 import TaskFormModal from './TaskFormModal'
 import type { CalendarTask, DateRange, TaskForm } from './types'
+import ProposalBar from './ProposalBar'
 import { useIsPhone } from './useIsPhone'
 
 // The window open over the calendar, if any
@@ -44,7 +49,8 @@ function todayText(): string {
 }
 
 // Page P4, the calendar (D66, D67, D120): events only on their active days, the tasks of the user, the windows of
-// detail and the Waveplate panel. The chat and the proposals arrive with the agent (v2).
+// detail and the Waveplate panel; the pending proposal with its bar, the basic plan and the warning that the plan is
+// out of date (D23, D64, D68, D125). The chat arrives with the agent.
 function CalendarPage() {
   usePageTitle('Calendario')
   const dispatch = useAppDispatch()
@@ -56,12 +62,18 @@ function CalendarPage() {
   const [title, setTitle] = useState('')
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [busy, setBusy] = useState(false)
+  // A request on the plan is running (basic plan, confirm, reject): its buttons wait
+  const [planning, setPlanning] = useState(false)
   // The range on the screen: asked again if the data are forgotten while the page is open
   const shownRange = useRef<DateRange | null>(null)
+  // After Conferma or Scarta the bar goes away with the focused button: the focus moves to the title of the page
+  const headingRef = useRef<HTMLHeadingElement>(null)
 
   const { characters, materials, rules, rulesStatus, rulesError } = useAppSelector((state) => state.catalog)
   const userId = useAppSelector((state) => state.auth.user?.id)
-  const { status, error, refreshing, events, tasks } = useAppSelector((state) => state.calendar)
+  const { status, error, refreshing, events, tasks, pendingProposal, planOutdated } = useAppSelector(
+    (state) => state.calendar,
+  )
 
   useEffect(() => {
     void dispatch(fetchRules())
@@ -82,7 +94,9 @@ function CalendarPage() {
     }
   }, [status, dispatch, store])
 
-  const items = useMemo(() => toCalendarItems(events, tasks), [events, tasks])
+  // The tasks of the proposal are drawn with the others, dashed (D68)
+  const shownTasks = useMemo(() => [...tasks, ...(pendingProposal?.tasks ?? [])], [tasks, pendingProposal])
+  const items = useMemo(() => toCalendarItems(events, shownTasks), [events, shownTasks])
 
   const handleRangeChange = useCallback(
     (range: DateRange, periodTitle: string) => {
@@ -145,7 +159,51 @@ function CalendarPage() {
     }
   }
 
-  const taskOf = (taskId: number) => tasks.find((task) => task.id === taskId)
+  // One request on the plan at a time; the server message of a failure becomes the toast (a 409 explains itself)
+  const runOnPlan = async (
+    request: () => Promise<UnknownAction>,
+    success: string,
+    fallback: string,
+    moveFocus = false,
+  ) => {
+    setPlanning(true)
+    const action = await request()
+    setPlanning(false)
+    if (moveFocus) {
+      headingRef.current?.focus()
+    }
+    if (isFulfilled(action)) {
+      dispatch(toastShown(success))
+      return
+    }
+    const failure = isRejectedWithValue(action) ? (action.payload as RequestFailure) : null
+    dispatch(toastShown(failure?.message ?? fallback, 'danger'))
+  }
+
+  const makeBasicPlan = () =>
+    void runOnPlan(
+      () => dispatch(generateBasicPlan()),
+      'Piano base pronto: controllalo e confermalo.',
+      'Non è stato possibile generare il piano base.',
+    )
+
+  const confirmProposal = (id: number) =>
+    void runOnPlan(
+      () => dispatch(confirmPendingProposal(id)),
+      'Piano confermato: le attività sono nel calendario.',
+      'Non è stato possibile confermare la proposta.',
+      true,
+    )
+
+  const rejectProposal = (id: number) =>
+    void runOnPlan(
+      () => dispatch(rejectPendingProposal(id)),
+      'Proposta scartata.',
+      'Non è stato possibile scartare la proposta.',
+      true,
+    )
+
+  const taskOf = (taskId: number) => shownTasks.find((task) => task.id === taskId)
   const characterName = (task: CalendarTask) =>
     characters.find((character) => character.id === task.characterId)?.name ?? null
 
@@ -212,7 +270,9 @@ function CalendarPage() {
 
   return (
     <section>
-      <h1>Calendario</h1>
+      <h1 ref={headingRef} tabIndex={-1}>
+        Calendario
+      </h1>
       {firstLoadFailed && failureMessage && <ErrorState message={failureMessage} onRetry={retry} />}
       <div className="row g-4">
         <div className="col-lg-9 order-2 order-lg-1">
@@ -225,7 +285,26 @@ function CalendarPage() {
             onNext={() => controller.next()}
             onViewChange={setDesktopView}
             onAddTask={() => setDialog({ kind: 'form', task: null })}
+            onGeneratePlan={makeBasicPlan}
+            isPlanning={planning}
           />
+          {planOutdated && (
+            <div className="alert alert-warning d-flex flex-wrap align-items-center gap-2">
+              <strong>Attenzione:</strong>
+              <span className="me-auto">Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano.</span>
+              <button type="button" className="btn btn-sm btn-dark" onClick={makeBasicPlan} disabled={planning}>
+                Genera un nuovo piano
+              </button>
+            </div>
+          )}
+          {pendingProposal && (
+            <ProposalBar
+              proposal={pendingProposal}
+              busy={planning}
+              onConfirm={() => confirmProposal(pendingProposal.id)}
+              onReject={() => rejectProposal(pendingProposal.id)}
+            />
+          )}
           {status === 'succeeded' && error && (
             <ErrorState message={`Il calendario non è aggiornato. ${error}`} onRetry={retry} />
           )}
@@ -241,8 +320,8 @@ function CalendarPage() {
             onRangeChange={handleRangeChange}
             onItemClick={handleItemClick}
           />
-          {status === 'succeeded' && !refreshing && tasks.length === 0 && (
-            <EmptyState message="Nessuna attività in questo periodo. Aggiungine una con «+ Attività»: presto potrai chiedere all’agente di organizzarti la settimana." />
+          {status === 'succeeded' && !refreshing && tasks.length === 0 && !pendingProposal && (
+            <EmptyState message="Non hai ancora un piano in questo periodo. Crealo dai tuoi obiettivi con «Genera piano base», oppure aggiungi un’attività con «+ Attività»." />
           )}
         </div>
         <aside className="col-lg-3 order-1 order-lg-2" aria-label="Riepilogo">

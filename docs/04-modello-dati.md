@@ -298,6 +298,8 @@ Unico: (`user_id`, `material_id`).
 | `summary` | `text` | La spiegazione del piano scritta dall'agente |
 | `created_at` | `timestamptz` | Obbligatorio |
 | `decided_at` | `timestamptz` | Quando l'utente ha confermato o scartato |
+| `inputs_hash` | `varchar(64)` | Impronta SHA-256 di roster ed eventi da cui è nato il piano (D125, migrazione `V2`) |
+| `first_day`, `last_day` | `date` | I giorni del piano, per ricalcolare l'impronta; vuoti insieme all'impronta nei piani salvati prima di `V2` |
 
 Indice unico parziale: un solo `PENDING` per utente (D37).
 

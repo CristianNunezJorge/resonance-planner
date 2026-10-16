@@ -6,6 +6,8 @@ import com.resonanceplanner.common.error.ConflictException;
 import com.resonanceplanner.common.error.NotFoundException;
 import com.resonanceplanner.common.error.UnauthorizedException;
 import com.resonanceplanner.common.error.UniqueViolation;
+import com.resonanceplanner.event.EventService;
+import com.resonanceplanner.planner.PlanInputs;
 import com.resonanceplanner.planner.PlannerService;
 import com.resonanceplanner.planner.ScheduleDraft;
 import com.resonanceplanner.planner.ScheduleDraft.DayPlan;
@@ -15,6 +17,8 @@ import com.resonanceplanner.planning.dto.ProposalResponse;
 import com.resonanceplanner.user.UserRepository;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProposalService {
 
     private static final String NOT_FOUND = "Proposta non trovata.";
+    private static final List<ProposalStatus> LAST_PLAN = List.of(ProposalStatus.PENDING, ProposalStatus.CONFIRMED);
     private static final String NOTHING_TO_PLAN = "Il pianificatore non ha trovato niente da fare in questi giorni.";
 
     private final PlanProposalRepository proposalRepository;
@@ -39,17 +44,19 @@ public class ProposalService {
     private final FarmingSourceRepository farmingSourceRepository;
     private final UserRepository userRepository;
     private final PlannerService plannerService;
+    private final PlanInputs planInputs;
     private final Today today;
     private final Clock clock;
 
     public ProposalService(PlanProposalRepository proposalRepository, PlannedTaskRepository taskRepository,
             FarmingSourceRepository farmingSourceRepository, UserRepository userRepository,
-            PlannerService plannerService, Today today, Clock clock) {
+            PlannerService plannerService, PlanInputs planInputs, Today today, Clock clock) {
         this.proposalRepository = proposalRepository;
         this.taskRepository = taskRepository;
         this.farmingSourceRepository = farmingSourceRepository;
         this.userRepository = userRepository;
         this.plannerService = plannerService;
+        this.planInputs = planInputs;
         this.today = today;
         this.clock = clock;
     }
@@ -75,7 +82,10 @@ public class ProposalService {
         Instant now = clock.instant();
         proposalRepository.findByUserIdAndStatus(userId, ProposalStatus.PENDING)
                 .ifPresent(pending -> close(pending, ProposalStatus.REPLACED, now));
-        PlanProposal proposal = insert(PlanProposal.pending(userId, summary, now));
+        LocalDate firstDay = draft.days().getFirst().date();
+        LocalDate lastDay = draft.days().getLast().date();
+        PlanProposal proposal = insert(PlanProposal.pending(userId, summary, now, firstDay, lastDay,
+                planInputs.fingerprint(userId, firstDay, lastDay)));
         List<PlannedTask> tasks = new ArrayList<>();
         for (DayPlan day : draft.days()) {
             for (DraftTask task : day.tasks()) {
@@ -103,6 +113,23 @@ public class ProposalService {
     Optional<ProposalResponse> pendingOf(Long userId) {
         return proposalRepository.findByUserIdAndStatus(userId, ProposalStatus.PENDING)
                 .map(proposal -> ProposalResponse.from(proposal, tasksOf(proposal)));
+    }
+
+    /**
+     * True when roster, goals or events of the days of the last plan changed after it was made (D23, D125); false
+     * without a plan, or for a plan saved before the fingerprint existed.
+     */
+    @Transactional(readOnly = true)
+    boolean isPlanOutdated(Long userId) {
+        return proposalRepository.findFirstByUserIdAndStatusInOrderByIdDesc(userId, LAST_PLAN)
+                .filter(plan -> plan.getInputsHash() != null)
+                // The planner makes plans of at most 14 days; a longer one could not be read with the events, whose
+                // range is limited, and would stop the whole calendar: it is never called out of date
+                .filter(plan -> ChronoUnit.DAYS.between(plan.getFirstDay(), plan.getLastDay())
+                        < EventService.MAX_RANGE_DAYS)
+                .map(plan -> !plan.getInputsHash().equals(
+                        planInputs.fingerprint(userId, plan.getFirstDay(), plan.getLastDay())))
+                .orElse(false);
     }
 
     /**

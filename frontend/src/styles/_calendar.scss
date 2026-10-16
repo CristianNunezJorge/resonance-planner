@@ -9,11 +9,19 @@
   --rp-task: #9cc3ff;
   --rp-task-done: #3a4566;
   --rp-on-task-done: #c9cfe0;
+  // A proposed task: the dark background of the page, with a light dashed border and light text (D68)
+  --rp-task-proposed: #1b2238;
+  --rp-on-task-proposed: #e6ecff;
 }
 
 // A done task is marked with ✓ in its title (D70) and crossed out
 .calendar-task--done {
   text-decoration: line-through;
+}
+
+// A task of the pending proposal is written "Proposta:" in its title (D70) and dashed (D68)
+.calendar-task--proposed {
+  border: 2px dashed var(--rp-on-task-proposed) !important;
 }
 
 // The type of an event in its window, with the colour it has in the calendar

@@ -51,6 +51,9 @@ function TaskDetailModal({ task, characterName, onClose, onComplete, onEdit, onD
         </>
       }
     >
+      {task.status === 'PROPOSED' && (
+        <p>Fa parte della proposta in attesa: confermala per aggiungerla al calendario.</p>
+      )}
       <dl className="mb-0">
         <dt>Giorno</dt>
         <dd>{dayText(task.taskDate)}</dd>

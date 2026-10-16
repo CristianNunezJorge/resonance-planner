@@ -46,6 +46,7 @@ public class CalendarService {
         List<TaskResponse> tasks = taskRepository.findInRange(userId, from, to, IN_CALENDAR).stream()
                 .map(TaskResponse::from)
                 .toList();
-        return new CalendarResponse(events, tasks, proposalService.pendingOf(userId).orElse(null));
+        return new CalendarResponse(events, tasks, proposalService.pendingOf(userId).orElse(null),
+                proposalService.isPlanOutdated(userId));
     }
 }
