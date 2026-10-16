@@ -2,15 +2,16 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (15/10/2026)
+## Stato attuale (16/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D116.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D122.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
 - **Giorno 4 (T17-T21) completato:** contatore Waveplate e Crystals (D105), roster con le regole di livello e grado (D104), inventario (D108), configurazione guidata in backend (D106, D109, D110: limite alla dimensione del corpo JSON) e in frontend (D111). Decisioni D1-D111. Tutto online; su Trello T01-T21 sono in "Fatto".
 - **Giorno 5 (T22-T24) completato:** calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni e giorni attivi, API pubbliche e admin (D113, D114), pagina roster e inventario (D115, D116). Decisioni D1-D116. Tutto online; su Trello T01-T24 sono in "Fatto".
-- **Prossimo passo:** giorno 6 (T25-T28: attività e calendario in backend, pagina calendario, profilo e gestione eventi, rilascio v1). Leggere `HANDOFF.md`.
+- **Giorno 6 (T25-T28) completato · v1 rilasciata:** attività manuali, completamento con l'inventario e calendario in backend (D117, D118), pagina calendario con FullCalendar 7 e riquadro Waveplate (D119, D120), profilo e gestione eventi admin (D121, D122), README e checklist di rilascio (`docs/rilascio-v1.md`, 9 punti ✓ online), tag `v1.0.0`. Tutto online; su Trello T01-T28 sono in "Fatto".
+- **Prossimo passo:** giorno 7 (T29-T31: pianificatore, proposte e piano base in backend, barra della proposta nel calendario). Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -64,7 +65,7 @@ Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm ru
 
 | Parte | Scelta | Versioni fissate il 10/10/2026 | Decisioni |
 |---|---|---|---|
-| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105 | D7, D76 |
+| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105, FullCalendar 7.1.1 con il tema Bootstrap 5 e `temporal-polyfill` 1.0.5 (D119) | D7, D76, D119 |
 | Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1 | D5, D45, D77 |
 | Database | PostgreSQL, schema con Flyway (Hibernate in `validate`) | PostgreSQL 16 (Docker `postgres:16`) | D38, D98 |
 | IA | API Claude con l'SDK Java ufficiale, modello `claude-haiku-4-5`, ciclo tool-use scritto da noi | — | D54, D59 |
@@ -102,6 +103,7 @@ backend/
     onboarding/               configurazione guidata in una transazione (D50, D109)
     farming/                  NeedCalculator e FarmingCalculator (calcolo puro su FarmingCatalog), service e API (D112)
     event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
+    planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118)
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
@@ -116,7 +118,11 @@ frontend/
   src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
   src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
-  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, ConfirmModal (D116), pagine 404 ed errore
+  src/features/calendar/      pagina calendario P4 (T26): CalendarView (unico componente con FullCalendar), calendarSlice, finestre (D119, D120)
+  src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
+  src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121)
+  src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
+  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
