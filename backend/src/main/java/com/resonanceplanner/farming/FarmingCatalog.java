@@ -1,5 +1,6 @@
 package com.resonanceplanner.farming;
 
+import com.resonanceplanner.catalog.FarmingSourceType;
 import com.resonanceplanner.catalog.MaterialCategory;
 import java.math.BigDecimal;
 import java.util.List;
@@ -59,8 +60,9 @@ public record FarmingCatalog(
         }
     }
 
-    /** Where materials come from: what a run costs and what it gives on average. */
-    public record Source(String id, String name, int waveplateCost, int minutesPerRun, List<Drop> drops) {
+    /** Where materials come from: what a run costs and what it gives on average; the type is what events boost (D94). */
+    public record Source(String id, String name, FarmingSourceType type, int waveplateCost, int minutesPerRun,
+            List<Drop> drops) {
 
         public Source {
             drops = List.copyOf(drops);

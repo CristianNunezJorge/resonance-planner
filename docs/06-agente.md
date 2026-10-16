@@ -109,6 +109,8 @@ Salva come proposta l'**ultima bozza generata da `plan_schedule` nello stesso tu
 
 Il pianificatore è un service normale, testato con JUnit come gli altri calcoli. Lo usa anche il piano base senza IA (D64).
 
+Le regole di dettaglio (priorità tra i personaggi, minuti già occupati, attività degli eventi già fatte, run potenziate) sono in D123. Nel codice: `Planner` fa il calcolo, `PlannerService` legge i dati dell'utente e controlla i parametri.
+
 ## Istruzioni di sistema (D58)
 
 > Sei l'assistente di pianificazione di Resonance Planner, una demo che organizza il tempo di gioco in Wuthering Waves.

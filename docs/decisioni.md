@@ -1138,3 +1138,28 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Perché:** lo stesso schema delle altre pagine rende la pagina prevedibile; tenere la bozza nella finestra evita uno slice in più per dati che vivono pochi minuti, mentre le funzioni pure testano la parte delicata, cioè la conversione dei numeri e dei campi.
 - **Scartate:** una pagina separata per il modulo (`/admin/eventi/nuovo`: più rotte per lo stesso lavoro); la bozza in Redux (più codice, nessun vantaggio per una finestra); controllare nel browser tutte le regole di D114 (doppioni delle regole del server, che potrebbero divergere).
 - **Limiti noti:** chiudere la finestra (Annulla, Esc) perde la bozza senza chiedere conferma: per un admin solo, nella demo, è un compromesso accettato. Durante il salvataggio i campi sono bloccati; togliendo una riga spariscono gli errori di quel gruppo, perché gli indici delle righe cambiano.
+
+## D123 · Regole di dettaglio del pianificatore
+**Stato:** Confermata · 16/10/2026 · nata da T29 · precisa D57
+
+- **Cosa:** come il pianificatore (D57) sceglie l'ordine dei personaggi, calcola le risorse di ogni giorno e inserisce attività degli eventi e ricompense doppie.
+- **Come:**
+  1. **priorità dei personaggi:** ogni personaggio ha il suo fabbisogno. L'inventario si assegna nell'ordine di priorità, e ogni run copre prima il personaggio più importante che ha ancora bisogno di quel materiale; quello che avanza va al successivo (per esempio le pozioni di un boss farmato per il primo). Dentro un personaggio l'ordine dei materiali è quello di D112 (boss, nemici, specialità, EXP, crediti) e ogni materiale usa la fonte migliore di D112. I personaggi non nominati in `characterPriority` seguono nell'ordine del roster;
+  2. **Waveplate del giorno:** oggi quelle attuali più i Crystals, gli altri giorni quelle che si ricaricano in 24 ore (240). Quelle avanzate non passano al giorno dopo;
+  3. **minuti del giorno:** il tempo di gioco meno le attività manuali e le attività già fatte di quel giorno. Le attività dell'agente confermate e non fatte non si sottraggono, perché la conferma del nuovo piano le sostituisce (D22);
+  4. **attività degli eventi**, per prime: quelle `DAILY` in ogni giorno attivo dal giorno di sblocco, se non sono già state fatte quel giorno; quelle `ONCE` una volta per edizione, nel primo giorno in cui c'è il tempo, e mai se sono già state fatte nell'edizione. Un'attività che non ci sta nei minuti rimasti si salta;
+  5. **ricompense doppie:** in ogni giorno, prima delle altre run, le run sulle fonti del tipo potenziato che servono ancora, fino al limite giornaliero meno le run di quel tipo già fatte. Effetto più forte e run potenziate si calcolano con le stesse funzioni del completamento (`CompletionRewards`, D118), così piano e "Segna come fatta" contano allo stesso modo;
+  6. **run normali:** si prende il primo materiale ancora mancante secondo la priorità; se la sua fonte non è più possibile (Waveplate o minuti finiti) si passa al materiale successivo, così le fonti senza Waveplate usano i minuti rimasti;
+  7. le run della stessa fonte nello stesso giorno diventano un'unica attività;
+  8. **risultato:** per ogni giorno le attività con Waveplate e minuti, poi per ogni materiale quanto manca e quanto il piano copre, e gli avvisi (obiettivi già raggiunti, giorni che servirebbero ancora, stimati con il calcolo di D112);
+  9. la resa per run e la scelta della fonte migliore stanno in una classe comune (`FarmingYields`), usata sia dal calcolo del farming sia dal pianificatore.
+- **Perché:** la priorità che segue le run è facile da spiegare ("prima finisco Jinhsi") e lascia comunque ai personaggi successivi quello che avanza. Le regole sui minuti e sulle attività già fatte evitano che rigenerare il piano riproponga cose fatte o tolga tempo per attività che stanno per essere sostituite.
+- **Scartate:** un fabbisogno unico per tutto il roster come in D112 (la priorità non conterebbe e l'EXP comune passerebbe davanti ai materiali del secondo personaggio); sottrarre le attività dell'agente confermate (il nuovo piano userebbe solo il tempo avanzato); portare le Waveplate avanzate al giorno dopo (nel gioco diventano Crystals, un calcolo in più per una demo).
+- **Limiti noti:**
+  - oltre a quello di D57, se oggi è escluso i Crystals non si usano nel primo giorno pianificato;
+  - un'attività `ONCE` che non ci sta mai nel tempo non genera un avviso;
+  - il piano conta le medie in centesimi come D112, mentre il completamento arrotonda per difetto il totale dell'attività (D118): la copertura può promettere qualche unità in più di quella che arriverà davvero nell'inventario;
+  - se nello stesso giorno due eventi potenziano tipi di fonte diversi e le Waveplate non bastano, passa prima il tipo che viene prima nell'elenco dei tipi, non quello più utile (nei dati della demo non succede);
+  - le run della stessa fonte nello stesso giorno restano attribuite al primo personaggio per cui sono state pianificate;
+  - le attività di un evento già fatte si riconoscono dal titolo ("Evento: attività"): se l'admin rinomina l'evento o l'attività, il piano la ripropone.
+- **Parametri:** `excludedDates` contiene al massimo 14 date, come i giorni di un piano, così una richiesta non può mandare elenchi enormi.

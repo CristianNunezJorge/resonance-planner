@@ -87,7 +87,7 @@ public class FarmingCatalogLoader {
         for (FarmingDrop drop : source.getDrops()) {
             drops.add(new Drop(drop.getMaterial().getId(), drop.getAvgQuantity(), drop.isEstimated()));
         }
-        return new Source(source.getId(), source.getName(), source.getWaveplateCost(), source.getMinutesPerRun(),
-                drops);
+        return new Source(source.getId(), source.getName(), source.getType(), source.getWaveplateCost(),
+                source.getMinutesPerRun(), drops);
     }
 }
