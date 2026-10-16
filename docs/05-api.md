@@ -102,7 +102,7 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 ### Catalogo di gioco
 | Metodo | Percorso | Cosa fa |
 |---|---|---|
-| GET | `/api/game/rules` | Regole di gioco: Waveplate, livelli di ascensione, opzioni di tempo |
+| GET | `/api/game/rules` | Regole di gioco: Waveplate, livelli di ascensione, opzioni di tempo e `demoEventsAnchorDate`, il giorno da cui si conta l'inizio degli eventi che si ripetono (D29, D122) |
 | GET | `/api/game/characters` | Elenco dei personaggi |
 | GET | `/api/game/characters/{id}` | Dettaglio con i costi di ascensione |
 | GET | `/api/game/materials` | Elenco dei materiali |

@@ -85,6 +85,8 @@ class CatalogControllerTest {
                 .andExpect(jsonPath("$.data.waveplateCrystals.max").value(480))
                 .andExpect(jsonPath("$.data.ascensionLevels", contains(20, 40)))
                 .andExpect(jsonPath("$.data.maxLevel").value(40))
-                .andExpect(jsonPath("$.data.playTimeOptionsMinutes", contains(30, 60, 120)));
+                .andExpect(jsonPath("$.data.playTimeOptionsMinutes", contains(30, 60, 120)))
+                // The admin form counts the offset of a recurring event from this day (D29, D122)
+                .andExpect(jsonPath("$.data.demoEventsAnchorDate").value("2026-10-01"));
     }
 }

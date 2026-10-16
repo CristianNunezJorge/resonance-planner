@@ -1109,3 +1109,32 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   7. le finestre usano un componente `Modal` comune (portale, fuoco dentro la finestra, Esc, fuoco restituito all'elemento che l'ha aperta o, se non c'è più, al contenuto della pagina); `ConfirmModal` è costruita sopra.
 - **Perché:** come in D115, i numeri li calcola sempre il server e ricaricare dopo una modifica evita conti doppi. Chiedere i valori delle Waveplate ogni minuto costa una richiesta piccola e tiene il riquadro corretto senza duplicare la formula del backend.
 - **Scartate:** caricare tutti gli eventi e le attività una volta sola (senza un intervallo la risposta crescerebbe senza limite); calcolare le Waveplate nel browser (formula duplicata, D3); finestre native del browser (D69).
+
+## D121 · Pagina del profilo
+**Stato:** Confermata · 16/10/2026 · nata da T27
+
+- **Cosa:** la pagina P6 (T27) permette di cambiare username e tempo di gioco, di uscire e di eliminare l'account (F11, F12, D42).
+- **Come:**
+  - "Salva" manda `PATCH /api/me` solo con i campi cambiati (D102), così uno username invariato non viene mai controllato; se non è cambiato niente non parte nessuna richiesta. L'utente aggiornato entra nello stato con `userUpdated`; gli errori del server vanno sotto il campo (`username`, `playTimeMinutes`), con il fuoco sul campo;
+  - l'email si vede ma non si cambia;
+  - "Elimina account" apre una finestra in cui si scrive la propria email: il pulsante "Elimina definitivamente" si attiva solo quando coincide, senza badare a maiuscole e spazi ai lati (il server salva l'email in minuscolo). Dopo `DELETE /api/me` si esce come con "Esci": prima la pagina di presentazione, poi il token sparisce, poi la notifica;
+  - "Esci" della barra e del profilo usano lo stesso hook `useLogout`, con quell'ordine (D103).
+- **Perché:** scrivere l'email è la conferma chiesta da F12 per un'operazione che non si può annullare; mandare solo i campi cambiati evita errori su valori che l'utente non ha toccato.
+- **Scartate:** conferma con un solo pulsante (troppo facile da premere per sbaglio); chiedere di nuovo la password (il backend non ha un endpoint per verificarla, e la sessione è già autenticata).
+- **Limiti noti:** la conferma con l'email protegge da un clic sbagliato, non da chi ha già rubato il token: `DELETE /api/me` chiede solo il token (D45). Anche l'admin può eliminare il proprio account: nessuno può registrarsi con la sua email o con lo username `admin` (D100), e al riavvio successivo il server lo ricrea da `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
+
+## D122 · Pagina admin degli eventi
+**Stato:** Confermata · 16/10/2026 · nata da T27
+
+- **Cosa:** la pagina P7 (T27) mostra gli eventi in una tabella e li crea, modifica ed elimina con le API admin (D14, D114).
+- **Come:**
+  1. l'elenco sta in un `adminEventsSlice`, come roster e calendario: si ricarica dopo ogni modifica, si azzera al logout e a ogni login, e ignora le risposte superate (D103, D115);
+  2. la tabella mostra nome (con l'etichetta "Demo" per gli eventi del file, D39), tipo, date ("dal 12/10/2026 al 18/10/2026" oppure "ogni 14 giorni, per 7 giorni") e giorni attivi; su telefono scorre in orizzontale;
+  3. il modulo è in una finestra larga. La sua bozza sta nello stato della finestra e non in Redux: esiste solo finché la finestra è aperta, e chiuderla o uscire la cancella. È un'eccezione voluta alla regola di `CLAUDE.md` sulle bozze dei moduli lunghi, nata per la configurazione a tre passi, dove la bozza deve sopravvivere tra un passo e l'altro;
+  4. bozza e corpo della richiesta si convertono con funzioni pure (`eventForm.ts`, test scritti prima). I numeri restano testo finché non si salva; la pagina controlla solo quello che serve per mandare un corpo valido (interi, moltiplicatore con la virgola o il punto e al massimo due decimali, almeno un giorno della settimana). Tutte le altre regole sono del server, e i suoi messaggi tornano sotto il campo con lo stesso nome, anche nelle righe delle ricompense e delle attività (`activities[0].unlockDay`); un messaggio per un campo che il modulo non mostra va in cima;
+  5. all'inizio i sette giorni sono tutti spuntati (tutti = tutti i giorni, D96); i campi dell'effetto compaiono solo per "Ricompense doppie" (D94);
+  6. `GET /api/game/rules` restituisce anche `demoEventsAnchorDate`: il modulo dice da quale giorno si conta l'inizio di un evento che si ripete, senza scrivere la data nel codice del frontend;
+  7. "Elimina" chiede conferma e avvisa che le attività collegate restano senza il collegamento; per un evento della demo aggiunge che ricompare al prossimo riavvio del server (D39).
+- **Perché:** lo stesso schema delle altre pagine rende la pagina prevedibile; tenere la bozza nella finestra evita uno slice in più per dati che vivono pochi minuti, mentre le funzioni pure testano la parte delicata, cioè la conversione dei numeri e dei campi.
+- **Scartate:** una pagina separata per il modulo (`/admin/eventi/nuovo`: più rotte per lo stesso lavoro); la bozza in Redux (più codice, nessun vantaggio per una finestra); controllare nel browser tutte le regole di D114 (doppioni delle regole del server, che potrebbero divergere).
+- **Limiti noti:** chiudere la finestra (Annulla, Esc) perde la bozza senza chiedere conferma: per un admin solo, nella demo, è un compromesso accettato. Durante il salvataggio i campi sono bloccati; togliendo una riga spariscono gli errori di quel gruppo, perché gli indici delle righe cambiano.

@@ -209,6 +209,7 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 - Username modificabile, email in sola lettura, tempo di gioco.
 - Pulsante **Esci**.
 - **Zona pericolosa:** "Elimina account", con conferma scrivendo la propria email (F12).
+- **In T27 (D121):** "Salva" manda solo i campi cambiati; l'email si confronta senza badare a maiuscole e spazi; dopo l'eliminazione si torna alla presentazione come con "Esci".
 
 ### P7 · Gestione eventi `/admin/eventi`
 
@@ -225,6 +226,7 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 ```
 - **Form evento** (pagina o finestra): nome, tipo, descrizione, date (fisse o ricorrenti), giorni della settimana in cui è attivo (sette caselle, tutte selezionate all'inizio), ricompense, attività con l'eventuale giorno di sblocco, effetto con tipo di fonte, moltiplicatore e limite giornaliero. I campi delle date cambiano in base al tipo di programmazione; quelli dell'effetto compaiono solo per "Ricompense doppie" (D94, D96).
 - **Elimina** chiede conferma e avvisa che le attività collegate restano, senza il collegamento all'evento.
+- **In T27 (D122):** il modulo è una finestra larga; gli eventi della demo hanno l'etichetta "Demo" e, se eliminati, ricompaiono al riavvio (D39); i messaggi del server tornano sotto il campo giusto, anche dentro le righe di ricompense e attività.
 
 ### P8 · Pagina non trovata
 
