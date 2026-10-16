@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiRequest } from '../../api/client'
-import { completeTask, createTask, deleteTask, getCalendar, updateTask } from './calendarApi'
+import {
+  completeTask,
+  confirmProposal,
+  createBasicPlan,
+  createTask,
+  deleteTask,
+  getCalendar,
+  rejectProposal,
+  updateTask,
+} from './calendarApi'
 
 vi.mock('../../api/client', () => ({ apiRequest: vi.fn() }))
 
@@ -34,13 +43,27 @@ describe('calendarApi', () => {
     expect(apiRequest).toHaveBeenNthCalledWith(4, '/api/me/tasks/40/complete', { method: 'POST', token: TOKEN })
   })
 
+  it('makes the basic plan, then confirms or rejects a proposal (D64, D124)', async () => {
+    vi.mocked(apiRequest).mockResolvedValue(undefined)
+
+    await createBasicPlan(TOKEN)
+    await confirmProposal(TOKEN, 7)
+    await rejectProposal(TOKEN, 8)
+
+    expect(apiRequest).toHaveBeenNthCalledWith(1, '/api/me/proposals/basic', { method: 'POST', token: TOKEN })
+    expect(apiRequest).toHaveBeenNthCalledWith(2, '/api/me/proposals/7/confirm', { method: 'POST', token: TOKEN })
+    expect(apiRequest).toHaveBeenNthCalledWith(3, '/api/me/proposals/8/reject', { method: 'POST', token: TOKEN })
+  })
+
   it('never lets a value change the address', async () => {
     vi.mocked(apiRequest).mockResolvedValue(undefined)
 
     await getCalendar(TOKEN, { from: '2026-10-12&x=1', to: '../admin' })
     await deleteTask(TOKEN, Number.NaN)
+    await confirmProposal(TOKEN, Number.NaN)
 
     expect(apiRequest).toHaveBeenNthCalledWith(1, '/api/me/calendar?from=2026-10-12%26x%3D1&to=..%2Fadmin', { token: TOKEN })
     expect(apiRequest).toHaveBeenNthCalledWith(2, '/api/me/tasks/NaN', { method: 'DELETE', token: TOKEN })
+    expect(apiRequest).toHaveBeenNthCalledWith(3, '/api/me/proposals/NaN/confirm', { method: 'POST', token: TOKEN })
   })
 })

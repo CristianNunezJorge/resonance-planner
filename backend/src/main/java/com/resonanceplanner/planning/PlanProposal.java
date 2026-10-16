@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * A plan made by the planner that waits for the user (D2, D22): its tasks are PROPOSED until it is confirmed. A user
@@ -38,16 +39,31 @@ public class PlanProposal {
 
     private Instant decidedAt;
 
+    // The fingerprint of the data of the plan and its days (D125); empty for the proposals saved before V2
+    @Column(updatable = false)
+    private String inputsHash;
+
+    @Column(updatable = false)
+    private LocalDate firstDay;
+
+    @Column(updatable = false)
+    private LocalDate lastDay;
+
     protected PlanProposal() {
         // for JPA
     }
 
-    public static PlanProposal pending(Long userId, String summary, Instant now) {
+    /** A new proposal for the days from firstDay to lastDay, made from the data with that fingerprint (D125). */
+    public static PlanProposal pending(Long userId, String summary, Instant now, LocalDate firstDay,
+            LocalDate lastDay, String inputsHash) {
         PlanProposal proposal = new PlanProposal();
         proposal.userId = userId;
         proposal.status = ProposalStatus.PENDING;
         proposal.summary = summary;
         proposal.createdAt = now;
+        proposal.firstDay = firstDay;
+        proposal.lastDay = lastDay;
+        proposal.inputsHash = inputsHash;
         return proposal;
     }
 
@@ -86,5 +102,17 @@ public class PlanProposal {
 
     public Instant getDecidedAt() {
         return decidedAt;
+    }
+
+    public String getInputsHash() {
+        return inputsHash;
+    }
+
+    public LocalDate getFirstDay() {
+        return firstDay;
+    }
+
+    public LocalDate getLastDay() {
+        return lastDay;
     }
 }

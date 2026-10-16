@@ -60,9 +60,24 @@ export interface CalendarTask {
   completedAt: string | null
 }
 
+export type ProposalStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'REPLACED'
+
+/** A plan of the planner that waits for the user (D22, D124); a rejected or replaced one has no tasks. */
+export interface Proposal {
+  id: number
+  status: ProposalStatus
+  summary: string | null
+  createdAt: string
+  tasks: CalendarTask[]
+}
+
 export interface CalendarData {
   events: GameEvent[]
+  // CONFIRMED and DONE: the tasks of the pending proposal come apart, all of them (D124)
   tasks: CalendarTask[]
+  pendingProposal: Proposal | null
+  // Roster, goals or events of the last plan changed after it was made (D23, D125)
+  planOutdated: boolean
 }
 
 /** The days shown by the calendar, both included, as "2026-10-12". */

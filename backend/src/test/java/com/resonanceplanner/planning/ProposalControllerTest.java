@@ -23,6 +23,8 @@ import com.resonanceplanner.event.GameEventRepository;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
 import com.resonanceplanner.user.UserRepository;
+import com.jayway.jsonpath.JsonPath;
+import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -68,6 +70,9 @@ class ProposalControllerTest {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @MockitoBean
     private Today today;
@@ -281,6 +286,129 @@ class ProposalControllerTest {
             assertThat(decidedAt(id)).isNotNull();
             assertThat(proposedTasks(id)).isZero();
             mockMvc.perform(as(rover, get(URL + "/pending"))).andExpect(jsonPath("$.data").value(nullValue()));
+        }
+    }
+
+    @Nested
+    class PlanOutdated {
+
+        @Test
+        void isFalseWithoutAPlanAndRightAfterOne() throws Exception {
+            addJinhsi(rover);
+            assertThat(planOutdated()).isFalse();
+
+            long id = createBasic(rover);
+            assertThat(planOutdated()).isFalse();
+
+            mockMvc.perform(as(rover, post(URL + "/" + id + "/confirm"))).andExpect(status().isOk());
+            assertThat(planOutdated()).isFalse();
+        }
+
+        @Test
+        void becomesTrueWhenAGoalChangesAndFalseAgainWhenItComesBack() throws Exception {
+            addJinhsi(rover);
+            long id = createBasic(rover);
+            mockMvc.perform(as(rover, post(URL + "/" + id + "/confirm"))).andExpect(status().isOk());
+
+            setTargetRank(1);
+            assertThat(planOutdated()).isTrue();
+
+            setTargetRank(2);
+            assertThat(planOutdated()).isFalse();
+        }
+
+        @Test
+        void becomesTrueWhenACharacterJoinsTheRoster() throws Exception {
+            addJinhsi(rover);
+            createBasic(rover);
+
+            jdbc.update("""
+                    insert into owned_character (user_id, character_id, current_level, current_rank, target_level,
+                        target_rank)
+                    values (?, 'yinlin', 1, 0, 20, 0)""", rover.getId());
+            entityManager.clear();
+
+            assertThat(planOutdated()).isTrue();
+        }
+
+        @Test
+        void looksOnlyAtTheEventsOfTheDaysOfThePlan() throws Exception {
+            addJinhsi(rover);
+            createBasic(rover);
+
+            // The basic plan covers Monday to Sunday: an event of the week after does not change it
+            festival(MONDAY.plusDays(8));
+            assertThat(planOutdated()).isFalse();
+
+            festival(MONDAY.plusDays(3));
+            assertThat(planOutdated()).isTrue();
+        }
+
+        @Test
+        void isFalseForAPlanSavedBeforeTheFingerprint() throws Exception {
+            addJinhsi(rover);
+            Long id = jdbc.queryForObject(
+                    "insert into plan_proposal (user_id, status, summary) values (?, 'CONFIRMED', 'Vecchio') returning id",
+                    Long.class, rover.getId());
+
+            assertThat(id).isPositive();
+            assertThat(planOutdated()).isFalse();
+        }
+
+        @Test
+        void comesBackAfterANewProposalIsRejected() throws Exception {
+            addJinhsi(rover);
+            long id = createBasic(rover);
+            mockMvc.perform(as(rover, post(URL + "/" + id + "/confirm"))).andExpect(status().isOk());
+            setTargetRank(1);
+            long fresh = createBasic(rover);
+            assertThat(planOutdated()).isFalse();
+
+            // The rejected proposal is not a plan: the confirmed one, made before the change, is the last plan again
+            mockMvc.perform(as(rover, post(URL + "/" + fresh + "/reject"))).andExpect(status().isOk());
+
+            assertThat(planOutdated()).isTrue();
+        }
+
+        @Test
+        void isFalseForAPlanTooLongToReadWithTheEvents() throws Exception {
+            addJinhsi(rover);
+            jdbc.update("insert into plan_proposal (user_id, status, summary, inputs_hash, first_day, last_day)"
+                    + " values (?, 'CONFIRMED', 'Lungo', ?, ?, ?)",
+                    rover.getId(), "0".repeat(64), MONDAY, MONDAY.plusDays(70));
+
+            assertThat(planOutdated()).isFalse();
+        }
+
+        @Test
+        void doesNotLookAtThePlansOfAnotherUser() throws Exception {
+            addJinhsi(other);
+            createBasic(other);
+            jdbc.update("update owned_character set target_rank = 1 where user_id = ?", other.getId());
+            entityManager.clear();
+
+            assertThat(planOutdated()).isFalse();
+        }
+
+        private boolean planOutdated() throws Exception {
+            String value = mockMvc.perform(as(rover, calendar(MONDAY.toString(), MONDAY.toString())))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.planOutdated").isBoolean())
+                    .andReturn().getResponse().getContentAsString();
+            return JsonPath.<Boolean>read(value, "$.data.planOutdated");
+        }
+
+        private void setTargetRank(int rank) {
+            jdbc.update("update owned_character set target_rank = ? where user_id = ?", rank, rover.getId());
+            // The roster was read by the earlier requests of this test transaction: read it again from the database
+            entityManager.clear();
+        }
+
+        private void festival(LocalDate day) {
+            GameEvent festival = GameEvent.custom("Festa " + day, EventType.POINTS_SHOP, "Solo per i test.");
+            festival.scheduleFixed(day, day);
+            festival.addActivity("Obiettivi", 10, ActivityFrequency.DAILY, null);
+            gameEventRepository.saveAndFlush(festival);
         }
     }
 

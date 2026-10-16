@@ -104,11 +104,11 @@ backend/
     farming/                  NeedCalculator e FarmingCalculator (calcolo puro su FarmingCatalog), service e API (D112)
     event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
     planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118), proposte (ProposalService, D124)
-    planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123)
+    planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123), PlanInputs (impronta, D125)
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
-    db/migration/V1__schema.sql
+    db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125)
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
 frontend/
@@ -119,7 +119,7 @@ frontend/
   src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
   src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
-  src/features/calendar/      pagina calendario P4 (T26): CalendarView (unico componente con FullCalendar), calendarSlice, finestre (D119, D120)
+  src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125)
   src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
   src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121)
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)

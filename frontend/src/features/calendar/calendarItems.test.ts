@@ -112,6 +112,19 @@ describe('toCalendarItems', () => {
     })
   })
 
+  it('writes and dashes a task of the pending proposal (D68, D70)', () => {
+    const [proposed] = toCalendarItems([], [{ ...task, id: 42, origin: 'AGENT', status: 'PROPOSED', title: 'Boss' }])
+
+    expect(proposed).toMatchObject({
+      id: 'task-42',
+      title: 'Proposta: Boss',
+      className: 'calendar-task calendar-task--proposed',
+      color: 'var(--rp-task-proposed)',
+      contrastColor: 'var(--rp-on-task-proposed)',
+      extendedProps: { kind: 'task', taskId: 42, rank: 1 },
+    })
+  })
+
   it('gives every type of event its own class', () => {
     const items = toCalendarItems(
       [bountiful, { ...bountiful, id: 2, type: 'COMBAT_STAGES' }],

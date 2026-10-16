@@ -5,15 +5,27 @@ import { signedIn } from '../../test/utils'
 import { sessionEnded } from '../auth/authSlice'
 import { loadRoster } from '../roster/rosterSlice'
 import { getRoster } from '../roster/rosterApi'
-import { completeTask, createTask, deleteTask, getCalendar, updateTask } from './calendarApi'
+import {
+  completeTask,
+  confirmProposal,
+  createBasicPlan,
+  createTask,
+  deleteTask,
+  getCalendar,
+  rejectProposal,
+  updateTask,
+} from './calendarApi'
 import {
   completeCalendarTask,
+  confirmPendingProposal,
   createCalendarTask,
   deleteCalendarTask,
+  generateBasicPlan,
   loadCalendar,
+  rejectPendingProposal,
   updateCalendarTask,
 } from './calendarSlice'
-import type { CalendarData, CalendarTask } from './types'
+import type { CalendarData, CalendarTask, Proposal } from './types'
 
 vi.mock('./calendarApi', () => ({
   getCalendar: vi.fn(),
@@ -21,6 +33,9 @@ vi.mock('./calendarApi', () => ({
   updateTask: vi.fn(),
   deleteTask: vi.fn(),
   completeTask: vi.fn(),
+  createBasicPlan: vi.fn(),
+  confirmProposal: vi.fn(),
+  rejectProposal: vi.fn(),
 }))
 vi.mock('../roster/rosterApi', () => ({
   getRoster: vi.fn(),
@@ -51,7 +66,15 @@ const task: CalendarTask = {
   completedAt: null,
 }
 
-const week: CalendarData = { events: [], tasks: [task] }
+const week: CalendarData = { events: [], tasks: [task], pendingProposal: null, planOutdated: false }
+
+const proposal: Proposal = {
+  id: 7,
+  status: 'PENDING',
+  summary: 'Piano base di 7 giorni, 1 attività.',
+  createdAt: '2026-10-16T09:00:00Z',
+  tasks: [{ ...task, id: 50, origin: 'AGENT', status: 'PROPOSED' }],
+}
 
 function newStore() {
   return setupStore(signedIn())
@@ -84,6 +107,16 @@ describe('calendarSlice', () => {
       expect(state.tasks).toEqual([task])
     })
 
+    it('keeps the pending proposal and whether the plan is out of date (D68, D125)', async () => {
+      vi.mocked(getCalendar).mockResolvedValue({ ...week, pendingProposal: proposal, planOutdated: true })
+      const store = newStore()
+
+      await store.dispatch(loadCalendar(WEEK))
+
+      expect(store.getState().calendar.pendingProposal).toEqual(proposal)
+      expect(store.getState().calendar.planOutdated).toBe(true)
+    })
+
     it('keeps the old data on the page while another range arrives', async () => {
       const store = newStore()
       await store.dispatch(loadCalendar(WEEK))
@@ -94,7 +127,7 @@ describe('calendarSlice', () => {
 
       expect(store.getState().calendar.refreshing).toBe(true)
       expect(store.getState().calendar.tasks).toEqual([task])
-      resolveNext({ events: [], tasks: [] })
+      resolveNext({ ...week, tasks: [] })
       await next
       expect(store.getState().calendar.refreshing).toBe(false)
       expect(store.getState().calendar.tasks).toEqual([])
@@ -105,7 +138,7 @@ describe('calendarSlice', () => {
       let resolveOld: (data: CalendarData) => void = () => undefined
       vi.mocked(getCalendar)
         .mockReturnValueOnce(new Promise((resolve) => (resolveOld = resolve)))
-        .mockResolvedValueOnce({ events: [], tasks: [] })
+        .mockResolvedValueOnce({ ...week, tasks: [] })
 
       const old = store.dispatch(loadCalendar(WEEK))
       await store.dispatch(loadCalendar(NEXT_WEEK))
@@ -226,6 +259,48 @@ describe('calendarSlice', () => {
       resolveCreate(task)
       await pending
 
+      expect(getCalendar).toHaveBeenCalledTimes(1)
+    })
+
+    it('make the basic plan, confirm and reject a proposal, reloading the range each time (D64, D124)', async () => {
+      vi.mocked(createBasicPlan).mockResolvedValue(proposal)
+      vi.mocked(confirmProposal).mockResolvedValue({ ...proposal, status: 'CONFIRMED' })
+      vi.mocked(rejectProposal).mockResolvedValue({ ...proposal, status: 'REJECTED', tasks: [] })
+      const store = newStore()
+      await store.dispatch(loadCalendar(WEEK))
+
+      const created = await store.dispatch(generateBasicPlan())
+      const confirmed = await store.dispatch(confirmPendingProposal(7))
+      const rejected = await store.dispatch(rejectPendingProposal(8))
+
+      expect(created.payload).toEqual(proposal)
+      expect(confirmed.payload).toMatchObject({ status: 'CONFIRMED' })
+      expect(rejected.payload).toMatchObject({ status: 'REJECTED' })
+      expect(createBasicPlan).toHaveBeenCalledWith(TOKEN)
+      expect(confirmProposal).toHaveBeenCalledWith(TOKEN, 7)
+      expect(rejectProposal).toHaveBeenCalledWith(TOKEN, 8)
+      expect(getCalendar).toHaveBeenCalledTimes(4)
+    })
+
+    it('ask again for the range when a proposal cannot be decided anymore', async () => {
+      vi.mocked(confirmProposal).mockRejectedValue(new ApiError('CONFLICT', 'Questa proposta non è più in attesa.', 409))
+      const store = newStore()
+      await store.dispatch(loadCalendar(WEEK))
+
+      const result = await store.dispatch(confirmPendingProposal(7))
+
+      expect(result.payload).toMatchObject({ code: 'CONFLICT' })
+      expect(getCalendar).toHaveBeenCalledTimes(2)
+    })
+
+    it('return the message of a basic plan with nothing to do', async () => {
+      vi.mocked(createBasicPlan).mockRejectedValue(new ApiError('CONFLICT', 'Il roster è vuoto.', 409))
+      const store = newStore()
+      await store.dispatch(loadCalendar(WEEK))
+
+      const result = await store.dispatch(generateBasicPlan())
+
+      expect(result.payload).toMatchObject({ code: 'CONFLICT', message: 'Il roster è vuoto.' })
       expect(getCalendar).toHaveBeenCalledTimes(1)
     })
 

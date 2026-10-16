@@ -1180,3 +1180,17 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   9. **un solo punto di salvataggio:** `ProposalService` salva una bozza del pianificatore (`ScheduleDraft`) con il suo testo. Lo usano il piano base e, in T33, lo strumento `create_plan_proposal` dell'agente (D56).
 - **Perché:** una barra "Conferma / Scarta" senza attività confonde; una proposta vecchia conterrebbe giorni passati e risorse che non ci sono più. Cancellare le attività mai entrate nel calendario evita che ogni clic su "Genera piano base" lasci decine di righe per sempre, mentre la riga della proposta conserva lo storico.
 - **Scartate:** proposta vuota con il solo avviso; confermare una proposta di un altro giorno togliendo i giorni passati (più regole da spiegare per un caso raro); tenere le attività scartate e sostituite con il loro stato (righe che crescono a ogni prova); mandare nel calendario solo le attività della proposta dentro l'intervallo (la barra ha bisogno del riassunto di tutta la proposta).
+
+## D125 · Avviso di cambiamento con l'impronta dei dati
+**Stato:** Confermata · 16/10/2026 · nata da T31 · precisa D23
+
+- **Cosa:** il calendario avvisa quando roster, obiettivi o eventi sono cambiati dopo l'ultimo piano (D23).
+- **Come:**
+  1. quando si salva una proposta, il backend calcola un'**impronta** (hash SHA-256) dei dati da cui è nata: il roster con livelli, gradi e obiettivi, e gli eventi nei giorni del piano con date, giorni attivi, attività ed effetti. La migrazione `V2` aggiunge a `plan_proposal` l'impronta (`inputs_hash`) e i giorni del piano (`first_day`, `last_day`), che servono a ricalcolarla sugli stessi giorni;
+  2. `GET /api/me/calendar` ricalcola l'impronta dell'ultimo piano (la proposta più recente fra quella in attesa e quelle confermate) e restituisce `planOutdated: true` se è diversa;
+  3. il calendario mostra sopra le attività l'avviso "Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano", con il pulsante "Genera piano base" (con la chat diventerà "chiedi all'agente");
+  4. gli eventi si confrontano solo nei giorni del piano: se no, ogni giorno nuovo farebbe entrare nella finestra un'altra edizione e l'avviso comparirebbe sempre;
+  5. non contano l'inventario e le attività fatte (cambiano a ogni "Segna come fatta" e l'avviso non sparirebbe mai), né il tempo di gioco, che D23 non nomina;
+  6. i piani salvati prima della migrazione non hanno l'impronta e non mostrano l'avviso; se una modifica viene annullata, l'impronta torna uguale e l'avviso sparisce.
+- **Perché:** confronta i dati veri e non le date di modifica, non tocca i service del roster e dell'admin, e si spiega con una frase: "il piano ricorda da quali dati è nato".
+- **Scartate:** una data di "ultima modifica" sull'utente e sugli eventi (va aggiornata in ogni service che scrive, ed è facile dimenticarne uno); un avviso tenuto solo nel browser (si perde ricaricando la pagina).

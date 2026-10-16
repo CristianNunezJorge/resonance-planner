@@ -53,6 +53,18 @@ export function activeSpans(activeDates: string[]): Span[] {
   return spans
 }
 
+// How a task looks for each status it can have in the calendar: a proposed one is dashed (D68, styles/_calendar.scss)
+const TASK_LOOK = {
+  CONFIRMED: { prefix: '', suffix: 'confirmed', color: 'var(--rp-task)', contrastColor: 'var(--rp-on-event)' },
+  DONE: { prefix: '✓ ', suffix: 'done', color: 'var(--rp-task-done)', contrastColor: 'var(--rp-on-task-done)' },
+  PROPOSED: {
+    prefix: 'Proposta: ',
+    suffix: 'proposed',
+    color: 'var(--rp-task-proposed)',
+    contrastColor: 'var(--rp-on-task-proposed)',
+  },
+} as const
+
 /** An edition is an event and its first day: the same event can come back in the same range (D113). */
 export function eventKey(event: Pick<GameEvent, 'id' | 'startDate'>): string {
   return `${event.id}:${event.startDate}`
@@ -75,17 +87,17 @@ export function toCalendarItems(events: GameEvent[], tasks: CalendarTask[]): Eve
     })),
   )
   const taskItems = tasks.map((task) => {
-    const isDone = task.status === 'DONE'
+    const look = TASK_LOOK[task.status === 'DONE' || task.status === 'PROPOSED' ? task.status : 'CONFIRMED']
     return {
       id: `task-${task.id}`,
       // The status is written, not only coloured (D70)
-      title: isDone ? `✓ ${task.title}` : task.title,
+      title: `${look.prefix}${task.title}`,
       start: task.taskDate,
       allDay: true,
       interactive: true,
-      className: `calendar-task calendar-task--${isDone ? 'done' : 'confirmed'}`,
-      color: isDone ? 'var(--rp-task-done)' : 'var(--rp-task)',
-      contrastColor: isDone ? 'var(--rp-on-task-done)' : 'var(--rp-on-event)',
+      className: `calendar-task calendar-task--${look.suffix}`,
+      color: look.color,
+      contrastColor: look.contrastColor,
       extendedProps: { kind: 'task', taskId: task.id, rank: 1 } satisfies ItemProps,
     }
   })
