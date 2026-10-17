@@ -45,7 +45,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** nessuna, è obbligatorio.
 
 ## D6 · API Claude per l'agente
-**Stato:** Confermata · modello Claude Haiku 4.5 scelto il 01/10/2026 (D59)
+**Stato:** Confermata · modello Claude Haiku 4.5 scelto il 01/10/2026 (D59) · sostituita da D126 (17/10/2026): modello gratuito con OpenRouter
 
 - **Cosa:** l'agente usa l'API Claude con tool use, tramite l'SDK Java ufficiale di Anthropic.
 - **Come:** la chiave API sta solo sul server come variabile d'ambiente. Tetto di spesa mensile nella Console Anthropic, agente riservato agli utenti loggati, limite di richieste al giorno.
@@ -434,7 +434,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** Swagger solo in locale (lo staff non lo vedrebbe sulla versione online).
 
 ## D54 · Ciclo dell'agente scritto da noi, con l'SDK Java ufficiale
-**Stato:** Confermata · 01/10/2026
+**Stato:** Confermata · 01/10/2026 · il ciclo resta nostro, l'SDK di Anthropic è sostituito da `RestClient` e OpenRouter (D126, 17/10/2026)
 
 - **Cosa:** il ciclo "Claude chiede uno strumento → il backend lo esegue → restituisce il risultato" è codice nostro, con l'SDK Java ufficiale di Anthropic.
 - **Come:** un `AgentService` ripete la chiamata finché Claude chiede strumenti, per un massimo di 6 giri. Gli strumenti richiesti nello stesso turno si eseguono tutti e i risultati tornano in un unico messaggio. Strumenti e istruzioni di sistema sono all'inizio della richiesta e marcati per la cache dei prompt; si verifica che la cache funzioni guardando i token letti dalla cache nelle risposte.
@@ -475,7 +475,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** inviare tutta la chat (costi che crescono senza limite); mettere i dati dell'utente nelle istruzioni (diventerebbero vecchi e romperebbero la cache).
 
 ## D59 · Modello configurabile
-**Stato:** Confermata · 01/10/2026 · Claude Haiku 4.5
+**Stato:** Confermata · 01/10/2026 · Claude Haiku 4.5 · modello cambiato da D126 (17/10/2026): `nvidia/nemotron-3-super-120b-a12b:free`
 
 - **Cosa:** il modello si cambia in configurazione. Le opzioni sono Claude Haiku 4.5, Claude Sonnet 5.5 e Claude Opus 5.5; costi stimati in `06-agente.md`.
 - **Come:** proprietà di configurazione con il nome del modello e, per Sonnet 5.5 e Opus 5.5, il livello di ragionamento (effort).
@@ -491,7 +491,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** affidare la sicurezza solo alle istruzioni del prompt.
 
 ## D61 · Errori e limiti di una richiesta
-**Stato:** Confermata · 01/10/2026
+**Stato:** Confermata · 01/10/2026 · gli errori di OpenRouter, compreso il 429 del piano gratuito, sono in D126
 
 - **Cosa:** massimo 6 giri, messaggi utente fino a 1.000 caratteri, 60 secondi di attesa per ogni chiamata all'API, risposta sincrona (D52).
 - **Come:** gli errori di uno strumento tornano al modello come risultato di errore, così può correggersi. Gli errori dell'API diventano 502 `AGENT_UNAVAILABLE`. Se una richiesta fallisce, i messaggi non si salvano e non contano nel limite giornaliero.
@@ -1194,3 +1194,22 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   6. i piani salvati prima della migrazione non hanno l'impronta e non mostrano l'avviso; se una modifica viene annullata, l'impronta torna uguale e l'avviso sparisce.
 - **Perché:** confronta i dati veri e non le date di modifica, non tocca i service del roster e dell'admin, e si spiega con una frase: "il piano ricorda da quali dati è nato".
 - **Scartate:** una data di "ultima modifica" sull'utente e sugli eventi (va aggiornata in ogni service che scrive, ed è facile dimenticarne uno); un avviso tenuto solo nel browser (si perde ricaricando la pagina).
+
+## D126 · Agente gratuito con OpenRouter
+**Stato:** Confermata · 17/10/2026 · scelta dell'utente, con Nemotron come modello predefinito · modifica D6, D54, D59 e D61
+
+- **Cosa:** l'agente usa un modello **gratuito** tramite OpenRouter, al posto dell'API Claude a pagamento. OpenRouter è un servizio che dà accesso a molti modelli di fornitori diversi con un'unica API e un'unica chiave; alcuni modelli sono gratuiti. È **fuori dal programma del corso**, che ha studiato l'API Claude (settimana 19, D6).
+- **Come:**
+  1. **formato:** l'API di OpenRouter compatibile con OpenAI (Chat Completions, `POST https://openrouter.ai/api/v1/chat/completions`), chiamata con `RestClient` di Spring, che è già nel progetto: nessuna libreria nuova. Il client sta dietro l'interfaccia `ModelClient`, con tipi nostri per messaggi, strumenti e chiamate agli strumenti: il ciclo (T34) e il finto client dei test (D63) non dipendono dal fornitore;
+  2. **modello:** `nvidia/nemotron-3-super-120b-a12b:free`, letto da `OPENROUTER_MODEL`; si cambia con una riga, come diceva D59. Nella chiamata di prova del 17/10 ha chiesto lo strumento giusto e ha risposto in italiano. `google/gemma-4-31b-it:free`, la prima scelta, riceveva sempre 429 dal suo fornitore gratuito (Google AI Studio), anche con la quota giornaliera intatta: resta l'alternativa;
+  3. **solo gratuito:** il backend non parte se il nome del modello non finisce con `:free`. In più la chiave ha un limite di credito di 5 $, e l'account non ha credito né un metodo di pagamento;
+  4. **variabili:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` al posto di `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL`, obbligatorie in `AppProperties`;
+  5. **limiti del piano gratuito:** 20 richieste al minuto e 50 al giorno per tutto l'account (1.000 al giorno se un giorno si comprano almeno 10 $ di credito). Un messaggio all'agente fa da 3 a 6 chiamate, quindi bastano per circa 10 messaggi al giorno in tutta l'app. Quando il limite finisce OpenRouter risponde 429, che diventa 502 `AGENT_UNAVAILABLE` con un messaggio che lo dice; il piano base resta disponibile (D64);
+  6. **ogni risposta del modello** ha al massimo 2.048 token: una risposta della chat è breve, e così il testo resta sotto i limiti di lettura di Jackson (D110). Il client legge al massimo 1 MB di risposta, così una risposta enorme non può riempire i 512 MB del server gratuito;
+  7. **cache dei prompt:** le parti fisse restano in testa (D58), ma con i modelli gratuiti la cache non è garantita: i token letti dalla cache si registrano solo se il fornitore li riporta;
+  8. **dati:** nelle impostazioni di OpenRouter sono permessi i fornitori gratuiti che possono addestrarsi sui dati, non quelli che pubblicano i prompt. Al modello vanno solo dati di gioco e i messaggi della chat, mai email o password (D60); la chat (T36) dirà all'utente che i messaggi vanno a un modello gratuito di terzi;
+  9. **tempo:** ogni chiamata gira in un thread virtuale e ha 60 secondi in tutto, risposta compresa (D61); allo scadere viene interrotta. Il timeout del client HTTP da solo non basta: smette di aspettare gli header, ma non un server che manda gli header e poi tace (lo mostra un test);
+  10. **errori:** chiave rifiutata, modello non trovato, tempo scaduto, risposta non valida, troppo grande o errore del fornitore diventano 502 `AGENT_UNAVAILABLE`. Nei log restano lo stato HTTP e il codice d'errore di OpenRouter; il messaggio d'errore solo a livello DEBUG, spento di norma, perché alcuni fornitori vi ripetono parte del prompt (D60). Una chiave con spazi o a capo ferma l'avvio, perché farebbe fallire ogni chiamata.
+- **Perché:** l'agente deve costare zero. Il ciclo, gli strumenti e il pianificatore restano nostri e non cambiano: cambia solo chi risponde. Siccome i calcoli li fa Java (D3), al modello resta il compito di capire la richiesta, scegliere i parametri e spiegare, che un modello gratuito di media grandezza sa fare; lo si verifica con gli scenari di `06-agente.md`.
+- **Scartate:** API Claude con Haiku 4.5 (D6, D59: a pagamento, circa 9 $ per lo sviluppo); SDK di Anthropic puntato su OpenRouter (OpenRouter garantisce quel formato solo con i modelli Claude); SDK di OpenAI (una libreria in più, fuori programma); Spring AI (fuori programma, e nasconde il ciclo che D54 vuole scritto da noi); `openrouter/free`, che sceglie ogni volta un modello gratuito diverso (prove non ripetibili); modello locale con Ollama (non funziona online, D6).
+- **Limiti noti:** l'elenco dei modelli gratuiti cambia nel tempo, quindi il modello scelto può sparire (si cambia `OPENROUTER_MODEL`); i limiti giornalieri sono condivisi da tutti gli utenti della demo, quindi un solo utente può esaurirli (il limite per utente di D48 si decide in T35); un fornitore gratuito può rispondere 429 anche quando la quota è intatta (successo con Gemma il 17/10); un modello gratuito può essere meno preciso di Claude nello scegliere gli strumenti.

@@ -94,7 +94,7 @@ Il lavoro è diviso in una **fase 0**, da fare mentre si aspetta l'approvazione 
 ### Giorno 8 · Agente: backend
 | ID | Attività | Area | Rif. | Fatta quando |
 |---|---|---|---|---|
-| T32 | Client dell'API Claude dietro un'interfaccia, configurazione di chiave e modello | IA | D54, D59 | Una chiamata di prova risponde con Claude Haiku 4.5 |
+| T32 | Client di OpenRouter dietro un'interfaccia, configurazione di chiave e modello gratuito | IA | D54, D59, D126 | Una chiamata di prova risponde con il modello gratuito |
 | T33 | I cinque strumenti, limitati all'utente del token, con validazione dei parametri | IA | D55, D56 | Test di ogni strumento |
 | T34 | Ciclo dell'agente: massimo 6 giri, errori, passaggi, cache dei prompt; test con finto client | IA | D54, D61, D62, D63 | Test del ciclo senza rete |
 

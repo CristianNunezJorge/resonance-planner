@@ -175,8 +175,8 @@ I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
 |---|---|
 | `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | Connessione al database |
 | `JWT_SECRET` | Firma dei token, almeno 256 bit casuali |
-| `ANTHROPIC_API_KEY` | Chiave dell'API Claude (D6) |
-| `ANTHROPIC_MODEL` | `claude-haiku-4-5` (D59) |
+| `OPENROUTER_API_KEY` | Chiave dell'API di OpenRouter (D126) |
+| `OPENROUTER_MODEL` | Modello gratuito, per esempio `nvidia/nemotron-3-super-120b-a12b:free`: deve finire con `:free` (D59, D126) |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Account admin creato all'avvio (D19) |
 | `CORS_ALLOWED_ORIGINS` | Dominio del frontend (D48) |
 | `VITE_API_BASE_URL` | Indirizzo del backend, per il frontend |

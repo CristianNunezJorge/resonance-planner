@@ -13,6 +13,10 @@ app:
     password: ${ADMIN_PASSWORD:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+  # The agent runs on a free model of OpenRouter (D126)
+  agent:
+    api-key: ${OPENROUTER_API_KEY:}
+    model: ${OPENROUTER_MODEL:}
   # "Today" for the whole app: event editions, calendar days, daily limits (D41). Moments stay in UTC
   time-zone: Europe/Rome
 
