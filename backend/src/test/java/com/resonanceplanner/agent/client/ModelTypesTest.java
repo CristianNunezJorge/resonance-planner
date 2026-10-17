@@ -77,6 +77,15 @@ class ModelTypesTest {
     }
 
     @Test
+    void tokensOfManyCallsAddUp() {
+        assertThat(new TokenUsage(100, 20, 80).plus(new TokenUsage(50, 5, 0))).isEqualTo(new TokenUsage(150, 25, 80));
+        assertThat(TokenUsage.NONE.plus(TokenUsage.NONE)).isEqualTo(TokenUsage.NONE);
+        // Numbers of the provider near the largest int stop there instead of failing the turn
+        assertThat(new TokenUsage(Integer.MAX_VALUE, 1, 0).plus(new TokenUsage(5, 1, 0)))
+                .isEqualTo(new TokenUsage(Integer.MAX_VALUE, 2, 0));
+    }
+
+    @Test
     void aReplyKeepsItsOwnCopyOfTheToolCalls() {
         List<ToolCall> calls = new ArrayList<>(List.of(new ToolCall("call_1", "get_calendar", "{}")));
         ModelReply reply = new ModelReply("", calls, FinishReason.TOOL_CALLS, TokenUsage.NONE);

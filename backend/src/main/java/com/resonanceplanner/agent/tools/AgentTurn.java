@@ -18,6 +18,7 @@ public final class AgentTurn {
     private final Long userId;
     private PlannedDraft lastPlan;
     private ProposalResponse proposal;
+    private boolean proposalIsLastPlan;
     private final Set<String> steps = new LinkedHashSet<>();
 
     public AgentTurn(Long userId) {
@@ -43,8 +44,17 @@ public final class AgentTurn {
         return List.copyOf(steps);
     }
 
+    /**
+     * False when, after saving the proposal, the model calculated another plan and did not save it: its answer may
+     * describe that plan, while the calendar shows the proposal (D128).
+     */
+    public boolean proposalIsLastPlan() {
+        return proposalIsLastPlan;
+    }
+
     void planned(ScheduleRequest request, ScheduleDraft draft) {
         lastPlan = new PlannedDraft(request, draft);
+        proposalIsLastPlan = false;
     }
 
     void forgetPlan() {
@@ -53,6 +63,7 @@ public final class AgentTurn {
 
     void proposalSaved(ProposalResponse saved) {
         proposal = Objects.requireNonNull(saved, "saved");
+        proposalIsLastPlan = true;
     }
 
     void stepDone(String step) {
