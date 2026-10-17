@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (17/10/2026)
+## Stato attuale (18/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D128.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D130.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -13,7 +13,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 6 (T25-T28) completato · v1 rilasciata:** attività manuali, completamento con l'inventario e calendario in backend (D117, D118), pagina calendario con FullCalendar 7 e riquadro Waveplate (D119, D120), profilo e gestione eventi admin (D121, D122), README e checklist di rilascio (`docs/rilascio-v1.md`, 9 punti ✓ online), tag `v1.0.0`. Tutto online; su Trello T01-T28 sono in "Fatto".
 - **Giorno 7 (T29-T31) completato:** pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Tutto online.
 - **Giorno 8 (T32-T34) completato:** per scelta dell'utente l'agente usa un **modello gratuito su OpenRouter** (`nvidia/nemotron-3-super-120b-a12b:free`) al posto dell'API Claude, ed è fuori dal programma del corso (D126); client OpenRouter con `RestClient` (T32), i cinque strumenti limitati all'utente del token (D127), ciclo dell'agente con al massimo 6 giri (D128). Tutto online, ma senza endpoint: la chat arriva con T35-T36.
-- **Prossimo passo:** giorno 9 (T35-T36: salvataggio dei messaggi, limiti e API della chat, poi la chat nel frontend). Leggere `HANDOFF.md`.
+- **Giorno 9 (T35-T36) completato:** API della chat con salvataggio dei messaggi e limiti (D129: 5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app, un turno alla volta, 20 proposte al giorno), migrazione `V3`; chat nel calendario, laterale da 992 px e a scomparsa sotto, con attesa, passaggi, limiti, "Spiegamelo" e "Chiedi all'agente" (D130). Prova vera riuscita. Tutto online.
+- **Prossimo passo:** giorno 10 (T37: istruzioni di sistema e dieci scenari reali; T38: rilascio v2 con checklist, README e tag `v2.0.0`). Leggere `HANDOFF.md`: i dieci scenari superano le richieste gratuite di un giorno.
 
 ## Da leggere per riprendere
 
@@ -78,7 +79,8 @@ Principi da non perdere:
 - I calcoli li fa Java; l'IA sceglie i parametri e spiega (D3).
 - Il modello non scrive mai le attività: la proposta è sempre l'ultima bozza del pianificatore (D56).
 - L'agente propone, l'utente conferma (D2). Esiste un "piano base" senza IA (D64).
-- L'agente deve restare **gratuito**: solo modelli OpenRouter con l'id che finisce in `:free`, controllato all'avvio (D126). Il piano gratuito dà 50 richieste al giorno per tutto l'account, e un messaggio ne usa fino a 6.
+- L'agente deve restare **gratuito**: solo modelli OpenRouter con l'id che finisce in `:free`, controllato all'avvio (D126). Il piano gratuito dà 50 richieste al giorno per tutto l'account, e un messaggio ne usa fino a 6: i limiti di D129 le contano nel database (`agent_model_calls`), giorno UTC.
+- I testi del modello si mostrano sempre come testo semplice, mai HTML (D60, D130).
 - Dati personali solo sotto `/api/me`; l'utente si ricava dal token (D44).
 - Eventi attivi giorno per giorno (D96), effetti con limite giornaliero (D94), eventi della demo ricorrenti (D29).
 - Calcolo dei materiali fino al livello 40, fase SOL3 4 (D27, D92).
@@ -110,15 +112,17 @@ backend/
     planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123), PlanInputs (impronta, D125)
     agent/client/             ModelClient e OpenRouterClient: Chat Completions con RestClient, 60 s per chiamata, solo modelli :free (D126)
     agent/tools/              AgentTools (i cinque strumenti), AgentToolDefinitions (schemi), AgentTurn (stato del turno), D127
-    agent/                    AgentLoop (ciclo, al massimo 6 giri), AgentPrompt (istruzioni di sistema), AgentReply, D128
+    agent/                    AgentLoop (ciclo, al massimo 6 giri, conta ogni chiamata), AgentPrompt (istruzioni di sistema), AgentReply, D128
+    agent/client/             anche ModelCallCounter e ModelCallDay: chiamate al modello per giorno UTC e utente (D129)
+    agent/chat/               AgentChatController (/api/me/agent/messages e /usage), AgentChatService (turno senza transazione), AgentMessageService, AgentQuota (limiti), AgentTurnGate (turni insieme), D129
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
-    db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125)
+    db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125), V3__agent_model_calls.sql (D129)
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
 frontend/
-  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76)
+  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
   src/features/catalog/       tipi, chiamate e catalogSlice (personaggi, regole e materiali caricati una volta), icons.ts
   src/features/landing/       pagina di presentazione P1 (T16): frase, pulsante, tre passi, personaggi
@@ -126,11 +130,12 @@ frontend/
   src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
   src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125)
+  src/features/chat/          chat con l'agente (T36, D130): chatSlice (bozza, invio, pagine), ChatPanel, ChatMessages, ChatComposer, ChatDrawer, format.ts (plainText, limiti, suggerimenti)
   src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
   src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121)
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
-  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), pagine 404 ed errore
-  src/styles/                 _theme.scss (tema scuro D65), _elements.scss, main.scss
+  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, pagine 404 ed errore
+  src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
 ```
@@ -166,5 +171,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10). La chiamata di prova vera è `OpenRouterClientLiveTest`, spenta di default: il comando è in `HANDOFF.md`.
 - **Norton su questo computer** ispeziona HTTPS e rifirma i certificati: Java non se ne fida (`PKIX path building failed`). Per chiamare OpenRouter da Java in locale si usa l'archivio di Windows: `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`). Su Render non serve.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
+- **Script e fine riga:** i file sono in CRLF e la shell dimezza le barre rovesciate negli script passati in linea. Per testo con barre rovesciate (regex, escape) usare lo strumento di modifica; in uno script Python che sostituisce testo, non convertire due volte gli a capo (il risultato sarebbe `CR CR LF` e Git vedrebbe il file come binario).
+- **Contatori dell'agente in locale:** `agent_model_calls` del database locale è diverso da quello di Render, ma la quota di OpenRouter è la stessa. Per provare un limite senza consumare richieste si scrive la riga a mano con `psql` dentro il container (`docker exec resonance-planner-db ...`).
 - Docker Desktop può restare bloccato in avvio (i comandi `docker` non rispondono): Restart dal menu della balena, poi se serve `wsl --shutdown` da PowerShell e riaprire Docker Desktop.
 - Trello: per spostare le card con `fetch` serve il cookie `dsc` della pagina nel corpo (form-encoded), altrimenti 403 "CSRF detected". Il testo digitato in una card aperta può diventare una scorciatoia da tastiera. Le descrizioni si scrivono via JavaScript con `execCommand`, dopo aver verificato il focus sull'editor. Le etichette si possono applicare con i tasti 1-0 sulla card, uno alla volta e con una pausa. Il riepilogo `/b/JCkNlahy.json` può essere in ritardo di qualche secondo.
