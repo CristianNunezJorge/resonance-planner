@@ -30,6 +30,24 @@ class TodayTest {
     }
 
     @Test
+    void startsAndEndsTheDayAtMidnightInItalyForTheDailyLimits() {
+        // 15 October in Rome (UTC+2) goes from 22:00 UTC of the 14th to 22:00 UTC of the 15th (D129)
+        Today today = new Today(new MutableClock(Instant.parse("2026-10-15T09:00:00Z")), ROME);
+
+        assertThat(today.startOfDay()).isEqualTo(Instant.parse("2026-10-14T22:00:00Z"));
+        assertThat(today.startOfNextDay()).isEqualTo(Instant.parse("2026-10-15T22:00:00Z"));
+    }
+
+    @Test
+    void givesTheNextMidnightAfterTheChangeOfTime() {
+        // 25 October 2026 has 25 hours in Rome: it starts in summer time and ends in winter time
+        Today today = new Today(new MutableClock(Instant.parse("2026-10-25T12:00:00Z")), ROME);
+
+        assertThat(today.startOfDay()).isEqualTo(Instant.parse("2026-10-24T22:00:00Z"));
+        assertThat(today.startOfNextDay()).isEqualTo(Instant.parse("2026-10-25T23:00:00Z"));
+    }
+
+    @Test
     void givesTheItalianDayOfAnyMoment() {
         Today today = new Today(new MutableClock(Instant.parse("2026-12-14T10:00:00Z")), ROME);
 

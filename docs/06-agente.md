@@ -153,7 +153,7 @@ Il modello si sceglie in configurazione, con una riga, e deve essere **gratuito*
 | `nvidia/nemotron-3-super-120b-a12b:free` | 0 $ | Scelto: nella chiamata di prova del 17/10 ha usato lo strumento e risposto in italiano |
 | `google/gemma-4-31b-it:free` | 0 $ | Alternativa: il 17/10 il suo fornitore gratuito rispondeva sempre 429 |
 
-Il piano gratuito di OpenRouter permette 20 richieste al minuto e 50 al giorno per tutto l'account: circa 10 messaggi all'agente al giorno in tutta l'app. Quando il limite finisce, l'agente risponde 502 e resta il piano base (D64).
+Il piano gratuito di OpenRouter permette 20 richieste al minuto e 50 al giorno per tutto l'account, azzerate a mezzanotte UTC: circa 10 messaggi all'agente al giorno in tutta l'app. Per questo il backend conta le chiamate al modello e si ferma a 40 al giorno (D129). Quando il limite finisce l'agente risponde 429, o 502 se è OpenRouter a rifiutare, e resta il piano base (D64).
 
 Con questo progetto i conti e il calendario li fa Java, quindi al modello resta un compito più semplice: capire la richiesta, scegliere i parametri e spiegare.
 
@@ -164,7 +164,9 @@ Con questo progetto i conti e il calendario li fa Java, quindi al modello resta 
 | Limite | Valore | Perché |
 |---|---|---|
 | Giri del ciclo | Massimo 6 | Il costo di un messaggio resta limitato |
-| Messaggi al giorno | 20 per utente (D48) | Protegge il limite gratuito di OpenRouter (D126) |
+| Messaggi al giorno | 5 per utente (D129) | Un solo utente non consuma la quota di tutti |
+| Chiamate al modello al giorno | 24 per utente, anche dei turni falliti, e 40 in tutta l'app; un turno parte solo se ne restano 6 (D129) | Protegge il limite gratuito di OpenRouter (D126): un solo account non lo esaurisce, nemmeno facendo fallire i turni |
+| Turni insieme | 1 per utente, 2 in tutta l'app (D129) | Due messaggi insieme non superano il limite e si resta sotto le 20 chiamate al minuto |
 | Storico inviato | Ultimi 10 messaggi | I token non crescono con la chat |
 | Lunghezza di un messaggio utente | 1.000 caratteri | Evita richieste enormi |
 | Tempo di risposta dell'API | 60 secondi per chiamata | Evita richieste appese |
@@ -177,7 +179,7 @@ Con questo progetto i conti e il calendario li fa Java, quindi al modello resta 
 | OpenRouter non risponde, dà errore o il limite gratuito è finito | Risposta 502 con un messaggio chiaro; il resto dell'app funziona e si può usare il piano base (D64) |
 | Superati i 6 giri | Il ciclo si ferma e l'utente riceve un messaggio che lo invita a riformulare |
 | Il modello rifiuta la richiesta o la risposta viene troncata | Messaggio generico all'utente, dettagli nei log |
-| Qualsiasi errore | Il messaggio non viene salvato e non conta nel limite giornaliero |
+| Qualsiasi errore | Il messaggio non viene salvato e non conta nei 5 messaggi dell'utente; le chiamate già fatte contano nelle sue 24 e nelle 40 dell'app (D129) |
 
 ## Trasparenza (D62)
 

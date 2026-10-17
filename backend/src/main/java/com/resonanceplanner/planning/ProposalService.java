@@ -1,9 +1,12 @@
 package com.resonanceplanner.planning;
 
 import com.resonanceplanner.catalog.FarmingSourceRepository;
+import com.resonanceplanner.common.config.AppProperties;
 import com.resonanceplanner.common.config.Today;
 import com.resonanceplanner.common.error.ConflictException;
+import com.resonanceplanner.common.error.ErrorCode;
 import com.resonanceplanner.common.error.NotFoundException;
+import com.resonanceplanner.common.error.TooManyRequestsException;
 import com.resonanceplanner.common.error.UnauthorizedException;
 import com.resonanceplanner.common.error.UniqueViolation;
 import com.resonanceplanner.event.EventService;
@@ -16,6 +19,7 @@ import com.resonanceplanner.planner.ScheduleRequest;
 import com.resonanceplanner.planning.dto.ProposalResponse;
 import com.resonanceplanner.user.UserRepository;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +42,7 @@ public class ProposalService {
     private static final String NOT_FOUND = "Proposta non trovata.";
     private static final List<ProposalStatus> LAST_PLAN = List.of(ProposalStatus.PENDING, ProposalStatus.CONFIRMED);
     private static final String NOTHING_TO_PLAN = "Il pianificatore non ha trovato niente da fare in questi giorni.";
+    static final String BASIC_PLAN_LIMIT = "Hai già generato %d piani oggi: riprova domani.";
     static final String DATA_CHANGED =
             "Roster, Waveplate o calendario sono cambiati dopo il calcolo del piano: richiama plan_schedule.";
 
@@ -49,10 +54,12 @@ public class ProposalService {
     private final PlanInputs planInputs;
     private final Today today;
     private final Clock clock;
+    private final int dailyBasicPlans;
 
     public ProposalService(PlanProposalRepository proposalRepository, PlannedTaskRepository taskRepository,
             FarmingSourceRepository farmingSourceRepository, UserRepository userRepository,
-            PlannerService plannerService, PlanInputs planInputs, Today today, Clock clock) {
+            PlannerService plannerService, PlanInputs planInputs, Today today, Clock clock,
+            AppProperties properties) {
         this.proposalRepository = proposalRepository;
         this.taskRepository = taskRepository;
         this.farmingSourceRepository = farmingSourceRepository;
@@ -61,11 +68,21 @@ public class ProposalService {
         this.planInputs = planInputs;
         this.today = today;
         this.clock = clock;
+        this.dailyBasicPlans = properties.agentLimits().dailyBasicPlans();
     }
 
-    /** The basic plan without AI (D64): the planner with its defaults and a standard text with its warnings. */
+    /**
+     * The basic plan without AI (D64): the planner with its defaults and a standard text with its warnings. 429 after
+     * 20 proposals of the day, of the basic plan and of the agent together (D129): with the user locked, two requests
+     * at the same moment count one after the other.
+     */
     public ProposalResponse createBasic(Long userId) {
         lockUser(userId);
+        long proposalsOfToday = proposalRepository.countByUserIdAndCreatedAtGreaterThanEqual(userId, today.startOfDay());
+        if (proposalsOfToday >= dailyBasicPlans) {
+            throw new TooManyRequestsException(ErrorCode.RATE_LIMITED, BASIC_PLAN_LIMIT.formatted(dailyBasicPlans),
+                    Duration.between(clock.instant(), today.startOfNextDay()));
+        }
         ScheduleDraft draft = plannerService.draft(userId, ScheduleRequest.defaults());
         return save(userId, draft, basicSummary(draft));
     }

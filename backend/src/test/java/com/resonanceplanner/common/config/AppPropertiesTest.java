@@ -69,6 +69,55 @@ class AppPropertiesTest {
                 });
     }
 
+    @Test
+    void usesTheLimitsOfD129WhenTheAgentLimitPropertiesAreNotSet() {
+        contextRunner.withPropertyValues(VALID_PROPERTIES).run(context -> {
+            assertThat(context).hasNotFailed();
+            AppProperties.AgentLimits limits = context.getBean(AppProperties.class).agentLimits();
+            assertThat(limits.dailyMessages()).isEqualTo(5);
+            assertThat(limits.dailyUserModelCalls()).isEqualTo(24);
+            assertThat(limits.dailyModelCalls()).isEqualTo(40);
+            assertThat(limits.concurrentTurns()).isEqualTo(2);
+            assertThat(limits.dailyBasicPlans()).isEqualTo(20);
+        });
+    }
+
+    @Test
+    void readsTheAgentLimitPropertiesWhenTheyAreSet() {
+        contextRunner.withPropertyValues(VALID_PROPERTIES)
+                .withPropertyValues("app.agent-limits.daily-messages=8", "app.agent-limits.daily-user-model-calls=60",
+                        "app.agent-limits.daily-model-calls=900",
+                        "app.agent-limits.concurrent-turns=3", "app.agent-limits.daily-basic-plans=50")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    AppProperties.AgentLimits limits = context.getBean(AppProperties.class).agentLimits();
+                    assertThat(limits.dailyMessages()).isEqualTo(8);
+                    assertThat(limits.dailyUserModelCalls()).isEqualTo(60);
+                    assertThat(limits.dailyModelCalls()).isEqualTo(900);
+                    assertThat(limits.concurrentTurns()).isEqualTo(3);
+                    assertThat(limits.dailyBasicPlans()).isEqualTo(50);
+                });
+    }
+
+    // Fewer than 6 calls a day would never let a whole turn start (D61, D129)
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "app.agent-limits.daily-messages=0",
+        "app.agent-limits.daily-messages=100001",
+        "app.agent-limits.daily-user-model-calls=5",
+        "app.agent-limits.daily-model-calls=5",
+        "app.agent-limits.daily-model-calls=100001",
+        "app.agent-limits.concurrent-turns=0",
+        "app.agent-limits.concurrent-turns=101",
+        "app.agent-limits.daily-basic-plans=-1"
+    })
+    void stopsWhenAnAgentLimitIsOutOfTheAllowedRange(String invalidProperty) {
+        contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(invalidProperty).run(context -> {
+            assertThat(context).hasFailed();
+            assertThat(context.getStartupFailure()).rootCause().hasMessageContaining(invalidProperty.split("=")[0]);
+        });
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {
         "app.rate-limit.auth-attempts=0",

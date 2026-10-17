@@ -5,6 +5,7 @@ import static com.resonanceplanner.agent.FakeModelClient.text;
 import static com.resonanceplanner.agent.FakeModelClient.tools;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.resonanceplanner.agent.client.ModelCallCounter;
 import com.resonanceplanner.agent.client.ModelMessage;
 import com.resonanceplanner.agent.tools.AgentTools;
 import com.resonanceplanner.user.Role;
@@ -32,6 +33,9 @@ class AgentLoopIntegrationTest {
     private AgentTools agentTools;
 
     @Autowired
+    private ModelCallCounter modelCalls;
+
+    @Autowired
     private Clock clock;
 
     @Autowired
@@ -54,7 +58,7 @@ class AgentLoopIntegrationTest {
                             "{\"summary\": \"Tre giorni di farming per portare Jinhsi avanti.\"}")),
                     text("Ho preparato un piano di tre giorni per Jinhsi: lo trovi nel calendario."));
 
-            AgentReply reply = new AgentLoop(model, agentTools, clock, appZone)
+            AgentReply reply = new AgentLoop(model, agentTools, modelCalls, clock, appZone)
                     .answer(user.getId(), List.of(), "Organizzami i prossimi tre giorni");
 
             assertThat(reply.text()).isEqualTo("Ho preparato un piano di tre giorni per Jinhsi: lo trovi nel calendario.");
@@ -86,7 +90,7 @@ class AgentLoopIntegrationTest {
                     tools(call("call_4", "create_plan_proposal", "{\"summary\": \"Una settimana per Jinhsi.\"}")),
                     text("Ecco il piano della settimana."));
 
-            AgentReply reply = new AgentLoop(model, agentTools, clock, appZone)
+            AgentReply reply = new AgentLoop(model, agentTools, modelCalls, clock, appZone)
                     .answer(user.getId(), List.of(), "Organizzami la settimana");
 
             List<ModelMessage> last = model.requests().getLast().messages();
@@ -124,5 +128,7 @@ class AgentLoopIntegrationTest {
 
     private void cleanUp(User user) {
         jdbc.update("delete from users where id = ?", user.getId());
+        // The calls of the day stay after the account is deleted (D129): the test removes its own
+        jdbc.update("delete from agent_model_calls where user_id = ?", user.getId());
     }
 }

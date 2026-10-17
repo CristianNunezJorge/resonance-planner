@@ -9,7 +9,7 @@ Il database è PostgreSQL. Le tabelle si dividono in quattro gruppi:
 | Catalogo di gioco | `material`, `farming_source`, `farming_drop`, `level_exp`, `game_character`, `ascension_cost` | Solo il caricamento dai JSON (D39) |
 | Eventi | `game_event`, `event_active_weekday`, `event_activity`, `event_reward` | Caricamento dai JSON e area admin |
 | Dati dell'utente | `users`, `owned_character`, `inventory_item` | L'utente |
-| Pianificazione e agente | `plan_proposal`, `planned_task`, `agent_message` | L'utente e l'agente |
+| Pianificazione e agente | `plan_proposal`, `planned_task`, `agent_message`, `agent_model_calls` | L'utente e l'agente |
 
 ## Diagramma: catalogo ed eventi
 
@@ -338,6 +338,15 @@ Corrispondenza con gli stati della fase 2: `PROPOSED` = proposta, `CONFIRMED` = 
 | `created_at` | `timestamptz` | Obbligatorio |
 
 Indici su (`user_id`, `created_at`) e su `proposal_id`.
+
+**`agent_model_calls`**: le chiamate al modello dell'agente, una riga per giorno e utente (D129, migrazione `V3`). La somma di un giorno è il totale dell'app: serve a fermarsi prima del limite gratuito di OpenRouter (D126).
+| Colonna | Tipo | Regole |
+|---|---|---|
+| `call_date` | `date` | Il giorno UTC, come il limite di OpenRouter |
+| `user_id` | `bigint` | L'utente del turno. Nessuna chiave esterna, apposta: le righe di un account cancellato restano fino alla fine del giorno, altrimenti il totale dell'app scenderebbe e chi si cancella e si registra di nuovo potrebbe consumare le chiamate senza fine |
+| `calls` | `integer` | Obbligatorio, ≥ 0; aumentato con un solo upsert prima di ogni chiamata, anche dei turni che poi falliscono |
+
+Chiave primaria su (`call_date`, `user_id`).
 
 ## Cosa non salviamo nel database
 

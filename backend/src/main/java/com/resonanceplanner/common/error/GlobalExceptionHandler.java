@@ -44,6 +44,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(ApiResponse.failure(new ApiError(code.name(), ex.getMessage(), fields)));
     }
 
+    // A limit of a service (D129): the same answer as the limits of the filter, with the seconds to wait (D101)
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTooManyRequests(TooManyRequestsException ex) {
+        ErrorCode code = ex.getErrorCode();
+        return ResponseEntity.status(code.status())
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(ex.retryAfterSeconds()))
+                .body(errorBody(code, ex.getMessage()));
+    }
+
     // A rule of the service on one field: same answer as the validation of the request body
     @ExceptionHandler(FieldValidationException.class)
     public ResponseEntity<Object> handleFieldValidation(FieldValidationException ex) {

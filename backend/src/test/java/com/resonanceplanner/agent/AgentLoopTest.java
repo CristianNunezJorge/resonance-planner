@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,9 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.resonanceplanner.agent.ChatMessage.Speaker;
+import com.resonanceplanner.agent.client.AgentUnavailableException;
 import com.resonanceplanner.agent.client.FinishReason;
+import com.resonanceplanner.agent.client.ModelCallCounter;
 import com.resonanceplanner.agent.client.ModelMessage;
 import com.resonanceplanner.agent.client.ModelReply;
 import com.resonanceplanner.agent.client.ModelRequest;
@@ -94,6 +97,7 @@ class AgentLoopTest {
     @Mock private CalendarService calendarService;
     @Mock private PlannerService plannerService;
     @Mock private ProposalService proposalService;
+    @Mock private ModelCallCounter modelCalls;
 
     private final MutableClock clock = new MutableClock(NOW);
     private FakeModelClient model;
@@ -105,7 +109,7 @@ class AgentLoopTest {
                 catalogService, waveplateService, userService, eventService, calendarService, plannerService,
                 proposalService), new Today(clock, ROME), ROME, jsonMapper);
         model = new FakeModelClient();
-        loop = new AgentLoop(model, tools, clock, ROME);
+        loop = new AgentLoop(model, tools, modelCalls, clock, ROME);
         logs.start();
         loopLog.addAppender(logs);
     }
@@ -113,6 +117,34 @@ class AgentLoopTest {
     @AfterEach
     void tearDown() {
         loopLog.detachAppender(logs);
+    }
+
+    // D129: every call counts for the user before it is made, also the calls of a turn that fails
+    @Test
+    void countsEveryCallToTheModelForTheUserOfTheTurn() {
+        model.answering(tools(call("call_1", "unknown_tool", "{}")), text("Ecco."));
+
+        ask("Ciao");
+
+        verify(modelCalls, times(2)).add(USER_ID);
+    }
+
+    @Test
+    void countsAlsoTheCallOfATurnThatFails() {
+        model.thenFailingWith(AgentUnavailableException.unavailable());
+
+        assertThatThrownBy(() -> ask("Ciao")).isInstanceOf(AgentUnavailableException.class);
+
+        verify(modelCalls).add(USER_ID);
+    }
+
+    @Test
+    void makesNoCallWhenItCannotCountIt() {
+        doThrow(new IllegalStateException("database down")).when(modelCalls).add(USER_ID);
+
+        assertThatThrownBy(() -> ask("Ciao")).isInstanceOf(IllegalStateException.class);
+
+        assertThat(model.requests()).isEmpty();
     }
 
     private AgentReply ask(String message) {
