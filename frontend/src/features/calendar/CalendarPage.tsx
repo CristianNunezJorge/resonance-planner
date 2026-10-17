@@ -10,6 +10,10 @@ import ErrorState from '../../components/ErrorState'
 import LoadingState from '../../components/LoadingState'
 import { usePageTitle } from '../../components/usePageTitle'
 import { fetchCharacters, fetchMaterials, fetchRules } from '../catalog/catalogSlice'
+import ChatDrawer from '../chat/ChatDrawer'
+import ChatPanel from '../chat/ChatPanel'
+import { loadChat, selectCanSend, sendChatMessage } from '../chat/chatSlice'
+import { explainEventText, UPDATE_PLAN_TEXT } from '../chat/format'
 import WaveplatePanel from '../waveplate/WaveplatePanel'
 import { eventKey, toCalendarItems, type ItemProps } from './calendarItems'
 import {
@@ -30,7 +34,7 @@ import TaskDetailModal from './TaskDetailModal'
 import TaskFormModal from './TaskFormModal'
 import type { CalendarTask, DateRange, TaskForm } from './types'
 import ProposalBar from './ProposalBar'
-import { useIsPhone } from './useIsPhone'
+import { useIsNarrow, useIsPhone } from './useIsPhone'
 
 // The window open over the calendar, if any
 type Dialog =
@@ -50,12 +54,14 @@ function todayText(): string {
 
 // Page P4, the calendar (D66, D67, D120): events only on their active days, the tasks of the user, the windows of
 // detail and the Waveplate panel; the pending proposal with its bar, the basic plan and the warning that the plan is
-// out of date (D23, D64, D68, D125). The chat arrives with the agent.
+// out of date (D23, D64, D68, D125); the chat with the agent, on the side or sliding from it below 992 px (D130).
 function CalendarPage() {
   usePageTitle('Calendario')
   const dispatch = useAppDispatch()
   const store = useAppStore()
   const isPhone = useIsPhone()
+  const isNarrow = useIsNarrow()
+  const [chatOpen, setChatOpen] = useState(false)
   const controller = useCalendarController()
   const [desktopView, setDesktopView] = useState<CalendarViewName>('dayGridWeek')
   const view: CalendarViewName = isPhone ? 'listWeek' : desktopView
@@ -74,12 +80,21 @@ function CalendarPage() {
   const { status, error, refreshing, events, tasks, pendingProposal, planOutdated } = useAppSelector(
     (state) => state.calendar,
   )
+  const chatStatus = useAppSelector((state) => state.chat.status)
+  const canAskAgent = useAppSelector(selectCanSend)
 
   useEffect(() => {
     void dispatch(fetchRules())
     void dispatch(fetchCharacters())
     void dispatch(fetchMaterials())
   }, [dispatch])
+
+  // The usage of today is needed also while the chat is closed: "Spiegamelo" and "Chiedi all'agente" depend on it
+  useEffect(() => {
+    if (chatStatus === 'idle') {
+      void dispatch(loadChat())
+    }
+  }, [chatStatus, dispatch])
 
   // The calendar was drawn with the first view: a change (phone turned, Settimana/Mese) is applied through the controller
   useEffect(() => {
@@ -203,9 +218,23 @@ function CalendarPage() {
       true,
     )
 
+  // A question for the agent from outside the chat: below 992 px the chat opens to show the answer; on a wide screen
+  // the answer arrives in the side column, and a toast says so (D130)
+  const askAgent = (content: string) => {
+    if (isNarrow) {
+      setChatOpen(true)
+    } else {
+      dispatch(toastShown('Domanda inviata all’agente: la risposta arriva nella chat a destra.', 'info'))
+    }
+    void dispatch(sendChatMessage(content))
+  }
+
   const taskOf = (taskId: number) => shownTasks.find((task) => task.id === taskId)
   const characterName = (task: CalendarTask) =>
     characters.find((character) => character.id === task.characterId)?.name ?? null
+
+  // A new user (a login in another tab) gets a new chat, without the text written by the one before
+  const chat = <ChatPanel key={userId} onBasicPlan={makeBasicPlan} isPlanning={planning} />
 
   const firstLoadFailed = status === 'failed' || rulesStatus === 'failed'
   const failureMessage = status === 'failed' ? error : rulesError
@@ -216,7 +245,17 @@ function CalendarPage() {
     }
     if (dialog.kind === 'event') {
       const event = events.find((item) => eventKey(item) === dialog.key)
-      return event ? <EventDetailModal event={event} onClose={closeDialog} /> : null
+      return event ? (
+        <EventDetailModal
+          event={event}
+          onClose={closeDialog}
+          canExplain={canAskAgent}
+          onExplain={() => {
+            setDialog(null)
+            askAgent(explainEventText(event.name))
+          }}
+        />
+      ) : null
     }
     if (dialog.kind === 'form') {
       return (
@@ -295,6 +334,14 @@ function CalendarPage() {
               <button type="button" className="btn btn-sm btn-dark" onClick={makeBasicPlan} disabled={planning}>
                 Genera un nuovo piano
               </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-dark"
+                onClick={() => askAgent(UPDATE_PLAN_TEXT)}
+                disabled={!canAskAgent}
+              >
+                Chiedi all’agente
+              </button>
             </div>
           )}
           {pendingProposal && (
@@ -321,14 +368,25 @@ function CalendarPage() {
             onItemClick={handleItemClick}
           />
           {status === 'succeeded' && !refreshing && tasks.length === 0 && !pendingProposal && (
-            <EmptyState message="Non hai ancora un piano in questo periodo. Crealo dai tuoi obiettivi con «Genera piano base», oppure aggiungi un’attività con «+ Attività»." />
+            <EmptyState message="Non hai ancora un piano in questo periodo. Chiedi all’agente di organizzarti la settimana, crealo dai tuoi obiettivi con «Genera piano base» oppure aggiungi un’attività con «+ Attività»." />
           )}
         </div>
         <aside className="col-lg-3 order-1 order-lg-2" aria-label="Riepilogo">
           {/* A new user (a login in another tab) gets a new panel, without the values of the one before */}
           {rules && <WaveplatePanel key={userId} rules={rules} />}
+          {!isNarrow && chat}
         </aside>
       </div>
+      {isNarrow && (
+        <>
+          <button type="button" className="btn btn-primary chat-fab" aria-haspopup="dialog" onClick={() => setChatOpen(true)}>
+            Agente
+          </button>
+          <ChatDrawer open={chatOpen} onClose={() => setChatOpen(false)}>
+            {chat}
+          </ChatDrawer>
+        </>
+      )}
       {renderDialog()}
     </section>
   )

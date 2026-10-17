@@ -180,6 +180,8 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 
 **Nel giorno 7 (T31, D124, D125):** barra "Proposta in attesa" con il testo del piano, il numero di attività e i giorni, "Scarta" e "Conferma" che agiscono subito; attività proposte tratteggiate con la scritta "Proposta:"; pulsante "Genera piano base" nella barra dei comandi; avviso "Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano" con "Genera un nuovo piano"; lo stato vuoto propone il piano base. Il dettaglio di un'attività proposta non ha "Segna come fatta": ricorda di confermare la proposta.
 
+**Nel giorno 9 (T36, D130):** pannello "Agente" nella colonna di destra da 992 px in su, sotto il riquadro Waveplate; sotto i 992 px un pulsante "Agente" in basso a destra apre la chat da destra. Il pannello mostra "3 / 5 messaggi oggi", i messaggi dal più vecchio con "Messaggi precedenti", i passaggi sotto le risposte di questa visita, l'attesa ("L'assistente sta lavorando… può richiedere fino a qualche minuto"), i suggerimenti "Organizzami la settimana", "Cosa faccio oggi?" e "Spiegami gli eventi in corso", il campo con l'avviso sui dati inviati a OpenRouter e, a un limite di D129, la spiegazione con "Genera piano base". Nel dettaglio di un evento c'è "Spiegamelo"; nell'avviso di cambiamento "Chiedi all'agente". Lo stato vuoto invita anche a chiedere all'agente.
+
 ### P5 · Roster e inventario `/roster`
 
 **Scopo:** vedere e modificare personaggi, obiettivi e materiali.

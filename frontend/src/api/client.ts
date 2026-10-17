@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../types/api'
+import type { ApiResponse, PageMeta } from '../types/api'
 
 // The single HTTP client of the app (D76): it adds the token, opens the ApiResponse envelope
 // and turns every failure into an ApiError with a message in Italian.
@@ -53,6 +53,21 @@ export function setUnauthorizedHandler(handler: ((refusedToken: string) => void)
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const envelope = await requestEnvelope<T>(path, options)
+  return envelope?.data as T
+}
+
+/** One page of a list (D46, D130): the data with the meta part, which says whether more items follow. */
+export async function apiPage<T>(path: string, options: RequestOptions = {}): Promise<{ data: T; meta: PageMeta }> {
+  const envelope = await requestEnvelope<T>(path, options)
+  if (!envelope?.meta) {
+    throw new ApiError('INTERNAL_ERROR', UNEXPECTED_ERROR_MESSAGE, 200)
+  }
+  return { data: envelope.data as T, meta: envelope.meta }
+}
+
+// The envelope of a successful answer, or null for 204; every failure becomes an ApiError
+async function requestEnvelope<T>(path: string, options: RequestOptions): Promise<ApiResponse<T> | null> {
   const { method = 'GET', body, token, signal } = options
   // The token goes only to our backend: a path like //other.site would change the destination
   if (!path.startsWith('/') || path.startsWith('//')) {
@@ -64,7 +79,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     unauthorizedHandler?.(token)
   }
   if (response.status === NO_CONTENT) {
-    return undefined as T
+    return null
   }
   const envelope = await readEnvelope<T>(response, signal)
   if (!envelope) {
@@ -79,7 +94,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       error?.fields,
     )
   }
-  return envelope.data as T
+  return envelope
 }
 
 /** Turns anything thrown by apiRequest into a plain object that can travel in a Redux action. */

@@ -3,6 +3,7 @@ import adminEventsReducer from '../features/adminEvents/adminEventsSlice'
 import authReducer from '../features/auth/authSlice'
 import calendarReducer from '../features/calendar/calendarSlice'
 import catalogReducer from '../features/catalog/catalogSlice'
+import chatReducer from '../features/chat/chatSlice'
 import onboardingReducer from '../features/onboarding/onboardingSlice'
 import rosterReducer from '../features/roster/rosterSlice'
 import toastReducer from './toastSlice'
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
   onboarding: onboardingReducer,
   roster: rosterReducer,
   calendar: calendarReducer,
+  chat: chatReducer,
   adminEvents: adminEventsReducer,
 })
 
