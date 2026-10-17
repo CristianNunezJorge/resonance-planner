@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 17/10/2026 (giorno 8 compreso), per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 18/10/2026 (giorno 9 compreso), per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata), il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento, e il giorno 8 l'agente in backend, con un modello gratuito su OpenRouter (D126). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 9 (T35-T36: API della chat con salvataggio e limiti, poi la chat nel frontend). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 9 (T01-T36) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata), il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento, il giorno 8 l'agente in backend, con un modello gratuito su OpenRouter (D126), e il giorno 9 la chat con i limiti delle richieste gratuite (D129, D130). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 10 (T37: istruzioni di sistema e dieci scenari reali; T38: rilascio v2). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -29,6 +29,7 @@ Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su
 | 15-16/10 | **Giorno 6: T25-T28 · v1** | Attività manuali, completamento con l'inventario e calendario in backend (D117, D118); pagina calendario con FullCalendar 7, che rispetta la CSP, e riquadro Waveplate (D119, D120); profilo e gestione eventi admin (D121, D122); README e checklist di rilascio, 9 punti su 9 ✓ online; tag `v1.0.0`. Backend 554 test (copertura 98,5%), frontend 478 (97,9%). Trello T25-T28 in "Fatto" |
 | 16/10 | **Giorno 7: T29-T31** | Pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Punto 6 della checklist verificato in locale. Backend 626 test (copertura 98,2%), frontend 492 (97,9%). PR #35-#38 |
 | 17/10 | **Giorno 8: T32-T34** | Per scelta dell'utente l'agente usa un modello gratuito su OpenRouter al posto dell'API Claude (D126, fuori dal programma del corso): client con `RestClient` e solo modelli `:free` (T32), i cinque strumenti con argomenti controllati e salvataggio con ricalcolo (D127), ciclo dell'agente con limiti di giri, strumenti e tempo (D128). Una sola chiamata vera, con Nemotron: Gemma riceveva 429 dal suo fornitore. Su questo computer Norton rifirma HTTPS, quindi Java usa l'archivio dei certificati di Windows. Backend 798 test (copertura 98,1%), frontend 492 invariato. PR #40-#42 |
+| 17-18/10 | **Giorno 9: T35-T36** | API della chat: salvataggio dei due messaggi dopo la risposta, storico a pagine con `meta`, utilizzo, e i limiti di D129 (5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app nel database con la migrazione `V3`, un turno alla volta, 20 proposte al giorno). Il tetto per utente è nato dalla revisione di sicurezza. Chat nel calendario (D130): laterale da 992 px, a scomparsa sotto, attesa, passaggi, limiti con il piano base, "Spiegamelo" e "Chiedi all'agente". Due prove vere: 4 e 5 chiamate, risposte in 20-28 secondi, proposta mostrata e confermata. Backend 856 test (copertura 98,4%), frontend 537 (97,5%). PR #44-#45 |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -50,7 +51,7 @@ Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D128) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D130) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -62,7 +63,7 @@ Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su
 - **Demo con dataset curato** (D9): sei personaggi reali (Jinhsi, Yinlin, Changli, Lingyang, Danjin, Aalto, D17), tre eventi reali (Bountiful Crescendo, Lament Recon: Solaris Soldier, By Moon's Grace), calcolo dei materiali fino al livello 40 (D27).
 - **Esperienza:** registrazione, configurazione guidata in tre passi, calendario con eventi e Waveplate, chat con l'agente che propone un piano da confermare.
 - **Rilasci:** v1 core entro il giorno 6, v2 agente entro il giorno 10, poi margine, extra e rifinitura (D8, D90).
-- **Agente:** modello gratuito su OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`, D126), cinque strumenti limitati all'utente del token (D127), ciclo scritto da noi con al massimo 6 giri (D128), pianificatore deterministico in Java, piano base senza IA come riserva (D54-D64).
+- **Agente:** modello gratuito su OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`, D126), cinque strumenti limitati all'utente del token (D127), ciclo scritto da noi con al massimo 6 giri (D128), limiti delle richieste gratuite (D129), chat nel calendario (D130), pianificatore deterministico in Java, piano base senza IA come riserva (D54-D64).
 
 ## Questioni aperte
 
@@ -72,9 +73,9 @@ Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su
 4. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide.
 5. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
 6. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
-7. **Limiti dell'agente e del piano base:** da decidere in T35. OpenRouter gratuito dà 50 richieste al giorno per tutto l'account e un messaggio ne usa fino a 6, quindi i 20 messaggi per utente di D48 sono troppi (vedi i promemoria di T34).
+7. **Quota gratuita e scenari di T37:** i dieci scenari reali costano circa 40-60 chiamate, più delle 50 al giorno di OpenRouter per tutto l'account, e in locale valgono anche i limiti di D129. Va deciso all'inizio di T37 come dividerli (vedi `HANDOFF.md`). Con più account si possono ancora finire le 40 chiamate dell'app (limite noto di D129).
 8. **Su Render resta `ANTHROPIC_MODEL`**, che il codice non usa più: si può togliere.
-9. **Trello:** T32-T34 da spostare in "Fatto".
+9. **Trello:** T35-T36 da spostare in "Fatto".
 
 ## Promemoria per le prossime card
 
@@ -117,14 +118,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 9: card T35-T36 di `docs/09-task.md` (salvataggio dei messaggi, storico a pagine, limiti e API di utilizzo; poi la chat nel frontend). Prima di T35 vanno decisi i limiti (vedi le questioni aperte).
+1. Giorno 10: card T37-T38 di `docs/09-task.md` (istruzioni di sistema e dieci scenari reali, poi rilascio v2 con checklist, README e tag `v2.0.0`). Prima di T37 va deciso come dividere gli scenari tra i giorni (quota gratuita).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 9 (card T35-T36). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 10 (card T37-T38). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
