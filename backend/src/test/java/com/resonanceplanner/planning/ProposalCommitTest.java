@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.resonanceplanner.common.error.ConflictException;
+import com.resonanceplanner.common.error.ErrorCode;
+import com.resonanceplanner.common.error.TooManyRequestsException;
 import com.resonanceplanner.planner.PlannerService;
 import com.resonanceplanner.planner.ScheduleDraft;
 import com.resonanceplanner.planner.ScheduleRequest;
@@ -108,6 +110,37 @@ class ProposalCommitTest {
                     .hasMessage(ProposalService.DATA_CHANGED);
             assertThat(jdbc.queryForList("select id from plan_proposal where user_id = ? and status = 'PENDING'",
                     Long.class, user.getId())).containsExactly(saved.id());
+        } finally {
+            cleanUp(user);
+        }
+    }
+
+    @Test
+    void refusesTheBasicPlanAfterTwentyProposalsOfTheDay() {
+        User user = newUser("proposal.limit");
+        try {
+            // Twenty proposals of today, of the basic plan or of the agent: they count together (D129)
+            for (int i = 0; i < 19; i++) {
+                jdbc.update("insert into plan_proposal (user_id, status, summary, created_at) "
+                        + "values (?, 'REPLACED', 'Piano.', now())", user.getId());
+            }
+            jdbc.update("insert into plan_proposal (user_id, status, summary, created_at) "
+                    + "values (?, 'REPLACED', 'Di ieri.', now() - interval '2 days')", user.getId());
+            ProposalResponse twentieth = proposalService.createBasic(user.getId());
+            assertThat(proposalStatus(twentieth.id())).isEqualTo("PENDING");
+
+            assertThatThrownBy(() -> proposalService.createBasic(user.getId()))
+                    .isInstanceOfSatisfying(TooManyRequestsException.class, error -> {
+                        assertThat(error.getErrorCode()).isEqualTo(ErrorCode.RATE_LIMITED);
+                        assertThat(error.getMessage()).isEqualTo(ProposalService.BASIC_PLAN_LIMIT.formatted(20));
+                        assertThat(error.retryAfter()).isPositive();
+                    });
+            // The agent is limited by its messages, not by this count
+            ScheduleRequest request = new ScheduleRequest(null, 3, null, null, false, null);
+            ScheduleDraft seen = plannerService.draft(user.getId(), request);
+            assertThat(proposalService.saveIfUnchanged(user.getId(), request, seen, "Piano dell'agente.").id())
+                    .isNotNull();
+            assertThat(proposalStatus(twentieth.id())).isEqualTo("REPLACED");
         } finally {
             cleanUp(user);
         }

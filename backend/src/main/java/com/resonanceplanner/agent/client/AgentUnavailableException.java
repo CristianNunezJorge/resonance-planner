@@ -18,7 +18,7 @@ public class AgentUnavailableException extends ApiException {
         super(ErrorCode.AGENT_UNAVAILABLE, message);
     }
 
-    static AgentUnavailableException unavailable() {
+    public static AgentUnavailableException unavailable() {
         return new AgentUnavailableException(UNAVAILABLE_MESSAGE);
     }
 

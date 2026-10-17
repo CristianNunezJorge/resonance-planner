@@ -28,6 +28,7 @@ import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,9 @@ class ProposalControllerTest {
     void createTwoUsersAndRemoveTheDemoEvents() {
         when(today.date()).thenReturn(MONDAY);
         when(today.dateOf(any())).thenReturn(MONDAY);
+        // The basic plans of the day count from here (D129): every proposal of the tests is made after it
+        when(today.startOfDay()).thenReturn(Instant.now().minus(1, ChronoUnit.HOURS));
+        when(today.startOfNextDay()).thenReturn(Instant.now().plus(1, ChronoUnit.DAYS));
         User withPlayTime = User.create("rover", "rover@example.com", "hash", Role.USER);
         withPlayTime.changePlayTimeMinutes(60);
         rover = userRepository.saveAndFlush(withPlayTime);

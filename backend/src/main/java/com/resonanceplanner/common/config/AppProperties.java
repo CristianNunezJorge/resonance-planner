@@ -29,7 +29,8 @@ public record AppProperties(
         @Valid @NotNull Admin admin,
         @Valid @NotNull Cors cors,
         @Valid @NotNull Agent agent,
-        @DefaultValue RateLimit rateLimit) {
+        @DefaultValue RateLimit rateLimit,
+        @DefaultValue AgentLimits agentLimits) {
 
     private static final String HIDDEN = "***";
 
@@ -133,6 +134,49 @@ public record AppProperties(
         private static void requireWindow(String property, Duration value) {
             if (value == null || value.compareTo(MIN_WINDOW) < 0 || value.compareTo(MAX_WINDOW) > 0) {
                 throw new IllegalArgumentException(property + " must be between 1 second and 24 hours");
+            }
+        }
+    }
+
+    /**
+     * Limits of the agent and of the basic plan (D129). Not required: without properties the values of D129 apply.
+     * They can be changed with the environment variables APP_AGENTLIMITS_DAILYMESSAGES and the like. The free plan of
+     * OpenRouter gives 50 calls a day to the whole account, and a message of the agent makes up to 6 (D126).
+     *
+     * The turns that start together can go beyond the calls of the app by up to 6 each: with the defaults at most
+     * 40 + 6 = 46, under the 50 of OpenRouter. Raising concurrentTurns or dailyModelCalls should keep that margin.
+     *
+     * @param dailyMessages the messages to the agent of each user in a day, from midnight in Italy (D41)
+     * @param dailyUserModelCalls the calls to the model of each user in a day, also of the turns that failed, from
+     *     midnight UTC like OpenRouter: one account alone never uses the calls of the whole app
+     * @param dailyModelCalls the calls to the model in a day in the whole app, from midnight UTC like OpenRouter
+     * @param concurrentTurns the turns of the agent that can run at the same time in the whole app
+     * @param dailyBasicPlans the proposals of each user in a day after which the basic plan is refused
+     */
+    public record AgentLimits(
+            @DefaultValue("5") int dailyMessages,
+            @DefaultValue("24") int dailyUserModelCalls,
+            @DefaultValue("40") int dailyModelCalls,
+            @DefaultValue("2") int concurrentTurns,
+            @DefaultValue("20") int dailyBasicPlans) {
+
+        // A whole turn makes up to 6 calls (D61): with fewer a day, the agent could never start one
+        private static final int ONE_TURN_OF_CALLS = 6;
+        private static final int MAX_DAILY = 100_000;
+        private static final int MAX_CONCURRENT_TURNS = 100;
+
+        public AgentLimits {
+            requireBetween("app.agent-limits.daily-messages", dailyMessages, 1, MAX_DAILY);
+            requireBetween("app.agent-limits.daily-user-model-calls", dailyUserModelCalls, ONE_TURN_OF_CALLS,
+                    MAX_DAILY);
+            requireBetween("app.agent-limits.daily-model-calls", dailyModelCalls, ONE_TURN_OF_CALLS, MAX_DAILY);
+            requireBetween("app.agent-limits.concurrent-turns", concurrentTurns, 1, MAX_CONCURRENT_TURNS);
+            requireBetween("app.agent-limits.daily-basic-plans", dailyBasicPlans, 1, MAX_DAILY);
+        }
+
+        private static void requireBetween(String property, int value, int min, int max) {
+            if (value < min || value > max) {
+                throw new IllegalArgumentException(property + " must be between " + min + " and " + max);
             }
         }
     }

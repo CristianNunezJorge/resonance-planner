@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -113,6 +115,27 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.error.message").value("Alcuni campi non sono validi."))
                 .andExpect(jsonPath("$.error.fields.quantity").value("La quantità non è tra quelle ammesse."));
+    }
+
+    @Test
+    void addsTheMetaOfAPageAndLeavesItOutOfTheOtherResponses() throws Exception {
+        mockMvc.perform(get("/test/page"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0]").value("b"))
+                .andExpect(jsonPath("$.meta.limit").value(2))
+                .andExpect(jsonPath("$.meta.hasMore").value(true));
+        mockMvc.perform(get("/test/ok")).andExpect(jsonPath("$.meta").doesNotExist());
+    }
+
+    @Test
+    void answersTooManyRequestsWithTheWaitOfALimitOfAService() throws Exception {
+        mockMvc.perform(get("/test/daily-limit").param("waitMillis", "1500"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, "2"))
+                .andExpect(jsonPath("$.error.code").value("AGENT_DAILY_LIMIT"))
+                .andExpect(jsonPath("$.error.message").value("Hai finito i messaggi di oggi."));
+        mockMvc.perform(get("/test/daily-limit").param("waitMillis", "0"))
+                .andExpect(header().string(HttpHeaders.RETRY_AFTER, "1"));
     }
 
     @Test

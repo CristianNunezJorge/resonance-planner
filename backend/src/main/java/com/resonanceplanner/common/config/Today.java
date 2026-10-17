@@ -25,6 +25,16 @@ public class Today {
         return dateOf(clock.instant());
     }
 
+    /** Midnight of today in the time zone of the app: the daily limits count from here (D129). */
+    public Instant startOfDay() {
+        return date().atStartOfDay(zone).toInstant();
+    }
+
+    /** The next midnight in the time zone of the app, when the daily limits start again (D129). */
+    public Instant startOfNextDay() {
+        return date().plusDays(1).atStartOfDay(zone).toInstant();
+    }
+
     /** The day of a moment in the time zone of the app, for example the day a proposal was made (D124). */
     public LocalDate dateOf(Instant instant) {
         return LocalDate.ofInstant(instant, zone);

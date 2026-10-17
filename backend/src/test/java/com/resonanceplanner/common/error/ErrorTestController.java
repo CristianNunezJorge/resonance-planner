@@ -1,6 +1,7 @@
 package com.resonanceplanner.common.error;
 
 import com.resonanceplanner.common.api.ApiResponse;
+import com.resonanceplanner.common.api.PageMeta;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;
@@ -8,6 +9,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -103,5 +106,17 @@ class ErrorTestController {
     @GetMapping("/too-many-requests")
     ApiResponse<Void> tooManyRequests() {
         throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    // A limit of a service (D129): the wait is rounded up to whole seconds, and is never 0
+    @GetMapping("/daily-limit")
+    ApiResponse<Void> dailyLimit(@RequestParam long waitMillis) {
+        throw new TooManyRequestsException(ErrorCode.AGENT_DAILY_LIMIT, "Hai finito i messaggi di oggi.",
+                Duration.ofMillis(waitMillis));
+    }
+
+    @GetMapping("/page")
+    ApiResponse<List<String>> page() {
+        return ApiResponse.page(List.of("b", "a"), new PageMeta(2, true));
     }
 }

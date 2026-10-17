@@ -101,7 +101,7 @@ Il lavoro è diviso in una **fase 0**, da fare mentre si aspetta l'approvazione 
 ### Giorno 9 · Agente: chat
 | ID | Attività | Area | Rif. | Fatta quando |
 |---|---|---|---|---|
-| T35 | Salvataggio dei messaggi, storico a pagine, limite giornaliero, API di utilizzo | IA | D40, D48 | Il ventunesimo messaggio del giorno risponde 429 |
+| T35 | Salvataggio dei messaggi, storico a pagine, limite giornaliero, API di utilizzo | IA | D40, D48, D129 | Il sesto messaggio del giorno risponde 429 |
 | T36 | Chat: messaggi, suggerimenti, passaggi, contatore, attesa, pannello a scomparsa su telefono | FE | D11, D62, D66 | Flusso F6 completo dal calendario |
 
 ### Giorno 10 · Rifinitura dell'agente e rilascio v2

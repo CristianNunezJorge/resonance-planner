@@ -1,6 +1,7 @@
 package com.resonanceplanner.agent;
 
 import com.resonanceplanner.agent.client.FinishReason;
+import com.resonanceplanner.agent.client.ModelCallCounter;
 import com.resonanceplanner.agent.client.ModelClient;
 import com.resonanceplanner.agent.client.ModelMessage;
 import com.resonanceplanner.agent.client.ModelReply;
@@ -32,16 +33,17 @@ import org.springframework.stereotype.Service;
 /**
  * The loop of the agent (D54, D128): it sends the conversation to the model, runs the tools it asks for and sends
  * back their results, until the model answers with a text. At most 6 calls to the model in 2 minutes, 5 tools per
- * reply and 10 per turn. It has no transaction of its own: every tool opens and closes its own, so none stays open
- * while the model thinks. The logs say what happened, never the text of the chat or of the tools (D60).
+ * reply and 10 per turn. Every call counts in the calls of the user and of the whole app before it is made, so also the
+ * calls of a turn that fails (D129). It has no transaction of its own: every tool opens and closes its own, so none
+ * stays open while the model thinks. The logs say what happened, never the text of the chat or of the tools (D60).
  */
 @Service
 public class AgentLoop {
 
-    static final int MAX_ROUNDS = 6;
+    public static final int MAX_ROUNDS = 6;
     static final int MAX_TOOLS_PER_REPLY = 5;
     static final int MAX_TOOLS_PER_TURN = 10;
-    static final int MAX_HISTORY = 10;
+    public static final int MAX_HISTORY = 10;
     // After this no new call to the model starts: with 60 seconds per call a turn ends within 3 minutes
     static final Duration MAX_TURN_TIME = Duration.ofMinutes(2);
     public static final int MAX_MESSAGE_CHARS = 1_000;
@@ -63,13 +65,16 @@ public class AgentLoop {
 
     private final ModelClient modelClient;
     private final AgentTools tools;
+    private final ModelCallCounter modelCalls;
     private final Clock clock;
     private final ZoneId zone;
     private final Set<String> knownTools;
 
-    public AgentLoop(ModelClient modelClient, AgentTools tools, Clock clock, ZoneId appZone) {
+    public AgentLoop(ModelClient modelClient, AgentTools tools, ModelCallCounter modelCalls, Clock clock,
+            ZoneId appZone) {
         this.modelClient = modelClient;
         this.tools = tools;
+        this.modelCalls = modelCalls;
         this.clock = clock;
         this.zone = appZone;
         this.knownTools = tools.definitions().stream().map(ToolDefinition::name).collect(Collectors.toSet());
@@ -118,6 +123,7 @@ public class AgentLoop {
     // turn ends telling the user where to find it. Any other failure is logged without its message and thrown
     private Optional<ModelReply> send(Turn turn, List<ModelMessage> messages) {
         try {
+            modelCalls.add(turn.agentTurn.userId());
             return Optional.of(turn.counted(modelClient.send(
                     new ModelRequest(AgentPrompt.SYSTEM, tools.definitions(), List.copyOf(messages)))));
         } catch (ApiException e) {

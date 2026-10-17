@@ -33,7 +33,7 @@ class DatabaseSchemaTest {
                 "material", "farming_source", "farming_drop", "level_exp", "game_character", "ascension_cost",
                 "game_event", "event_active_weekday", "event_activity", "event_reward",
                 "users", "owned_character", "inventory_item",
-                "plan_proposal", "planned_task", "agent_message");
+                "plan_proposal", "planned_task", "agent_message", "agent_model_calls");
     }
 
     @Test
@@ -44,6 +44,20 @@ class DatabaseSchemaTest {
         assertThat(jdbc.queryForObject("SELECT count(*) " + foreignKeysToUsers, Integer.class)).isGreaterThanOrEqualTo(5);
         assertThat(jdbc.queryForList("SELECT conrelid::regclass::text || '.' || conname " + foreignKeysToUsers
                 + " AND confdeltype <> 'c'", String.class)).isEmpty();
+    }
+
+    // D129: the calls of a day are never fewer than zero, and a NULL would pass a CHECK that does not test it.
+    // One statement per test: after an error PostgreSQL refuses every other statement of the transaction
+    @Test
+    void rejectsANegativeCountOfModelCalls() {
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO agent_model_calls (call_date, calls) VALUES ('2031-01-01', -1)"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void rejectsAMissingCountOfModelCalls() {
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO agent_model_calls (call_date, calls) VALUES ('2031-01-02', NULL)"))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

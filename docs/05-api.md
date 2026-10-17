@@ -215,8 +215,16 @@ Le proposte nascono solo dal pianificatore, attraverso l'agente o il piano base:
 | Metodo | Percorso | Cosa fa | Risposta |
 |---|---|---|---|
 | GET | `/api/me/agent/messages?before=&limit=` | Storico della chat, dal più recente, a pagine | 200 |
-| POST | `/api/me/agent/messages` | Invia un messaggio e aspetta la risposta (D52) | 200; 429 al limite giornaliero |
-| GET | `/api/me/agent/usage` | Richieste usate oggi, limite e orario di azzeramento | 200 |
+| POST | `/api/me/agent/messages` | Invia un messaggio e aspetta la risposta (D52) | 200; 429 ai limiti di D129 |
+| GET | `/api/me/agent/usage` | Messaggi usati oggi, limite, orario di azzeramento e stato dei limiti sulle chiamate | 200 |
+
+**Chat (T35, D129).** Un messaggio è `{ "id", "role", "content", "proposalId", "createdAt" }`, con `role` `USER` o `ASSISTANT` e `proposalId` vuoto se il messaggio non ha prodotto una proposta.
+- **Storico:** `GET /messages` restituisce i messaggi dal più recente, `limit` da 1 a 50 (20 se manca). Per la pagina successiva si passa come `before` l'id del messaggio più vecchio ricevuto. La risposta ha `meta: { "limit": 20, "hasMore": true }`. La pagina parte da un id e non da un numero, così un messaggio nuovo non fa scorrere le pagine.
+- **Invio:** `POST /messages` con `content` da 1 a 1.000 caratteri (400 sul campo `content`). Il messaggio dell'utente e la risposta si salvano solo se l'agente risponde (D61); la risposta salvata ha al massimo 4.000 caratteri, perché torna nello storico di ogni richiesta.
+- **Utilizzo:** `GET /usage` restituisce `{ "used", "limit", "resetsAt", "callsLimitReached", "appLimitReached" }`. `callsLimitReached` è vero quando all'utente non resta un turno intero di chiamate al modello (contano anche i turni falliti), `appLimitReached` quando non resta a tutta l'app; entrambi ripartono a mezzanotte UTC (D129).
+- **429** ai limiti giornalieri dell'utente (messaggi o chiamate) o di tutta l'app (`AGENT_DAILY_LIMIT`), con un turno già in corso o con troppi turni insieme (`RATE_LIMITED`); sempre con `Retry-After`.
+- **502** se l'agente non risponde (`AGENT_UNAVAILABLE`, D61, D126).
+- **401** se l'utente del token non esiste più (D102).
 
 ## Esempi delle richieste principali
 
@@ -343,10 +351,10 @@ Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 
 → `data`:
 ```json
 {
-  "message": { "id": 88, "role": "ASSISTANT", "content": "Ho preparato un piano di 5 giorni...", "createdAt": "2026-10-01T14:02:10Z" },
+  "message": { "id": 88, "role": "ASSISTANT", "content": "Ho preparato un piano di 5 giorni...", "proposalId": 7, "createdAt": "2026-10-01T14:02:10Z" },
   "proposal": { "id": 7, "summary": "Concentro la Simulation Training nei giorni dell'evento...", "tasks": [] },
-  "steps": ["Ho letto il tuo roster", "Ho controllato gli eventi", "Ho calcolato il piano"],
-  "usage": { "used": 3, "limit": 20, "resetsAt": "2026-10-01T22:00:00Z" }
+  "steps": ["Ho letto il tuo roster e le Waveplate", "Ho calcolato il piano", "Ho preparato la proposta"],
+  "usage": { "used": 3, "limit": 5, "resetsAt": "2026-10-01T22:00:00Z", "callsLimitReached": false, "appLimitReached": false }
 }
 ```
 `proposal` è vuoto se l'agente ha solo risposto senza preparare un piano. `steps` elenca i passaggi fatti, ricavati dagli strumenti chiamati (D62). `resetsAt` è la mezzanotte italiana (D41) espressa in UTC.
@@ -356,7 +364,8 @@ Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 
 | Cosa | Limite |
 |---|---|
 | Login e registrazione | 10 tentativi ogni 15 minuti per indirizzo IP, con un contatore per il login e uno per la registrazione (D101) |
-| Messaggi all'agente | 20 al giorno per utente |
+| Messaggi all'agente | 5 al giorno per utente; chiamate al modello: 24 al giorno per utente (anche dei turni falliti) e 40 in tutta l'app; un turno alla volta per utente e due in tutta l'app (D129) |
+| Piano base | 20 proposte al giorno per utente (D129) |
 | Tutte le altre API | 120 richieste al minuto per indirizzo IP |
 
 Superato un limite, la risposta è 429 `RATE_LIMITED` con l'header `Retry-After` (secondi da aspettare) e un messaggio che dice quanto aspettare ("Troppe richieste: riprova tra 12 minuti."). Il controllo di salute ha un contatore suo (600 al minuto) e le richieste di verifica del CORS non contano. Il frontend può leggere `Retry-After` (è tra gli header esposti dal CORS). I numeri si possono cambiare con le variabili d'ambiente `APP_RATELIMIT_*` (D101).
