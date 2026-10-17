@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (16/10/2026)
+## Stato attuale (17/10/2026)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D125.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D128.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -12,7 +12,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 5 (T22-T24) completato:** calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni e giorni attivi, API pubbliche e admin (D113, D114), pagina roster e inventario (D115, D116). Decisioni D1-D116. Tutto online; su Trello T01-T24 sono in "Fatto".
 - **Giorno 6 (T25-T28) completato · v1 rilasciata:** attività manuali, completamento con l'inventario e calendario in backend (D117, D118), pagina calendario con FullCalendar 7 e riquadro Waveplate (D119, D120), profilo e gestione eventi admin (D121, D122), README e checklist di rilascio (`docs/rilascio-v1.md`, 9 punti ✓ online), tag `v1.0.0`. Tutto online; su Trello T01-T28 sono in "Fatto".
 - **Giorno 7 (T29-T31) completato:** pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Tutto online.
-- **Prossimo passo:** giorno 8 (T32-T34: client dell'API Claude, strumenti e ciclo dell'agente). Leggere `HANDOFF.md`.
+- **Giorno 8 (T32-T34) completato:** per scelta dell'utente l'agente usa un **modello gratuito su OpenRouter** (`nvidia/nemotron-3-super-120b-a12b:free`) al posto dell'API Claude, ed è fuori dal programma del corso (D126); client OpenRouter con `RestClient` (T32), i cinque strumenti limitati all'utente del token (D127), ciclo dell'agente con al massimo 6 giri (D128). Tutto online, ma senza endpoint: la chat arriva con T35-T36.
+- **Prossimo passo:** giorno 9 (T35-T36: salvataggio dei messaggi, limiti e API della chat, poi la chat nel frontend). Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -77,6 +78,7 @@ Principi da non perdere:
 - I calcoli li fa Java; l'IA sceglie i parametri e spiega (D3).
 - Il modello non scrive mai le attività: la proposta è sempre l'ultima bozza del pianificatore (D56).
 - L'agente propone, l'utente conferma (D2). Esiste un "piano base" senza IA (D64).
+- L'agente deve restare **gratuito**: solo modelli OpenRouter con l'id che finisce in `:free`, controllato all'avvio (D126). Il piano gratuito dà 50 richieste al giorno per tutto l'account, e un messaggio ne usa fino a 6.
 - Dati personali solo sotto `/api/me`; l'utente si ricava dal token (D44).
 - Eventi attivi giorno per giorno (D96), effetti con limite giornaliero (D94), eventi della demo ricorrenti (D29).
 - Calcolo dei materiali fino al livello 40, fase SOL3 4 (D27, D92).
@@ -106,6 +108,9 @@ backend/
     event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
     planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118), proposte (ProposalService, D124)
     planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123), PlanInputs (impronta, D125)
+    agent/client/             ModelClient e OpenRouterClient: Chat Completions con RestClient, 60 s per chiamata, solo modelli :free (D126)
+    agent/tools/              AgentTools (i cinque strumenti), AgentToolDefinitions (schemi), AgentTurn (stato del turno), D127
+    agent/                    AgentLoop (ciclo, al massimo 6 giri), AgentPrompt (istruzioni di sistema), AgentReply, D128
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
@@ -158,6 +163,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
 - **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
+- **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10). La chiamata di prova vera è `OpenRouterClientLiveTest`, spenta di default: il comando è in `HANDOFF.md`.
 - **Norton su questo computer** ispeziona HTTPS e rifirma i certificati: Java non se ne fida (`PKIX path building failed`). Per chiamare OpenRouter da Java in locale si usa l'archivio di Windows: `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`). Su Render non serve.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
 - Docker Desktop può restare bloccato in avvio (i comandi `docker` non rispondono): Restart dal menu della balena, poi se serve `wsl --shutdown` da PowerShell e riaprire Docker Desktop.

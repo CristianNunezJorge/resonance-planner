@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 16/10/2026 (giorno 7 compreso), per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 17/10/2026 (giorno 8 compreso), per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata) e il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento. Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 8 (T32-T34: l'agente in backend). Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 8 (T01-T34) sono completati, uniti su `main` e online: la **v1 è rilasciata** (tag `v1.0.0`, checklist online superata), il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento, e il giorno 8 l'agente in backend, con un modello gratuito su OpenRouter (D126). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo è il giorno 9 (T35-T36: API della chat con salvataggio e limiti, poi la chat nel frontend). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -28,6 +28,7 @@ Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su
 | 14-15/10 | **Giorno 5: T22-T24** | Calcolo dei materiali mancanti e del piano di farming (D112), eventi con edizioni, giorni attivi e area admin (D113, D114), pagina roster e inventario (D115, D116). Backend 496 test (copertura 98,5%), frontend 336 (98,6%). Un incidente di Render ha fermato i deploy gratuiti per alcune ore: T22 è andata online con un deploy manuale. Trello T22-T24 in "Fatto" |
 | 15-16/10 | **Giorno 6: T25-T28 · v1** | Attività manuali, completamento con l'inventario e calendario in backend (D117, D118); pagina calendario con FullCalendar 7, che rispetta la CSP, e riquadro Waveplate (D119, D120); profilo e gestione eventi admin (D121, D122); README e checklist di rilascio, 9 punti su 9 ✓ online; tag `v1.0.0`. Backend 554 test (copertura 98,5%), frontend 478 (97,9%). Trello T25-T28 in "Fatto" |
 | 16/10 | **Giorno 7: T29-T31** | Pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Punto 6 della checklist verificato in locale. Backend 626 test (copertura 98,2%), frontend 492 (97,9%). PR #35-#38 |
+| 17/10 | **Giorno 8: T32-T34** | Per scelta dell'utente l'agente usa un modello gratuito su OpenRouter al posto dell'API Claude (D126, fuori dal programma del corso): client con `RestClient` e solo modelli `:free` (T32), i cinque strumenti con argomenti controllati e salvataggio con ricalcolo (D127), ciclo dell'agente con limiti di giri, strumenti e tempo (D128). Una sola chiamata vera, con Nemotron: Gemma riceveva 429 dal suo fornitore. Su questo computer Norton rifirma HTTPS, quindi Java usa l'archivio dei certificati di Windows. Backend 798 test (copertura 98,1%), frontend 492 invariato. PR #40-#42 |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -49,7 +50,7 @@ Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D125) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D128) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -61,7 +62,7 @@ Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su
 - **Demo con dataset curato** (D9): sei personaggi reali (Jinhsi, Yinlin, Changli, Lingyang, Danjin, Aalto, D17), tre eventi reali (Bountiful Crescendo, Lament Recon: Solaris Soldier, By Moon's Grace), calcolo dei materiali fino al livello 40 (D27).
 - **Esperienza:** registrazione, configurazione guidata in tre passi, calendario con eventi e Waveplate, chat con l'agente che propone un piano da confermare.
 - **Rilasci:** v1 core entro il giorno 6, v2 agente entro il giorno 10, poi margine, extra e rifinitura (D8, D90).
-- **Agente:** Claude Haiku 4.5, cinque strumenti limitati all'utente del token, pianificatore deterministico in Java, piano base senza IA come riserva (D54-D64).
+- **Agente:** modello gratuito su OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`, D126), cinque strumenti limitati all'utente del token (D127), ciclo scritto da noi con al massimo 6 giri (D128), pianificatore deterministico in Java, piano base senza IA come riserva (D54-D64).
 
 ## Questioni aperte
 
@@ -71,7 +72,9 @@ Il progetto è approvato e i giorni da 1 a 7 (T01-T31) sono completati, uniti su
 4. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide.
 5. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
 6. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
-7. **Limite apposito per il piano base:** da decidere in T35 insieme al limite giornaliero dell'agente (vedi i promemoria).
+7. **Limiti dell'agente e del piano base:** da decidere in T35. OpenRouter gratuito dà 50 richieste al giorno per tutto l'account e un messaggio ne usa fino a 6, quindi i 20 messaggi per utente di D48 sono troppi (vedi i promemoria di T34).
+8. **Su Render resta `ANTHROPIC_MODEL`**, che il codice non usa più: si può togliere.
+9. **Trello:** T32-T34 da spostare in "Fatto".
 
 ## Promemoria per le prossime card
 
@@ -113,14 +116,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorno 8: card T32-T34 di `docs/09-task.md` (client dell'API Claude, i cinque strumenti, ciclo dell'agente con un finto client nei test). Serve la chiave API di Anthropic, che inserisce l'utente.
+1. Giorno 9: card T35-T36 di `docs/09-task.md` (salvataggio dei messaggi, storico a pagine, limiti e API di utilizzo; poi la chat nel frontend). Prima di T35 vanno decisi i limiti (vedi le questioni aperte).
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 6 (card T25-T28). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo il giorno 9 (card T35-T36). Prima di scrivere codice riassumimi il piano e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
@@ -133,6 +136,8 @@ Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`.
 - In SQL un `CHECK` che vale NULL viene considerato superato: ogni regola deve controllare anche `IS NOT NULL`.
 - Se si modifica in locale una migrazione già applicata (solo prima di unirla a `main`), Flyway rifiuta il checksum: si ricreano i database con `docker compose down -v`.
 - Una revisione del codice prima di ogni pull request ha trovato problemi veri in quasi tutte le card: vale la pena farla sempre.
+- Con i modelli gratuiti un 429 può venire dal fornitore anche con la quota intatta: prima di cercare un errore nel codice si prova un altro modello (`OPENROUTER_MODEL`).
+- Un timeout del client HTTP non è una scadenza totale: smette di aspettare gli header, ma non un server che manda gli header e poi tace. Lo ha mostrato un test con un piccolo server locale (T32).
 - I filtri di Spring Security lavorano prima dei controller: i loro errori non passano dal `@RestControllerAdvice`.
 - Provare l'immagine Docker in locale con i limiti di Render (`--memory=512m --cpus=0.1`) ha mostrato prima del deploy il rischio di memoria e l'avvio lento.
 - Le intestazioni di sicurezza del sito statico (CSP, `nosniff`) si impostano in Render > sito > Headers e non stanno nel repository: se il sito viene ricreato vanno rifatte. Il pulsante "Add Rule" della pagina Headers va premuto con un clic alle coordinate, non con il riferimento dell'elemento.
