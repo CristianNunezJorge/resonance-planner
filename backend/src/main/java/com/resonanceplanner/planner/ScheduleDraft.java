@@ -23,12 +23,37 @@ public record ScheduleDraft(List<String> characterPriority, List<DayPlan> days, 
         warnings = List.copyOf(warnings);
     }
 
+    /**
+     * True when the other draft proposes the same plan: the same tasks on the same days, the same coverage and
+     * warnings. What was free on each day does not count: a Waveplate that comes back every 6 minutes changes it
+     * without changing the plan (D127).
+     */
+    public boolean samePlanAs(ScheduleDraft other) {
+        if (other == null || days.size() != other.days.size()) {
+            return false;
+        }
+        for (int i = 0; i < days.size(); i++) {
+            if (!days.get(i).samePlanAs(other.days.get(i))) {
+                return false;
+            }
+        }
+        return characterPriority.equals(other.characterPriority) && coverage.equals(other.coverage)
+                && complete == other.complete && containsEstimates == other.containsEstimates
+                && warnings.equals(other.warnings);
+    }
+
     /** A day: what was free on it, what the plan uses and its tasks, the event activities first. */
     public record DayPlan(LocalDate date, boolean excluded, int waveplatesAvailable, int minutesAvailable,
             int waveplatesUsed, int minutesUsed, List<DraftTask> tasks) {
 
         public DayPlan {
             tasks = List.copyOf(tasks);
+        }
+
+        // Everything but what was available on the day
+        boolean samePlanAs(DayPlan other) {
+            return date.equals(other.date) && excluded == other.excluded && waveplatesUsed == other.waveplatesUsed
+                    && minutesUsed == other.minutesUsed && tasks.equals(other.tasks);
         }
     }
 
