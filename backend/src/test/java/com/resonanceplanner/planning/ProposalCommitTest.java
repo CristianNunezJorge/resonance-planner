@@ -1,8 +1,12 @@
 package com.resonanceplanner.planning;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.resonanceplanner.common.error.ConflictException;
+import com.resonanceplanner.planner.PlannerService;
+import com.resonanceplanner.planner.ScheduleDraft;
+import com.resonanceplanner.planner.ScheduleRequest;
 import com.resonanceplanner.planning.dto.ProposalResponse;
 import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.User;
@@ -35,6 +39,9 @@ class ProposalCommitTest {
 
     @Autowired
     private ProposalService proposalService;
+
+    @Autowired
+    private PlannerService plannerService;
 
     @Autowired
     private UserRepository userRepository;
@@ -72,6 +79,35 @@ class ProposalCommitTest {
             // The tasks of the first plan from today on are replaced by the new one (D22)
             assertThat(taskCount(first.id(), "CONFIRMED")).isZero();
             assertThat(taskCount(first.id(), "REPLACED")).isEqualTo(first.tasks().size());
+        } finally {
+            cleanUp(user);
+        }
+    }
+
+    @Test
+    void savesThePlanTheAgentSawOnlyWhileItsDataStayTheSame() {
+        User user = newUser("proposal.agent");
+        try {
+            ScheduleRequest request = new ScheduleRequest(null, 3, null, null, false, null);
+            ScheduleDraft seen = plannerService.draft(user.getId(), request);
+
+            ProposalResponse saved = proposalService.saveIfUnchanged(user.getId(), request, seen, "Piano dell'agente.");
+
+            assertThat(proposalStatus(saved.id())).isEqualTo("PENDING");
+            assertThat(jdbc.queryForObject("select summary from plan_proposal where id = ?", String.class, saved.id()))
+                    .isEqualTo("Piano dell'agente.");
+            assertThat(taskCount(saved.id(), "PROPOSED"))
+                    .isEqualTo(seen.days().stream().mapToInt(day -> day.tasks().size()).sum())
+                    .isPositive();
+
+            // The roster changes after the model saw the plan: that plan is not saved (D127)
+            jdbc.update("update owned_character set current_level = 10 where user_id = ?", user.getId());
+
+            assertThatThrownBy(() -> proposalService.saveIfUnchanged(user.getId(), request, seen, "Piano vecchio."))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessage(ProposalService.DATA_CHANGED);
+            assertThat(jdbc.queryForList("select id from plan_proposal where user_id = ? and status = 'PENDING'",
+                    Long.class, user.getId())).containsExactly(saved.id());
         } finally {
             cleanUp(user);
         }

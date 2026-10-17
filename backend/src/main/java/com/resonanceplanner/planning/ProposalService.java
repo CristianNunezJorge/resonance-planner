@@ -38,6 +38,8 @@ public class ProposalService {
     private static final String NOT_FOUND = "Proposta non trovata.";
     private static final List<ProposalStatus> LAST_PLAN = List.of(ProposalStatus.PENDING, ProposalStatus.CONFIRMED);
     private static final String NOTHING_TO_PLAN = "Il pianificatore non ha trovato niente da fare in questi giorni.";
+    static final String DATA_CHANGED =
+            "Roster, Waveplate o calendario sono cambiati dopo il calcolo del piano: richiama plan_schedule.";
 
     private final PlanProposalRepository proposalRepository;
     private final PlannedTaskRepository taskRepository;
@@ -97,6 +99,20 @@ public class ProposalService {
             }
         }
         return ProposalResponse.from(proposal, tasks);
+    }
+
+    /**
+     * Saves the plan the agent showed to the model (D56, D127): with the user locked it calculates the plan again with
+     * the same parameters, and saves it only if it is the same plan, so a proposal never comes from data that are out
+     * of date. Otherwise 409, which the agent passes to the model so it plans again. The new draft is the one saved.
+     */
+    public ProposalResponse saveIfUnchanged(Long userId, ScheduleRequest request, ScheduleDraft seen, String summary) {
+        lockUser(userId);
+        ScheduleDraft draft = plannerService.draft(userId, request);
+        if (!draft.samePlanAs(seen)) {
+            throw new ConflictException(DATA_CHANGED);
+        }
+        return save(userId, draft, summary);
     }
 
     /** The pending proposal with its tasks, if there is one. */

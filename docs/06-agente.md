@@ -57,6 +57,8 @@ Tutti gli strumenti lavorano sull'utente del token: nessuno ha un parametro `use
 
 Il calcolo dei materiali mancanti (`GET /api/me/farming-plan`) è dentro `plan_schedule`, quindi non serve uno strumento separato.
 
+Come gli strumenti leggono gli argomenti del modello, cosa restituiscono e i passaggi che danno sono in D127. `get_events` e `get_calendar` senza date leggono da oggi per 14 giorni, al massimo 62 giorni.
+
 ### plan_schedule
 
 ```json
@@ -87,7 +89,7 @@ Restituisce la bozza: per ogni giorno le attività con minuti e Waveplate, poi l
 { "summary": "Concentro la Simulation Training mercoledì e giovedì, quando le ricompense sono doppie..." }
 ```
 
-Salva come proposta l'**ultima bozza generata da `plan_schedule` nello stesso turno**, sostituendo la proposta in attesa (D22). Se nel turno non c'è una bozza, restituisce un errore e il modello deve prima chiamare `plan_schedule`. Così il modello non scrive mai le attività a mano e nessun numero del piano può essere inventato (D56).
+Salva come proposta l'**ultima bozza generata da `plan_schedule` nello stesso turno**, sostituendo la proposta in attesa (D22). Prima di salvarla la ricalcola con gli stessi parametri e l'utente bloccato: se i dati sono cambiati nel frattempo, risponde al modello di richiamare `plan_schedule` (D127). Se nel turno non c'è una bozza, restituisce un errore e il modello deve prima chiamare `plan_schedule`. Così il modello non scrive mai le attività a mano e nessun numero del piano può essere inventato (D56).
 
 ## Il pianificatore (D57)
 
