@@ -25,6 +25,8 @@ class AppPropertiesTest {
             assertThat(properties.admin().email()).isEqualTo("admin@example.com");
             assertThat(properties.cors().allowedOrigins())
                     .containsExactly("http://localhost:5173", "https://planner.example.com");
+            assertThat(properties.agent().apiKey()).isEqualTo("test-openrouter-key");
+            assertThat(properties.agent().model()).isEqualTo("google/gemma-4-31b-it:free");
         });
     }
 
@@ -93,7 +95,9 @@ class AppPropertiesTest {
         "app.jwt.secret, JWT_SECRET",
         "app.admin.email, ADMIN_EMAIL",
         "app.admin.password, ADMIN_PASSWORD",
-        "app.cors.allowed-origins, CORS_ALLOWED_ORIGINS"
+        "app.cors.allowed-origins, CORS_ALLOWED_ORIGINS",
+        "app.agent.api-key, OPENROUTER_API_KEY",
+        "app.agent.model, OPENROUTER_MODEL"
     })
     void stopsWithTheVariableNameWhenAValueIsMissing(String property, String variable) {
         contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(property + "=").run(context -> {
@@ -109,7 +113,15 @@ class AppPropertiesTest {
         "app.admin.password=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, ADMIN_PASSWORD",
         "'app.cors.allowed-origins=,', CORS_ALLOWED_ORIGINS",
         "app.cors.allowed-origins=*, CORS_ALLOWED_ORIGINS",
-        "app.cors.allowed-origins=https://planner.example.com/app, CORS_ALLOWED_ORIGINS"
+        "app.cors.allowed-origins=https://planner.example.com/app, CORS_ALLOWED_ORIGINS",
+        // The agent must be free (D126): a paid model, or the router that picks a free model at random, stops the app
+        "app.agent.model=anthropic/claude-haiku-4.5, OPENROUTER_MODEL",
+        "app.agent.model=openrouter/free, OPENROUTER_MODEL",
+        "app.agent.model=google/gemma-4-31b-it:free-trial, OPENROUTER_MODEL",
+        "'app.agent.model=google/gemma 4:free', OPENROUTER_MODEL",
+        "app.agent.model=google/gemma-4-31b-it:nitro:free, OPENROUTER_MODEL",
+        // A key pasted with a space would make every call fail with an invalid header
+        "'app.agent.api-key=sk-or-v1-abc def', OPENROUTER_API_KEY"
     })
     void stopsWithTheVariableNameWhenAValueIsInvalid(String invalidProperty, String variable) {
         contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(invalidProperty).run(context -> {
@@ -124,7 +136,9 @@ class AppPropertiesTest {
             String printed = context.getBean(AppProperties.class).toString();
             assertThat(printed)
                     .contains("admin@example.com")
-                    .doesNotContain("database-password", "a-test-secret-that-is-long-enough-for-jwt", "admin-password");
+                    .contains("google/gemma-4-31b-it:free")
+                    .doesNotContain("database-password", "a-test-secret-that-is-long-enough-for-jwt", "admin-password",
+                            "test-openrouter-key");
         });
     }
 }

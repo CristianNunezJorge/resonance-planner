@@ -12,7 +12,9 @@ final class AppPropertiesTestSupport {
         "app.jwt.secret=a-test-secret-that-is-long-enough-for-jwt",
         "app.admin.email=admin@example.com",
         "app.admin.password=admin-password",
-        "app.cors.allowed-origins=http://localhost:5173,https://planner.example.com"
+        "app.cors.allowed-origins=http://localhost:5173,https://planner.example.com",
+        "app.agent.api-key=test-openrouter-key",
+        "app.agent.model=google/gemma-4-31b-it:free"
     };
 
     private AppPropertiesTestSupport() {}

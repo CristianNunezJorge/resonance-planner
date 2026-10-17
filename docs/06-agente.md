@@ -1,6 +1,6 @@
 # 6. Agente IA
 
-**Stato:** completata · 01/10/2026 · modello scelto: Claude Haiku 4.5
+**Stato:** completata · 01/10/2026 · dal 17/10/2026 modello gratuito con OpenRouter (D126)
 
 ## Cosa fa l'agente
 
@@ -20,7 +20,7 @@ sequenceDiagram
   participant U as Utente
   participant F as Frontend
   participant B as Backend
-  participant C as API Claude
+  participant C as OpenRouter
   U->>F: Organizzami la settimana
   F->>B: POST /api/me/agent/messages
   B->>B: controlla il limite giornaliero
@@ -41,7 +41,7 @@ sequenceDiagram
   F->>B: POST conferma della proposta
 ```
 
-Il ciclo è scritto da noi (D54): finché Claude chiede strumenti, il backend li esegue e gli rimanda i risultati; quando Claude risponde con un testo, il ciclo finisce. Se Claude chiede più strumenti nello stesso turno, il backend li esegue tutti e restituisce i risultati in un unico messaggio.
+Il ciclo è scritto da noi (D54): finché il modello chiede strumenti, il backend li esegue e gli rimanda i risultati; quando il modello risponde con un testo, il ciclo finisce. Se il modello chiede più strumenti nello stesso turno, il backend li esegue tutti e manda tutti i risultati nella richiesta successiva, un messaggio `tool` per ogni chiamata (D126).
 
 ## Gli strumenti (D55)
 
@@ -136,30 +136,29 @@ Il testo definitivo si rifinisce durante lo sviluppo con gli scenari di prova.
 | Storico | Gli ultimi 10 messaggi della chat, solo testo (D40) | A ogni richiesta |
 | Messaggio nuovo | Il testo dell'utente, preceduto da data e ora di oggi (Europe/Rome, D41) | A ogni richiesta |
 
-Le parti fisse stanno all'inizio, così l'API può tenerle in cache e farle pagare meno nei giri successivi del ciclo (D54).
+Le parti fisse stanno all'inizio, così il fornitore può tenerle in cache nei giri successivi del ciclo, se lo fa: con i modelli gratuiti non è garantito (D54, D126).
 
-## Modello e costi (D59)
+## Modello e costi (D59, D126)
 
-Il modello si sceglie in configurazione, con una riga. Stima per una richiesta tipica: 4 giri del ciclo, circa 20.000 token in input e 2.000 in output. Sono stime nostre, da verificare con i dati reali di utilizzo.
+Il modello si sceglie in configurazione, con una riga, e deve essere **gratuito**: il backend non parte se il nome non finisce con `:free`. Una richiesta tipica fa 4 giri del ciclo, cioè 4 chiamate a OpenRouter.
 
-| Modello | Prezzo per milione di token (input / output) | Costo stimato per richiesta | 300 richieste di sviluppo |
-|---|---|---|---|
-| Claude Haiku 4.5 | 1 $ / 5 $ | ~0,03 $ | ~9 $ |
-| Claude Sonnet 5.5 | 2 $ / 10 $ | ~0,06-0,09 $ | ~18-27 $ |
-| Claude Opus 5.5 | 4 $ / 20 $ | ~0,12-0,18 $ | ~36-54 $ |
+| Modello | Costo | Note |
+|---|---|---|
+| `nvidia/nemotron-3-super-120b-a12b:free` | 0 $ | Scelto: nella chiamata di prova del 17/10 ha usato lo strumento e risposto in italiano |
+| `google/gemma-4-31b-it:free` | 0 $ | Alternativa: il 17/10 il suo fornitore gratuito rispondeva sempre 429 |
 
-Per Sonnet 5.5 e Opus 5.5 la stima è più larga: ragionano prima di rispondere (anche questi token si pagano) e contano circa il 30% di token in più a parità di testo. Le cache dei prompt abbassano tutti i costi.
+Il piano gratuito di OpenRouter permette 20 richieste al minuto e 50 al giorno per tutto l'account: circa 10 messaggi all'agente al giorno in tutta l'app. Quando il limite finisce, l'agente risponde 502 e resta il piano base (D64).
 
 Con questo progetto i conti e il calendario li fa Java, quindi al modello resta un compito più semplice: capire la richiesta, scegliere i parametri e spiegare.
 
-**Scelta:** Claude Haiku 4.5 (`claude-haiku-4-5`), senza ragionamento esteso. Se gli scenari di prova mostrassero risposte poco precise, si può passare a Sonnet 5.5 cambiando la configurazione.
+**Scelta:** `nvidia/nemotron-3-super-120b-a12b:free`. Se gli scenari di prova mostrassero risposte poco precise, o il fornitore non rispondesse, si prova l'altro modello gratuito cambiando la configurazione.
 
 ## Limiti per richiesta
 
 | Limite | Valore | Perché |
 |---|---|---|
 | Giri del ciclo | Massimo 6 | Il costo di un messaggio resta limitato |
-| Messaggi al giorno | 20 per utente (D48) | Protegge il credito |
+| Messaggi al giorno | 20 per utente (D48) | Protegge il limite gratuito di OpenRouter (D126) |
 | Storico inviato | Ultimi 10 messaggi | I token non crescono con la chat |
 | Lunghezza di un messaggio utente | 1.000 caratteri | Evita richieste enormi |
 | Tempo di risposta dell'API | 60 secondi per chiamata | Evita richieste appese |
@@ -169,7 +168,7 @@ Con questo progetto i conti e il calendario li fa Java, quindi al modello resta 
 | Situazione | Cosa succede |
 |---|---|
 | Uno strumento fallisce (per esempio parametri non validi) | Il risultato torna al modello segnato come errore, con la spiegazione; il modello può correggersi |
-| L'API Claude non risponde o dà errore | Risposta 502 con un messaggio chiaro; il resto dell'app funziona e si può usare il piano base (D64) |
+| OpenRouter non risponde, dà errore o il limite gratuito è finito | Risposta 502 con un messaggio chiaro; il resto dell'app funziona e si può usare il piano base (D64) |
 | Superati i 6 giri | Il ciclo si ferma e l'utente riceve un messaggio che lo invita a riformulare |
 | Il modello rifiuta la richiesta o la risposta viene troncata | Messaggio generico all'utente, dettagli nei log |
 | Qualsiasi errore | Il messaggio non viene salvato e non conta nel limite giornaliero |

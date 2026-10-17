@@ -32,7 +32,7 @@ Il backend usa il piano gratuito di Render: dopo 15 minuti senza richieste si sp
 È una demo con un dataset curato: sei personaggi e tre eventi reali del gioco, calcolo dei materiali fino al livello 40.
 
 **In arrivo con la v2:**
-- un agente IA, basato sull'API Claude, che propone un piano giorno per giorno;
+- un agente IA, con un modello gratuito tramite OpenRouter, che propone un piano giorno per giorno;
 - un piano base, sempre disponibile, che funziona anche senza IA;
 - l'anteprima della proposta nel calendario, da confermare o scartare.
 
@@ -63,7 +63,7 @@ Il backend usa il piano gratuito di Render: dopo 15 minuti senza richieste si sp
 | Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24, React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3, FullCalendar 7.1 |
 | Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc | Java 21, Spring Boot 4.1.1, Maven 3.10 (wrapper incluso) |
 | Database | PostgreSQL, schema gestito con Flyway | PostgreSQL 16 |
-| IA (v2) | API Claude con l'SDK Java ufficiale | — |
+| IA (v2) | OpenRouter con un modello gratuito, chiamato con `RestClient` di Spring (D126) | — |
 | Test | JUnit 5, Mockito, JaCoCo, Vitest, React Testing Library | — |
 | Deploy | Render (sito statico, backend Docker, database) | — |
 
@@ -127,4 +127,4 @@ Alla v1 i test sono 554 nel backend e 478 nel frontend, con una copertura intorn
 
 ## In English
 
-Resonance Planner is a planner for the game Wuthering Waves, built as the capstone project of the Epicode Full-Stack AI Developer master. Version 1 is online: a calendar that shows time-limited events only on the days they are active, manual tasks, the Waveplate stamina counter, the roster and inventory with the materials still missing for each character, a profile page and an admin area for events. The Java backend does all the calculations. Version 2 adds an AI agent based on the Claude API that proposes a day-by-day plan, which the user always confirms. Stack: React + TypeScript, Spring Boot, PostgreSQL, deployed on Render.
+Resonance Planner is a planner for the game Wuthering Waves, built as the capstone project of the Epicode Full-Stack AI Developer master. Version 1 is online: a calendar that shows time-limited events only on the days they are active, manual tasks, the Waveplate stamina counter, the roster and inventory with the materials still missing for each character, a profile page and an admin area for events. The Java backend does all the calculations. Version 2 adds an AI agent, running on a free model through OpenRouter, that proposes a day-by-day plan, which the user always confirms. Stack: React + TypeScript, Spring Boot, PostgreSQL, deployed on Render.

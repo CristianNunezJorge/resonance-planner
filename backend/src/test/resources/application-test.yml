@@ -16,6 +16,10 @@ app:
     password: test-only-admin-password
   cors:
     allowed-origins: http://localhost:5173
+  # Never the real key of the .env file: the tests use a fake model client or a fake server (D63)
+  agent:
+    api-key: test-only-openrouter-key
+    model: test/model:free
   # The tests of all the classes call the application from the same address and share its counters: the limits are
   # so high that they never get in the way. RateLimitIntegrationTest sets its own small ones.
   rate-limit:

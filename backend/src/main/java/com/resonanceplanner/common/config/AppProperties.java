@@ -28,6 +28,7 @@ public record AppProperties(
         @Valid @NotNull Jwt jwt,
         @Valid @NotNull Admin admin,
         @Valid @NotNull Cors cors,
+        @Valid @NotNull Agent agent,
         @DefaultValue RateLimit rateLimit) {
 
     private static final String HIDDEN = "***";
@@ -75,6 +76,29 @@ public record AppProperties(
                     @Pattern(regexp = "^https?://[^/*\\s]+$",
                             message = "CORS_ALLOWED_ORIGINS must list origins like https://example.com, without * or paths")
                     String> allowedOrigins) {}
+
+    /**
+     * The model of the agent on OpenRouter (D126). It must be free: an id like "author/model:free", so a paid model,
+     * or the router that picks a different free model every time, stops the application at startup.
+     * A key pasted with a space or a line break would make every call fail, so it stops the startup too.
+     */
+    public record Agent(
+            @NotBlank(message = "set the OPENROUTER_API_KEY environment variable")
+            @Pattern(regexp = API_KEY, message = "OPENROUTER_API_KEY must not contain spaces or line breaks")
+            String apiKey,
+            @NotBlank(message = "set the OPENROUTER_MODEL environment variable")
+            @Pattern(regexp = FREE_MODEL,
+                    message = "OPENROUTER_MODEL must be a free model, with an id like author/model:free (D126)")
+            String model) {
+
+        public static final String API_KEY = "^\\S+$";
+        public static final String FREE_MODEL = "^[\\w.-]+/[\\w.-]+:free$";
+
+        @Override
+        public String toString() {
+            return "Agent[apiKey=" + HIDDEN + ", model=" + model + "]";
+        }
+    }
 
     /**
      * Limits of requests per client address (D48, D101). Not required: without properties the values of D48 apply.
