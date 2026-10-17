@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiRequest, describeError, setUnauthorizedHandler } from './client'
+import { ApiError, apiPage, apiRequest, describeError, setUnauthorizedHandler } from './client'
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -208,6 +208,49 @@ describe('apiRequest', () => {
 
       await expect(apiRequest('/api/me', { token: 'old.token' })).rejects.toBeInstanceOf(ApiError)
     })
+  })
+})
+
+// A page of a list (D46, D130): the data and the meta part with the size of the page and whether more items follow
+describe('apiPage', () => {
+  const fetchMock = vi.fn<typeof fetch>()
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com')
+  })
+
+  afterEach(() => {
+    fetchMock.mockReset()
+    vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+  })
+
+  it('returns the data of the page with its meta part', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ success: true, data: [{ id: 88 }], error: null, meta: { limit: 20, hasMore: true } }),
+    )
+
+    await expect(apiPage('/api/me/agent/messages', { token: 'the.token' })).resolves.toEqual({
+      data: [{ id: 88 }],
+      meta: { limit: 20, hasMore: true },
+    })
+    const headers = fetchMock.mock.calls[0][1]?.headers as Headers
+    expect(headers.get('Authorization')).toBe('Bearer the.token')
+  })
+
+  it('fails like apiRequest when the server answers with an error', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ success: false, data: null, error: { code: 'UNAUTHORIZED', message: 'Devi accedere.' } }, 401),
+    )
+
+    await expect(apiPage('/api/me/agent/messages')).rejects.toMatchObject({ code: 'UNAUTHORIZED', status: 401 })
+  })
+
+  it('treats a page without its meta part as an unexpected answer', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ success: true, data: [], error: null }))
+
+    await expect(apiPage('/api/me/agent/messages')).rejects.toMatchObject({ code: 'INTERNAL_ERROR' })
   })
 })
 

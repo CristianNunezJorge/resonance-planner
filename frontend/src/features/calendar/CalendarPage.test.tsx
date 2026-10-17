@@ -8,6 +8,8 @@ import { catalogCharacters, catalogMaterials, gameRules } from '../../test/fixtu
 import { rover, signedIn } from '../../test/utils'
 import { restoreSession } from '../auth/authSlice'
 import { getCharacters, getGameRules, getMaterials } from '../catalog/catalogApi'
+import { getMessages, getUsage, sendMessage } from '../chat/chatApi'
+import type { ChatAnswer, ChatUsage } from '../chat/types'
 import { getWaveplate } from '../waveplate/waveplateApi'
 import {
   completeTask,
@@ -24,6 +26,7 @@ import type { CalendarData, CalendarTask, GameEvent, Proposal } from './types'
 
 vi.mock('../catalog/catalogApi', () => ({ getCharacters: vi.fn(), getGameRules: vi.fn(), getMaterials: vi.fn() }))
 vi.mock('../waveplate/waveplateApi', () => ({ getWaveplate: vi.fn(), saveWaveplate: vi.fn() }))
+vi.mock('../chat/chatApi', () => ({ getMessages: vi.fn(), getUsage: vi.fn(), sendMessage: vi.fn() }))
 vi.mock('./calendarApi', () => ({
   getCalendar: vi.fn(),
   createTask: vi.fn(),
@@ -140,6 +143,14 @@ const proposal: Proposal = {
   tasks: [proposedTask],
 }
 
+const chatUsage: ChatUsage = {
+  used: 0,
+  limit: 5,
+  resetsAt: '2026-10-17T22:00:00Z',
+  callsLimitReached: false,
+  appLimitReached: false,
+}
+
 function stubScreen(isPhone: boolean) {
   vi.stubGlobal('matchMedia', (query: string) => ({
     matches: isPhone,
@@ -178,6 +189,8 @@ describe('CalendarPage', () => {
     vi.mocked(getMaterials).mockResolvedValue(catalogMaterials)
     vi.mocked(getWaveplate).mockRejectedValue(new ApiError('NOT_FOUND', 'Nessuna lettura.', 404))
     vi.mocked(getCalendar).mockResolvedValue(week)
+    vi.mocked(getMessages).mockResolvedValue({ messages: [], hasMore: false })
+    vi.mocked(getUsage).mockResolvedValue(chatUsage)
   })
 
   afterEach(() => {
@@ -630,6 +643,90 @@ describe('CalendarPage', () => {
 
       await waitFor(() => expect(lastToast(store)?.message).toBe('Attività non trovata.'))
       expect(lastToast(store)?.variant).toBe('danger')
+    })
+  })
+
+  describe('chat with the agent (D130)', () => {
+    const answer: ChatAnswer = {
+      message: { id: 6, role: 'ASSISTANT', content: 'Ecco un piano.', proposalId: 7, createdAt: '2026-10-17T12:00:00Z' },
+      proposal,
+      steps: ['Ho calcolato il piano', 'Ho preparato la proposta'],
+      usage: { ...chatUsage, used: 1 },
+    }
+
+    it('shows the chat in the side column on a wide screen', async () => {
+      renderPage()
+
+      const aside = screen.getByRole('complementary', { name: 'Riepilogo' })
+      expect(await within(aside).findByRole('heading', { level: 2, name: 'Agente' })).toBeInTheDocument()
+      expect(within(aside).getByText('0 / 5 messaggi oggi')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Agente' })).not.toBeInTheDocument()
+    })
+
+    it('opens the chat from the side below 992 px', async () => {
+      stubScreen(true)
+      renderPage()
+      expect(screen.queryByRole('heading', { level: 2, name: 'Agente' })).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Agente' }))
+
+      const drawer = screen.getByRole('dialog', { name: 'Chat con l’agente' })
+      expect(await within(drawer).findByText('0 / 5 messaggi oggi')).toBeInTheDocument()
+      fireEvent.click(within(drawer).getByRole('button', { name: 'Chiudi la chat' }))
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('loads the calendar again when the answer brings a proposal, so the bar appears', async () => {
+      vi.mocked(sendMessage).mockResolvedValue(answer)
+      renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+      vi.mocked(getCalendar).mockResolvedValue({ ...week, pendingProposal: proposal })
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Organizzami la settimana' }))
+
+      expect(await screen.findByRole('region', { name: 'Proposta in attesa' })).toBeInTheDocument()
+      expect(getCalendar).toHaveBeenCalledTimes(2)
+      expect(screen.getByText('Ecco un piano.')).toBeInTheDocument()
+    })
+
+    it('asks the agent about an event with «Spiegamelo»', async () => {
+      vi.mocked(sendMessage).mockResolvedValue({ ...answer, proposal: null })
+      renderPage()
+      await screen.findByText('0 / 5 messaggi oggi')
+
+      const dialog = await openItem("By Moon's Grace")
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Spiegamelo' }))
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      await waitFor(() => expect(sendMessage).toHaveBeenCalledWith(TOKEN, "Spiegami l’evento «By Moon's Grace»."))
+    })
+
+    it('asks the agent to update an out of date plan, opening the chat below 992 px', async () => {
+      stubScreen(true)
+      vi.mocked(getCalendar).mockResolvedValue({ ...week, planOutdated: true })
+      vi.mocked(sendMessage).mockResolvedValue({ ...answer, proposal: null })
+      renderPage()
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Chiedi all’agente' })).toBeEnabled())
+
+      fireEvent.click(screen.getByRole('button', { name: 'Chiedi all’agente' }))
+
+      expect(screen.getByRole('dialog', { name: 'Chat con l’agente' })).toBeInTheDocument()
+      await waitFor(() =>
+        expect(sendMessage).toHaveBeenCalledWith(
+          TOKEN,
+          'Roster, obiettivi o eventi sono cambiati dopo il mio ultimo piano: aggiornalo.',
+        ),
+      )
+    })
+
+    it('does not offer «Spiegamelo» while the agent cannot answer today', async () => {
+      vi.mocked(getUsage).mockResolvedValue({ ...chatUsage, appLimitReached: true })
+      renderPage()
+      await screen.findByText(/finito le richieste gratuite/)
+
+      const dialog = await openItem("By Moon's Grace")
+
+      expect(within(dialog).getByRole('button', { name: 'Spiegamelo' })).toBeDisabled()
     })
   })
 })

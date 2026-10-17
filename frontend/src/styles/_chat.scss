@@ -1,0 +1,44 @@
+// The chat with the agent (D130). The texts are plain text: the lines the model writes stay, long words break
+.chat-log {
+  max-height: 28rem;
+  overflow-y: auto;
+}
+
+.chat-message {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// The messages of the user lean to the right, with a touch of the gold accent; the light text stays AA on both
+.chat-message--user {
+  margin-left: 2rem;
+  background-color: rgba($gold, 0.14);
+  border: 1px solid rgba($gold, 0.45);
+}
+
+.chat-message--assistant {
+  margin-right: 1rem;
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+
+// Below 992 px the chat opens from the side (D130): the list takes the height that is left
+.chat-drawer .offcanvas-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-drawer .chat-log {
+  flex: 1 1 auto;
+  max-height: none;
+}
+
+// The button that opens the chat stays in a corner, over the calendar
+.chat-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1030;
+}
