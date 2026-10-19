@@ -507,7 +507,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate per ora:** passaggi in tempo reale con lo streaming (miglioramento futuro).
 
 ## D63 · Come testiamo l'agente
-**Stato:** Confermata · 01/10/2026
+**Stato:** Confermata · 01/10/2026 · come provare gli scenari reali con la quota gratuita in D131
 
 - **Cosa:** test JUnit di pianificatore e strumenti; test del ciclo con un finto client dell'API; dieci scenari reali verificati prima della demo.
 - **Come:** il client dell'API sta dietro un'interfaccia Java, così nei test si sostituisce con una versione che restituisce risposte preparate. Gli scenari reali sono elencati in `06-agente.md`.
@@ -1311,3 +1311,16 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Perché:** su computer si vede l'anteprima del piano mentre si parla con l'agente (D66); l'utente sa sempre cosa sta succedendo durante un'attesa che può essere lunga, non perde quello che ha scritto e capisce perché l'agente non è disponibile. Il testo semplice tiene lontani i rischi di un HTML scritto dal modello.
 - **Scartate:** chat in una pagina a parte (D66); una libreria per il markdown (fuori programma, e il modello potrebbe scrivere link: D60); salvare i passaggi nel database (D40 salva solo il testo); il confine del telefono a 768 px (vedi punto 1); "Spiegami l'evento" come suggerimento fisso (senza un evento preciso è ambiguo).
 - **Limiti noti:** i passaggi si perdono ricaricando la pagina (punto 4); se la connessione cade e la rilettura non trova la risposta, un nuovo invio manuale può ripetere un messaggio che il server stava ancora elaborando (servirebbe una chiave di idempotenza nel backend); la pulizia del testo non tocca il corsivo con un solo asterisco, che resta visibile; su schermo largo la risposta può arrivare nella colonna di destra fuori dalla vista, e lo dice solo la notifica.
+
+## D131 · Come proviamo i dieci scenari dell'agente con la quota gratuita
+**Stato:** Confermata · 19/10/2026 · nata da T37 · precisa D63, D126 e D129
+
+- **Cosa:** i dieci scenari reali di `06-agente.md` (D63) si provano in locale, divisi su due giorni UTC: il 19/10 quelli che creano un piano (1, 2, 3, 4 e 7), il 20/10 gli altri (5, 6, 8, 9 e 10), le ripetizioni dopo le correzioni e la prova online di T38.
+- **Come:**
+  1. **prima le correzioni già note:** le istruzioni di sistema si rifiniscono con i problemi visti nelle prove di T35 e T36 (markdown, nome dell'evento nella domanda, testo della proposta), così le prove vere non si spendono per errori già conosciuti;
+  2. **account di prova locali,** uno per ogni preparazione dei dati: A con un solo personaggio, B con tre, C per le domande senza piano, D con un piano base confermato, E con l'obiettivo già raggiunto. Ognuno ha i suoi 5 messaggi e le sue 24 chiamate (D129), quindi i limiti restano quelli veri. Gli account si cancellano alla fine;
+  3. **criterio prima della prova:** per ogni scenario si scrivono prima gli strumenti attesi, se deve nascere una proposta e cosa deve dire la risposta; dopo la prova si annotano strumenti usati, proposta, chiamate al modello (dalla riga di log del backend), secondi ed esito in `docs/scenari-agente.md`;
+  4. **permesso:** prima di ogni blocco di prove l'utente dà il permesso, con le chiamate stimate. Con un 429 di OpenRouter ci si ferma, senza riprovare (D126);
+  5. **effetto sul piano:** T38 finisce il 20/10, nei giorni di margine (D91: "fine del giorno 10 senza v2 completa").
+- **Perché:** dieci scenari costano circa 40-60 chiamate, più delle 50 al giorno di OpenRouter per tutto l'account, che servono anche al sito online. Con 25-35 chiamate al giorno resta spazio per chi usa il sito. Gli scenari che creano un piano vanno per primi perché sono i più costosi e quelli che dicono di più sulle istruzioni: se falliscono, si correggono e si ripetono il giorno dopo.
+- **Scartate:** tutti gli scenari in un giorno (si supera la quota e si blocca il sito online); alzare i limiti in locale con `APP_AGENTLIMITS_*` (con più account non serve, e le 50 di OpenRouter restano); comprare 10 $ di credito per avere 1.000 richieste al giorno (costa denaro, contro D126); test automatici contro l'API vera (già scartati da D63).
