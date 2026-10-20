@@ -89,7 +89,8 @@ public class AgentToolDefinitions {
                         schema(jsonMapper, RANGE)),
                 new ToolDefinition(PLAN_SCHEDULE,
                         "Calcola in Java un piano giorno per giorno (farming e attività degli eventi) con Waveplate e "
-                                + "minuti, e restituisce la bozza con la copertura dei materiali e gli avvisi. Non salva "
+                                + "minuti, e restituisce la bozza con la copertura dei materiali e gli avvisi. Legge da "
+                                + "solo roster, obiettivi, eventi, Waveplate e calendario dell'utente. Non salva "
                                 + "niente: per proporlo all'utente chiama poi create_plan_proposal. Per cambiare il piano "
                                 + "richiamalo con parametri diversi.",
                         schema(jsonMapper, SCHEDULE)),

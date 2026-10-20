@@ -24,6 +24,17 @@ describe('plainText', () => {
     )
   })
 
+  // In the scenarios of T37 the model still wrote italic text with one asterisk
+  it('removes the marks of italic text with one asterisk', () => {
+    expect(plainText('Oggi *Simulation Training: Resonance Potion* e *By Moon’s Grace*.')).toBe(
+      'Oggi Simulation Training: Resonance Potion e By Moon’s Grace.',
+    )
+  })
+
+  it('keeps the asterisks of products and of lists', () => {
+    expect(plainText('2*3 e 4*5 run\n* Lunedì\n* Martedì')).toBe('2*3 e 4*5 run\n* Lunedì\n* Martedì')
+  })
+
   it('leaves everything else as it is, also what looks like HTML', () => {
     expect(plainText('2 * 3 run, #1 della lista, <b>niente HTML</b>')).toBe('2 * 3 run, #1 della lista, <b>niente HTML</b>')
   })
