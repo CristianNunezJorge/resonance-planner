@@ -475,7 +475,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** inviare tutta la chat (costi che crescono senza limite); mettere i dati dell'utente nelle istruzioni (diventerebbero vecchi e romperebbero la cache).
 
 ## D59 · Modello configurabile
-**Stato:** Confermata · 01/10/2026 · Claude Haiku 4.5 · modello cambiato da D126 (17/10/2026): `nvidia/nemotron-3-super-120b-a12b:free`
+**Stato:** Confermata · 01/10/2026 · Claude Haiku 4.5 · modello cambiato da D126 (17/10/2026): `nvidia/nemotron-3-super-120b-a12b:free`, poi da D132 (20/10/2026): `nvidia/nemotron-3-ultra-550b-a55b:free`
 
 - **Cosa:** il modello si cambia in configurazione. Le opzioni sono Claude Haiku 4.5, Claude Sonnet 5.5 e Claude Opus 5.5; costi stimati in `06-agente.md`.
 - **Come:** proprietà di configurazione con il nome del modello e, per Sonnet 5.5 e Opus 5.5, il livello di ragionamento (effort).
@@ -1196,7 +1196,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** una data di "ultima modifica" sull'utente e sugli eventi (va aggiornata in ogni service che scrive, ed è facile dimenticarne uno); un avviso tenuto solo nel browser (si perde ricaricando la pagina).
 
 ## D126 · Agente gratuito con OpenRouter
-**Stato:** Confermata · 17/10/2026 · scelta dell'utente, con Nemotron come modello predefinito · modifica D6, D54, D59 e D61
+**Stato:** Confermata · 17/10/2026 · scelta dell'utente, con Nemotron come modello predefinito · modifica D6, D54, D59 e D61 · dal 20/10/2026 il modello predefinito è Nemotron Ultra (D132)
 
 - **Cosa:** l'agente usa un modello **gratuito** tramite OpenRouter, al posto dell'API Claude a pagamento. OpenRouter è un servizio che dà accesso a molti modelli di fornitori diversi con un'unica API e un'unica chiave; alcuni modelli sono gratuiti. È **fuori dal programma del corso**, che ha studiato l'API Claude (settimana 19, D6).
 - **Come:**
@@ -1292,7 +1292,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - messaggi e proposte crescono senza una pulizia automatica: con i limiti di oggi sono al massimo 10 messaggi e 20 proposte al giorno per utente.
 
 ## D130 · La chat dell'agente nel frontend
-**Stato:** Confermata · 17/10/2026 · nata da T36 · precisa D11, D62, D66 e D126
+**Stato:** Confermata · 17/10/2026 · nata da T36 · precisa D11, D62, D66 e D126 · corsivo tolto dalla pulizia del testo in T37 (20/10)
 
 - **Cosa:** come la pagina del calendario (P4) mostra la chat con l'agente: pannello, attesa, passaggi, limiti, errori e testi del modello.
 - **Come:**
@@ -1303,14 +1303,14 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   5. **proposta:** se la risposta porta una proposta, la pagina ricarica il calendario, che mostra la barra e le attività tratteggiate (D68);
   6. **limiti (D129):** il contatore "3 / 5 oggi" viene da `usage`. Con `used ≥ limit`, `callsLimitReached` o `appLimitReached` il campo si disattiva, la chat spiega quale limite è finito e offre "Genera piano base" (D64);
   7. **errori:** se l'invio fallisce il testo torna nel campo, così non si perde, se nel frattempo l'utente non ne ha scritto un altro; sotto compare il messaggio del server (429, 502). La bozza sta nello `chatSlice`, quindi resta anche se il pannello si chiude o passa di lato. Se la risposta non arriva affatto (connessione caduta, gateway), la chat ricarica storico e utilizzo: il server potrebbe aver salvato la risposta lo stesso;
-  8. **testi del modello:** sempre testo semplice, mai HTML (D60, T35). Una pulizia leggera toglie i segni del markdown (`**`, `__`, `` ` `` e i `#` dei titoli) e tiene gli a capo e i trattini degli elenchi;
+  8. **testi del modello:** sempre testo semplice, mai HTML (D60, T35). Una pulizia leggera toglie i segni del markdown (`**`, `__`, `` ` ``, i `#` dei titoli e, dal 20/10, il corsivo con un asterisco visto negli scenari di T37) e tiene gli a capo, i trattini degli elenchi e gli asterischi dentro una parola (2*3) o davanti a uno spazio;
   9. **suggerimenti (D11):** "Organizzami la settimana", "Cosa faccio oggi?", "Spiegami gli eventi in corso". Nel dettaglio di un evento "Spiegamelo" manda "Spiegami l'evento «nome»." e apre la chat; il nome, scritto da un admin, va su una riga, senza «» e al massimo di 80 caratteri, perché nel messaggio dell'utente avrebbe più autorità di un risultato di uno strumento (D60). Nell'avviso di cambiamento (D125) "Chiedi all'agente" chiede di aggiornare il piano. Su schermo largo una notifica dice che la risposta arriva nella chat a destra;
   10. **dati (D126):** sotto il campo la chat dice che i messaggi e i dati di gioco (roster, obiettivi, calendario) vanno a un modello gratuito di terzi tramite OpenRouter, che può conservarli, e di non scrivere dati personali;
   11. **sessione (D103):** uno `chatSlice` tiene messaggi, utilizzo, invio in corso e bozza; si azzera alla fine della sessione, a ogni login e quando la sessione ripristinata è di un altro utente (una sessione ripristinata per lo stesso utente, per esempio da un'altra scheda, non interrompe il messaggio che aspetta). Ignora le risposte arrivate per una sessione finita; un caricamento alla volta (la pagina e il pannello lo chiedono insieme), e una pagina vecchia arrivata dopo una rilettura non si aggiunge;
   12. **screen reader:** la lista è un `role="log"` che si può raggiungere con Tab perché scorre; l'attesa è un `role="status"` fuori dalla lista, così non si sente due volte; il messaggio in attesa è nascosto agli screen reader, che lo sentono una volta sola insieme alla risposta.
 - **Perché:** su computer si vede l'anteprima del piano mentre si parla con l'agente (D66); l'utente sa sempre cosa sta succedendo durante un'attesa che può essere lunga, non perde quello che ha scritto e capisce perché l'agente non è disponibile. Il testo semplice tiene lontani i rischi di un HTML scritto dal modello.
 - **Scartate:** chat in una pagina a parte (D66); una libreria per il markdown (fuori programma, e il modello potrebbe scrivere link: D60); salvare i passaggi nel database (D40 salva solo il testo); il confine del telefono a 768 px (vedi punto 1); "Spiegami l'evento" come suggerimento fisso (senza un evento preciso è ambiguo).
-- **Limiti noti:** i passaggi si perdono ricaricando la pagina (punto 4); se la connessione cade e la rilettura non trova la risposta, un nuovo invio manuale può ripetere un messaggio che il server stava ancora elaborando (servirebbe una chiave di idempotenza nel backend); la pulizia del testo non tocca il corsivo con un solo asterisco, che resta visibile; su schermo largo la risposta può arrivare nella colonna di destra fuori dalla vista, e lo dice solo la notifica.
+- **Limiti noti:** i passaggi si perdono ricaricando la pagina (punto 4); se la connessione cade e la rilettura non trova la risposta, un nuovo invio manuale può ripetere un messaggio che il server stava ancora elaborando (servirebbe una chiave di idempotenza nel backend); su schermo largo la risposta può arrivare nella colonna di destra fuori dalla vista, e lo dice solo la notifica.
 
 ## D131 · Come proviamo i dieci scenari dell'agente con la quota gratuita
 **Stato:** Confermata · 19/10/2026 · nata da T37 · precisa D63, D126 e D129
@@ -1324,3 +1324,12 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   5. **effetto sul piano:** T38 finisce il 20/10, nei giorni di margine (D91: "fine del giorno 10 senza v2 completa").
 - **Perché:** dieci scenari costano circa 40-60 chiamate, più delle 50 al giorno di OpenRouter per tutto l'account, che servono anche al sito online. Con 25-35 chiamate al giorno resta spazio per chi usa il sito. Gli scenari che creano un piano vanno per primi perché sono i più costosi e quelli che dicono di più sulle istruzioni: se falliscono, si correggono e si ripetono il giorno dopo.
 - **Scartate:** tutti gli scenari in un giorno (si supera la quota e si blocca il sito online); alzare i limiti in locale con `APP_AGENTLIMITS_*` (con più account non serve, e le 50 di OpenRouter restano); comprare 10 $ di credito per avere 1.000 richieste al giorno (costa denaro, contro D126); test automatici contro l'API vera (già scartati da D63).
+
+## D132 · Nemotron Ultra come modello predefinito
+**Stato:** Confermata · 20/10/2026 · nata da T37, scelta dell'utente · modifica la scelta del modello di D126 (punto 2)
+
+- **Cosa:** il modello predefinito dell'agente diventa `nvidia/nemotron-3-ultra-550b-a55b:free`, al posto di `nvidia/nemotron-3-super-120b-a12b:free`. Super e `google/gemma-4-31b-it:free` restano le alternative.
+- **Come:** si cambia solo `OPENROUTER_MODEL`, nel `.env` locale e su Render; il codice non cambia (D59). Il nome finisce con `:free`, quindi il controllo all'avvio di D126 resta valido. Gli scenari 4, 6 e 7 si ripetono con Ultra, così ogni comportamento importante è provato anche sul modello nuovo (`scenari-agente.md`).
+- **Perché:** il 20/10 l'unico fornitore gratuito di Super (Nvidia) è rimasto fuori servizio per ore: OpenRouter rispondeva 404 e l'agente del sito online non funzionava. Ultra, della stessa famiglia, aveva disponibilità piena e supporta gli strumenti. Negli scenari ha risposto in 3-36 secondi, in italiano e senza markdown, e non ha inventato motivi per i giorni vuoti.
+- **Scartate:** aspettare che Super torni (l'agente online resta fermo per un tempo che non si conosce); Gemma (il 17/10 il suo fornitore gratuito rispondeva sempre 429); `openrouter/free` (sceglie ogni volta un modello diverso, già scartato da D126); cambiare modello da solo quando uno non risponde (più codice e prove non ripetibili, per una demo).
+- **Limiti noti:** anche Ultra ha un solo fornitore gratuito, quindi può cadere come Super: si torna a Super o a Gemma cambiando `OPENROUTER_MODEL`. Ultra è più grande, quindi può essere più lento quando il fornitore è carico. Anche Ultra legge gli strumenti uno per giro, quindi un piano costa 4-6 chiamate.

@@ -18,13 +18,15 @@ export function explainEventText(name: string): string {
 export const UPDATE_PLAN_TEXT = 'Roster, obiettivi o eventi sono cambiati dopo il mio ultimo piano: aggiornalo.'
 
 /**
- * The text of the model as plain text: the marks of bold text, of code and of titles go away, the lines and the
- * dashes of the lists stay. The result is still shown as text, never as HTML (D60).
+ * The text of the model as plain text: the marks of bold and italic text, of code and of titles go away, the lines
+ * and the dashes of the lists stay. The result is still shown as text, never as HTML (D60).
  */
 export function plainText(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/gs, '$1')
     .replace(/__(.+?)__/gs, '$1')
+    // One asterisk on each side of a word, not inside a word (2*3) and not before a space (a list)
+    .replace(/(^|[^\w*])\*(?=\S)([^*\n]*?\S)\*(?![\w*])/gm, '$1$2')
     .replace(/`([^`\n]*)`/g, '$1')
     .replace(/^#{1,6}[ \t]+/gm, '')
 }

@@ -22,7 +22,7 @@ class AgentPromptTest {
             .toList();
 
     @Test
-    void tellsWhenToUseEachOfTheFiveTools() {
+    void mentionsEachOfTheFiveTools() {
         assertThat(toolNames).hasSize(5).allSatisfy(name -> assertThat(AgentPrompt.SYSTEM).contains(name));
     }
 

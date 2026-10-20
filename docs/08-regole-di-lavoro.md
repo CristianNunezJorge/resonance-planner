@@ -176,7 +176,7 @@ I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
 | `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | Connessione al database |
 | `JWT_SECRET` | Firma dei token, almeno 256 bit casuali |
 | `OPENROUTER_API_KEY` | Chiave dell'API di OpenRouter (D126) |
-| `OPENROUTER_MODEL` | Modello gratuito, per esempio `nvidia/nemotron-3-super-120b-a12b:free`: deve finire con `:free` (D59, D126) |
+| `OPENROUTER_MODEL` | Modello gratuito, per esempio `nvidia/nemotron-3-ultra-550b-a55b:free` (D132): deve finire con `:free` (D59, D126) |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Account admin creato all'avvio (D19) |
 | `CORS_ALLOWED_ORIGINS` | Dominio del frontend (D48) |
 | `VITE_API_BASE_URL` | Indirizzo del backend, per il frontend |
