@@ -2,7 +2,7 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (20/10/2026)
+## Stato attuale (21/10/2026)
 
 - **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D132.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
@@ -14,8 +14,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 7 (T29-T31) completato:** pianificatore giorno per giorno (D123), proposte con piano base, conferma e scarto (D124), barra della proposta, attività tratteggiate e avviso di cambiamento con l'impronta dei dati e la migrazione `V2` (D125). Tutto online.
 - **Giorno 8 (T32-T34) completato:** per scelta dell'utente l'agente usa un **modello gratuito su OpenRouter** (`nvidia/nemotron-3-super-120b-a12b:free`) al posto dell'API Claude, ed è fuori dal programma del corso (D126); client OpenRouter con `RestClient` (T32), i cinque strumenti limitati all'utente del token (D127), ciclo dell'agente con al massimo 6 giri (D128). Tutto online, ma senza endpoint: la chat arriva con T35-T36.
 - **Giorno 9 (T35-T36) completato:** API della chat con salvataggio dei messaggi e limiti (D129: 5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app, un turno alla volta, 20 proposte al giorno), migrazione `V3`; chat nel calendario, laterale da 992 px e a scomparsa sotto, con attesa, passaggi, limiti, "Spiegamelo" e "Chiedi all'agente" (D130). Prova vera riuscita. Tutto online.
-- **Giorno 10, T37 completata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132). Su `main` (PR #47) e online.
-- **Prossimo passo:** finire T38 sul ramo `docs/release-v2-t38` (`docs/rilascio-v2.md` e README già pronti): l'utente fa la checklist online, poi esito, PR, squash merge e tag `v2.0.0`. Leggere `HANDOFF.md`.
+- **Giorno 10 (T37-T38) completato · v2 rilasciata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132); README e checklist di rilascio (`docs/rilascio-v2.md`, tutti i punti ✓ online il 21/10, il punto 8 saltato), tag `v2.0.0`. Tutto online; su Trello T01-T38 sono in "Fatto".
+- **Prossimo passo:** giorni 11-12, margine ed extra in ordine (D90): X01 export del piano in Excel, poi X02-X05. Ogni extra parte da una piccola progettazione e da una decisione nuova. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
