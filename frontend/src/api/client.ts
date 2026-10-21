@@ -16,6 +16,7 @@ const NETWORK_ERROR_MESSAGE = 'Impossibile contattare il server. Controlla la co
 const INVALID_REQUEST_MESSAGE = 'Richiesta non valida.'
 const UNEXPECTED_ERROR_MESSAGE = 'Si è verificato un errore imprevisto. Riprova più tardi.'
 const NOT_READY_MESSAGE = 'Il server non è ancora pronto: riprova tra qualche istante.'
+const JSON_TYPE = 'application/json'
 const NO_CONTENT = 204
 const UNAUTHORIZED = 401
 // Answers of Render's gateway while the free backend is still waking up (D82)
@@ -66,35 +67,58 @@ export async function apiPage<T>(path: string, options: RequestOptions = {}): Pr
   return { data: envelope.data as T, meta: envelope.meta }
 }
 
+/**
+ * A file of the backend (D133), like the Excel file of the plan: the bytes when the server answers with success. The
+ * errors still arrive as ApiResponse, so the request accepts JSON too and they become the same ApiError.
+ */
+export async function apiDownload(path: string, fileType: string, options: RequestOptions = {}): Promise<Blob> {
+  const response = await sendChecked(path, options, `${fileType}, ${JSON_TYPE}`)
+  if (!response.ok) {
+    const envelope = await readEnvelope<unknown>(response, options.signal)
+    throw envelope ? errorOf(envelope, response.status) : errorWithoutEnvelope(response.status)
+  }
+  try {
+    return await response.blob()
+  } catch (error) {
+    rethrowIfCancelled(error, options.signal)
+    throw new ApiError('NETWORK_ERROR', NETWORK_ERROR_MESSAGE, 0, undefined, error)
+  }
+}
+
 // The envelope of a successful answer, or null for 204; every failure becomes an ApiError
 async function requestEnvelope<T>(path: string, options: RequestOptions): Promise<ApiResponse<T> | null> {
+  const response = await sendChecked(path, options, JSON_TYPE)
+  if (response.status === NO_CONTENT) {
+    return null
+  }
+  const envelope = await readEnvelope<T>(response, options.signal)
+  if (!envelope) {
+    throw errorWithoutEnvelope(response.status)
+  }
+  if (!envelope.success || envelope.error) {
+    throw errorOf(envelope, response.status)
+  }
+  return envelope
+}
+
+// Sends a request to our backend only, and reports a refused token
+async function sendChecked(path: string, options: RequestOptions, accept: string): Promise<Response> {
   const { method = 'GET', body, token, signal } = options
   // The token goes only to our backend: a path like //other.site would change the destination
   if (!path.startsWith('/') || path.startsWith('//')) {
     throw new Error(`Invalid API path: ${path}`)
   }
-  const response = await send(path, method, buildHeaders(body, token), body, signal)
+  const response = await send(path, method, buildHeaders(body, token, accept), body, signal)
   // Also when the answer has no ApiResponse body (a gateway, a firewall): the token is refused all the same
   if (token && response.status === UNAUTHORIZED) {
     unauthorizedHandler?.(token)
   }
-  if (response.status === NO_CONTENT) {
-    return null
-  }
-  const envelope = await readEnvelope<T>(response, signal)
-  if (!envelope) {
-    throw errorWithoutEnvelope(response.status)
-  }
-  if (!envelope.success || envelope.error) {
-    const error = envelope.error
-    throw new ApiError(
-      error?.code ?? 'INTERNAL_ERROR',
-      error?.message ?? UNEXPECTED_ERROR_MESSAGE,
-      response.status,
-      error?.fields,
-    )
-  }
-  return envelope
+  return response
+}
+
+function errorOf(envelope: ApiResponse<unknown>, status: number): ApiError {
+  const error = envelope.error
+  return new ApiError(error?.code ?? 'INTERNAL_ERROR', error?.message ?? UNEXPECTED_ERROR_MESSAGE, status, error?.fields)
 }
 
 /** Turns anything thrown by apiRequest into a plain object that can travel in a Redux action. */
@@ -105,10 +129,10 @@ export function describeError(error: unknown): RequestFailure {
   return { code: 'INTERNAL_ERROR', message: UNEXPECTED_ERROR_MESSAGE, status: 0 }
 }
 
-function buildHeaders(body: unknown, token: string | null | undefined): Headers {
-  const headers = new Headers({ Accept: 'application/json' })
+function buildHeaders(body: unknown, token: string | null | undefined, accept: string): Headers {
+  const headers = new Headers({ Accept: accept })
   if (body !== undefined) {
-    headers.set('Content-Type', 'application/json')
+    headers.set('Content-Type', JSON_TYPE)
   }
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)

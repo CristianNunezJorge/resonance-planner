@@ -17,6 +17,7 @@
 		<java.version>21</java.version>
 		<springdoc.version>3.1.1</springdoc.version>
 		<jjwt.version>0.13.0</jjwt.version>
+		<poi.version>5.5.1</poi.version>
 		<jacoco.version>0.8.15</jacoco.version>
 	</properties>
 	<dependencies>
@@ -72,6 +73,13 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- Excel files of the plan (D133); not managed by Spring Boot, so the version is explicit.
+		     POI logs with log4j-api, which Spring Boot already sends to Logback. -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
 		</dependency>
 
 		<dependency>

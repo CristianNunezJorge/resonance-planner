@@ -167,6 +167,7 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 | Contatore 3 / 20 | Richieste usate oggi; al limite il campo si disattiva e propone il piano base (D64) |
 | "Genera piano base" | Crea una proposta senza IA (D64) |
 | "+ Attività" | Apre il form dell'attività manuale (F9) |
+| "Esporta in Excel" | Scarica il piano del periodo sullo schermo in un file `.xlsx` (X01, D133) |
 
 **Finestre che si aprono dal calendario:**
 - **Dettaglio attività:** titolo, giorno, durata, Waveplate, personaggio. Azioni: "Segna come fatta"; per le attività manuali anche Modifica ed Elimina.
@@ -181,6 +182,8 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 **Nel giorno 7 (T31, D124, D125):** barra "Proposta in attesa" con il testo del piano, il numero di attività e i giorni, "Scarta" e "Conferma" che agiscono subito; attività proposte tratteggiate con la scritta "Proposta:"; pulsante "Genera piano base" nella barra dei comandi; avviso "Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano" con "Genera un nuovo piano"; lo stato vuoto propone il piano base. Il dettaglio di un'attività proposta non ha "Segna come fatta": ricorda di confermare la proposta.
 
 **Nel giorno 9 (T36, D130):** pannello "Agente" nella colonna di destra da 992 px in su, sotto il riquadro Waveplate; sotto i 992 px un pulsante "Agente" in basso a destra apre la chat da destra. Il pannello mostra "3 / 5 messaggi oggi", i messaggi dal più vecchio con "Messaggi precedenti", i passaggi sotto le risposte di questa visita, l'attesa ("L'assistente sta lavorando… può richiedere fino a qualche minuto"), i suggerimenti "Organizzami la settimana", "Cosa faccio oggi?" e "Spiegami gli eventi in corso", il campo con l'avviso sui dati inviati a OpenRouter e, a un limite di D129, la spiegazione con "Genera piano base". Nel dettaglio di un evento c'è "Spiegamelo"; nell'avviso di cambiamento "Chiedi all'agente". Lo stato vuoto invita anche a chiedere all'agente.
+
+**Nel giorno 11 (X01, D133):** pulsante "Esporta in Excel" nella barra dei comandi, tra "Genera piano base" e "+ Attività". Scarica il periodo sullo schermo (`resonance-planner_<dal>_<al>.xlsx`); mentre aspetta dice "Esportazione…" e resta raggiungibile con la tastiera (`aria-disabled`, come nelle finestre di conferma), poi la notifica "Piano esportato." o il messaggio d'errore. Su telefono la barra va a capo.
 
 ### P5 · Roster e inventario `/roster`
 

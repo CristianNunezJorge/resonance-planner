@@ -3,11 +3,18 @@ package com.resonanceplanner.planning;
 import com.resonanceplanner.auth.AuthenticatedUser;
 import com.resonanceplanner.common.api.ApiResponse;
 import com.resonanceplanner.common.config.OpenApiConfig;
+import com.resonanceplanner.planning.CalendarExportService.PlanFile;
 import com.resonanceplanner.planning.dto.CalendarResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CalendarController {
 
     private final CalendarService calendarService;
+    private final CalendarExportService calendarExportService;
 
-    public CalendarController(CalendarService calendarService) {
+    public CalendarController(CalendarService calendarService, CalendarExportService calendarExportService) {
         this.calendarService = calendarService;
+        this.calendarExportService = calendarExportService;
     }
 
     @GetMapping
@@ -32,5 +41,21 @@ public class CalendarController {
     public ApiResponse<CalendarResponse> between(@AuthenticationPrincipal AuthenticatedUser user,
             @RequestParam LocalDate from, @RequestParam LocalDate to) {
         return ApiResponse.success(calendarService.between(user.id(), from, to));
+    }
+
+    // No "produces": the errors are answered in JSON, which a request for the file only must also accept
+    @GetMapping("/export")
+    @Operation(summary = "Il mio piano in Excel", description = "Un file `.xlsx` con lo stesso intervallo e gli stessi errori di `GET /api/me/calendar` (D133): il foglio \"Piano\" con le attività confermate e fatte e i totali, il foglio \"Eventi\" con gli eventi attivi. La proposta in attesa non c'è. Gli errori arrivano in JSON: l'header `Accept` deve ammettere anche `application/json`.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Il file del piano",
+            content = @Content(mediaType = PlanSpreadsheet.CONTENT_TYPE,
+                    schema = @Schema(type = "string", format = "binary")))
+    public ResponseEntity<byte[]> export(@AuthenticationPrincipal AuthenticatedUser user,
+            @RequestParam LocalDate from, @RequestParam LocalDate to) {
+        PlanFile file = calendarExportService.export(user.id(), from, to);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(PlanSpreadsheet.CONTENT_TYPE))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(file.name()).build().toString())
+                .body(file.content());
     }
 }

@@ -1,7 +1,9 @@
-import { apiRequest } from '../../api/client'
+import { apiDownload, apiRequest } from '../../api/client'
 import type { CalendarData, CalendarTask, Completion, DateRange, Proposal, TaskForm } from './types'
 
 // The calendar of the user of the token (D44, D51). Values go into the address encoded, so they can never change it.
+
+const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 function taskPath(id: number): string {
   return `/api/me/tasks/${encodeURIComponent(String(id))}`
@@ -14,6 +16,12 @@ function proposalPath(id: number): string {
 export function getCalendar(token: string, range: DateRange): Promise<CalendarData> {
   const query = new URLSearchParams({ from: range.from, to: range.to })
   return apiRequest<CalendarData>(`/api/me/calendar?${query.toString()}`, { token })
+}
+
+/** The plan of a range as an Excel file (D133): the confirmed and done tasks and the events, without the proposal. */
+export function exportPlan(token: string, range: DateRange): Promise<Blob> {
+  const query = new URLSearchParams({ from: range.from, to: range.to })
+  return apiDownload(`/api/me/calendar/export?${query.toString()}`, EXCEL_TYPE, { token })
 }
 
 export function createTask(token: string, form: TaskForm): Promise<CalendarTask> {

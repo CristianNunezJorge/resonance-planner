@@ -13,6 +13,9 @@ interface CalendarToolbarProps {
   // The basic plan without AI (D64), disabled while a request on the plan is running
   onGeneratePlan: () => void
   isPlanning: boolean
+  // The period on the screen as an Excel file (D133), disabled while the file is coming
+  onExport: () => void
+  isExporting: boolean
 }
 
 const VIEWS: { view: CalendarViewName; label: string }[] = [
@@ -32,6 +35,8 @@ function CalendarToolbar({
   onAddTask,
   onGeneratePlan,
   isPlanning,
+  onExport,
+  isExporting,
 }: CalendarToolbarProps) {
   return (
     <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -68,6 +73,10 @@ function CalendarToolbar({
       )}
       <button type="button" className="btn btn-outline-light" onClick={onGeneratePlan} disabled={isPlanning}>
         Genera piano base
+      </button>
+      {/* aria-disabled and not disabled: a disabled button loses the focus while the file is coming */}
+      <button type="button" className="btn btn-outline-light" onClick={onExport} aria-disabled={isExporting || undefined}>
+        {isExporting ? 'Esportazione…' : 'Esporta in Excel'}
       </button>
       <button type="button" className="btn btn-primary" onClick={onAddTask}>
         + Attività
