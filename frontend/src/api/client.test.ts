@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiDownload, apiPage, apiRequest, describeError, setUnauthorizedHandler } from './client'
+import {
+  ApiError,
+  apiDownload,
+  apiPage,
+  apiRequest,
+  apiSocketUrl,
+  describeError,
+  setUnauthorizedHandler,
+} from './client'
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -340,6 +348,34 @@ describe('apiPage', () => {
     fetchMock.mockResolvedValue(jsonResponse({ success: true, data: [], error: null }))
 
     await expect(apiPage('/api/me/agent/messages')).rejects.toMatchObject({ code: 'INTERNAL_ERROR' })
+  })
+})
+
+// The address of the WebSocket of the notifications (D135): the same backend, with the WebSocket scheme
+describe('apiSocketUrl', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('uses wss for a backend on https', () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com/')
+
+    expect(apiSocketUrl('/ws')).toBe('wss://api.example.com/ws')
+  })
+
+  it('uses ws for the backend on this computer', () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8080')
+
+    expect(apiSocketUrl('/ws')).toBe('ws://localhost:8080/ws')
+  })
+
+  it('gives no address without a backend or for a path that would change the destination', () => {
+    vi.stubEnv('VITE_API_BASE_URL', '')
+    expect(apiSocketUrl('/ws')).toBeNull()
+
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com')
+    expect(apiSocketUrl('//other.site/ws')).toBeNull()
+    expect(apiSocketUrl('ws')).toBeNull()
   })
 })
 

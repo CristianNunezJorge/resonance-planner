@@ -3,6 +3,7 @@ package com.resonanceplanner.common.security;
 import com.resonanceplanner.auth.JwtAuthenticationFilter;
 import com.resonanceplanner.auth.JwtService;
 import com.resonanceplanner.common.config.AppProperties;
+import com.resonanceplanner.notification.NotificationSocketConfig;
 import jakarta.servlet.DispatcherType;
 import java.time.Clock;
 import java.time.Duration;
@@ -54,6 +55,9 @@ public class SecurityConfig {
                         // public by accident
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/guest")
                         .permitAll()
+                        // The WebSocket of the notifications: the browser cannot send the token when it opens it,
+                        // so the token arrives in the first message and the handler checks it (D135)
+                        .requestMatchers(HttpMethod.GET, NotificationSocketConfig.PATH).permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

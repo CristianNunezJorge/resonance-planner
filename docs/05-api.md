@@ -26,6 +26,7 @@ Authorization: Bearer eyJhbGciOi...
 | `/api/me/**` | Utenti con login (USER, ADMIN, GUEST) |
 | `/api/admin/**` | Solo ADMIN |
 | `/swagger-ui.html`, `/v3/api-docs`, `/actuator/health` | Tutti |
+| `/ws` (WebSocket delle notifiche, D135) | Tutti possono aprirlo, ma riceve qualcosa solo dopo il token nel primo messaggio |
 
 ## Formato delle risposte (D46)
 
@@ -363,6 +364,22 @@ Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 
 ```
 `proposal` è vuoto se l'agente ha solo risposto senza preparare un piano. `steps` elenca i passaggi fatti, ricavati dagli strumenti chiamati (D62). `resetsAt` è la mezzanotte italiana (D41) espressa in UTC.
 
+## Notifiche in tempo reale (WebSocket, D135)
+
+Un WebSocket semplice, senza STOMP: `wss://<backend>/ws` (in locale `ws://localhost:8080/ws`). Si apre solo dalle origini del CORS. I messaggi sono JSON con un campo `type`.
+
+| Chi | Messaggio | Quando |
+|---|---|---|
+| Browser | `{ "type": "AUTH", "token": "eyJ..." }` | Primo messaggio, subito dopo l'apertura: il browser non può mandare l'header `Authorization` sul WebSocket, e il token non va nell'indirizzo |
+| Browser | `{ "type": "PING" }` | Ogni 25 secondi, perché la connessione resti aperta dietro Cloudflare |
+| Server | `{ "type": "WAVEPLATE_ALMOST_FULL", "message": "Waveplate quasi piene: 232/240, piene alle 18:42." }` | Al pieno mancano al massimo 60 minuti; una volta per lettura |
+| Server | `{ "type": "WAVEPLATE_FULL", "message": "Le Waveplate sono piene dalle 14:02: ora si accumulano i Crystals (37/480)." }` | Le Waveplate sono già piene quando l'utente si collega |
+| Server | `{ "type": "EVENT_ENDING", "message": "«Nome» finisce domani." }` | Un'edizione finisce oggi ("Ultimo giorno di «Nome».") o domani; una volta al giorno |
+| Server | `{ "type": "EVENTS_CHANGED", "message": "Gli eventi sono cambiati: il calendario è aggiornato." }` | A tutti i collegati, dopo che l'admin ha creato, modificato o eliminato un evento |
+
+- Il server controlla il token come le API (JWT valido e utente che esiste ancora, D102). Le notifiche arrivano subito dopo l'`AUTH` e poi al controllo di ogni minuto.
+- **Chiusure:** `4401` se il token è rifiutato, scaduto o l'utente non esiste più (il browser non riprova); `4408` se la connessione tace da più di 90 secondi; `1008` per un primo messaggio diverso da `AUTH` o un messaggio che non si legge; `1009` per un messaggio oltre 8 KB. Con le chiusure diverse da `4401` il browser riprova dopo 1, 2, 4… fino a 60 secondi.
+
 ## Limiti di richieste (D48)
 
 | Cosa | Limite |
@@ -370,7 +387,7 @@ Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 
 | Login e registrazione | 10 tentativi ogni 15 minuti per indirizzo IP, con un contatore per il login e uno per la registrazione (D101) |
 | Messaggi all'agente | 5 al giorno per utente; chiamate al modello: 24 al giorno per utente (anche dei turni falliti) e 40 in tutta l'app; un turno alla volta per utente e due in tutta l'app (D129) |
 | Piano base | 20 proposte al giorno per utente (D129) |
-| Tutte le altre API | 120 richieste al minuto per indirizzo IP |
+| Tutte le altre API | 120 richieste al minuto per indirizzo IP; anche l'apertura del WebSocket `/ws` conta qui (D135) |
 
 Superato un limite, la risposta è 429 `RATE_LIMITED` con l'header `Retry-After` (secondi da aspettare) e un messaggio che dice quanto aspettare ("Troppe richieste: riprova tra 12 minuti."). Il controllo di salute ha un contatore suo (600 al minuto) e le richieste di verifica del CORS non contano. Il frontend può leggere `Retry-After` (è tra gli header esposti dal CORS). I numeri si possono cambiare con le variabili d'ambiente `APP_RATELIMIT_*` (D101).
 

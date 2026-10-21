@@ -15,7 +15,8 @@ export function contentSecurityPolicy(apiOrigin: string): string {
     "style-src 'self'",
     // data: for the small icons that Bootstrap writes inside its own CSS (menu button, select arrow)
     "img-src 'self' data:",
-    `connect-src 'self' ${apiOrigin}`,
+    // The backend twice: its requests, and the WebSocket of the real-time notifications (D135)
+    `connect-src 'self' ${apiOrigin} ${webSocketOriginOf(apiOrigin)}`,
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
@@ -23,6 +24,11 @@ export function contentSecurityPolicy(apiOrigin: string): string {
     // The site cannot be shown inside the page of another site (clickjacking)
     "frame-ancestors 'none'",
   ].join('; ')
+}
+
+// The same host and port with the WebSocket scheme: wss for https, ws for the http of this computer
+function webSocketOriginOf(apiOrigin: string): string {
+  return apiOrigin.replace(/^http/, 'ws')
 }
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])

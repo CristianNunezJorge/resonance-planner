@@ -57,6 +57,11 @@ public class JwtService {
 
     /** The user of a valid token; empty if the token is missing, forged, expired or has unexpected content. */
     public Optional<AuthenticatedUser> parse(String token) {
+        return verify(token).map(VerifiedToken::user);
+    }
+
+    /** Like {@link #parse}, with the moment the token expires. */
+    public Optional<VerifiedToken> verify(String token) {
         if (token == null || token.isBlank()) {
             return Optional.empty();
         }
@@ -71,7 +76,8 @@ public class JwtService {
             if (role == null) {
                 return Optional.empty();
             }
-            return Optional.of(new AuthenticatedUser(Long.valueOf(claims.getSubject()), Role.valueOf(role)));
+            AuthenticatedUser user = new AuthenticatedUser(Long.valueOf(claims.getSubject()), Role.valueOf(role));
+            return Optional.of(new VerifiedToken(user, claims.getExpiration().toInstant()));
         } catch (JwtException | IllegalArgumentException e) {
             // Not an error: an expired or garbled token only means "no user". The token itself is never logged.
             log.debug("JWT rejected: {}", e.getClass().getSimpleName());
