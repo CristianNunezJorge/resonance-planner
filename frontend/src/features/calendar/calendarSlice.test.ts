@@ -23,6 +23,7 @@ import {
   generateBasicPlan,
   loadCalendar,
   rejectPendingProposal,
+  reloadCalendar,
   updateCalendarTask,
 } from './calendarSlice'
 import type { CalendarData, CalendarTask, Proposal } from './types'
@@ -189,6 +190,26 @@ describe('calendarSlice', () => {
       expect(store.getState().calendar.status).toBe('idle')
       expect(store.getState().calendar.tasks).toEqual([])
       expect(store.getState().calendar.range).toBeNull()
+    })
+  })
+
+  describe('reloadCalendar', () => {
+    it('asks again for the range of the page when the events changed on the server (D135)', async () => {
+      const store = newStore()
+      await store.dispatch(loadCalendar(WEEK))
+
+      await store.dispatch(reloadCalendar())
+
+      expect(getCalendar).toHaveBeenCalledTimes(2)
+      expect(getCalendar).toHaveBeenLastCalledWith(TOKEN, WEEK)
+    })
+
+    it('asks nothing if the calendar was never opened', async () => {
+      const store = newStore()
+
+      await store.dispatch(reloadCalendar())
+
+      expect(getCalendar).not.toHaveBeenCalled()
     })
   })
 

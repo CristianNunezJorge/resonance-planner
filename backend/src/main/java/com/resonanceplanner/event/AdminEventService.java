@@ -7,12 +7,13 @@ import com.resonanceplanner.event.dto.EventRequest.Effect;
 import com.resonanceplanner.event.dto.EventRequest.Schedule;
 import com.resonanceplanner.user.UserService;
 import java.util.List;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Events created, changed and deleted by the admin (D14, D114). Every method first checks that the user of the
- * token still exists and is still ADMIN (D102).
+ * token still exists and is still ADMIN (D102). Every change is announced with {@link EventsChanged} (D135).
  */
 @Service
 @Transactional
@@ -23,11 +24,14 @@ public class AdminEventService {
     private final GameEventRepository gameEventRepository;
     private final EventRules rules;
     private final UserService userService;
+    private final ApplicationEventPublisher publisher;
 
-    public AdminEventService(GameEventRepository gameEventRepository, EventRules rules, UserService userService) {
+    public AdminEventService(GameEventRepository gameEventRepository, EventRules rules, UserService userService,
+            ApplicationEventPublisher publisher) {
         this.gameEventRepository = gameEventRepository;
         this.rules = rules;
         this.userService = userService;
+        this.publisher = publisher;
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +45,9 @@ public class AdminEventService {
         rules.requireValid(request);
         GameEvent event = GameEvent.custom(request.name(), request.type(), request.description());
         apply(event, request);
-        return AdminEventResponse.from(gameEventRepository.saveAndFlush(event));
+        AdminEventResponse created = AdminEventResponse.from(gameEventRepository.saveAndFlush(event));
+        publisher.publishEvent(new EventsChanged());
+        return created;
     }
 
     /** Replaces everything; a demo event keeps its code (D39). 404 before 400: a missing event has no rules. */
@@ -51,6 +57,7 @@ public class AdminEventService {
         rules.requireValid(request);
         apply(event, request);
         gameEventRepository.flush();
+        publisher.publishEvent(new EventsChanged());
         return AdminEventResponse.from(event);
     }
 
@@ -60,6 +67,7 @@ public class AdminEventService {
         if (gameEventRepository.deleteOne(id) == 0) {
             throw new NotFoundException(EVENT_NOT_FOUND);
         }
+        publisher.publishEvent(new EventsChanged());
     }
 
     private static void apply(GameEvent event, EventRequest request) {

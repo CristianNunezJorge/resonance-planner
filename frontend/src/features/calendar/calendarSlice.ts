@@ -71,6 +71,20 @@ export const loadCalendar = createAsyncThunk<CalendarData, DateRange, LoadConfig
 )
 
 /**
+ * Asks again for the range that the page opened, if any: the admin changed the events and the server said so (D135).
+ * The range stays after the user leaves the page, so the calendar is already the new one when they come back.
+ */
+export const reloadCalendar = createAsyncThunk<void, void, { state: RootState }>(
+  'calendar/reload',
+  async (_, { getState, dispatch }) => {
+    const { range } = getState().calendar
+    if (range) {
+      await dispatch(loadCalendar(range))
+    }
+  },
+)
+
+/**
  * Runs a change with the token of the session and, if it worked and the session is the same, reloads the range on
  * the screen before it answers: the window closes and the toast appears when the calendar is already the new one.
  * The failure is returned as it is, so the form can show the message of every field under it.

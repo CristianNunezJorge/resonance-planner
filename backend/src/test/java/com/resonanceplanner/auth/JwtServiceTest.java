@@ -41,6 +41,16 @@ class JwtServiceTest {
     }
 
     @Test
+    void tellsWhenAValidTokenExpires() {
+        String token = serviceAt(NOW).generateToken(7L, Role.GUEST);
+
+        // The WebSocket of D135 keeps the moment, to close the connection when the token is no longer valid
+        assertThat(serviceAt(NOW.plus(Duration.ofHours(1))).verify(token))
+                .contains(new VerifiedToken(new AuthenticatedUser(7L, Role.GUEST), NOW.plus(Duration.ofHours(24))));
+        assertThat(serviceAt(NOW.plus(Duration.ofHours(25))).verify(token)).isEmpty();
+    }
+
+    @Test
     void rejectsATokenSignedWithAnotherSecret() {
         JwtService other = new JwtService("another-secret-of-at-least-32-chars!!", clockAt(NOW));
 

@@ -3,11 +3,14 @@ import { Outlet, useLocation } from 'react-router'
 import Footer from '../components/Footer'
 import NavBar from '../components/NavBar'
 import ToastContainer from '../components/ToastContainer'
+import { useNotifications } from '../features/notifications/useNotifications'
 
 // Frame of every page: skip link, navigation bar, content, footer and notifications.
 // The footer stays at the bottom of the window even on short pages.
 function RootLayout() {
   const { pathname } = useLocation()
+  // The real-time notifications of the server arrive on every page (D135)
+  useNotifications()
   const mainRef = useRef<HTMLElement>(null)
   const previousPathname = useRef(pathname)
 

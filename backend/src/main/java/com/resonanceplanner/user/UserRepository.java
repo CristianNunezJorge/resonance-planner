@@ -1,6 +1,8 @@
 package com.resonanceplanner.user;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,6 +20,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     long countByRole(Role role);
+
+    /**
+     * The last Waveplate reading of each of these users that still exists, in one query: the users connected to the
+     * notifications (D135). A deleted user is simply missing.
+     */
+    @Query("""
+            select new com.resonanceplanner.user.UserWaveplate(u.id, u.waveplate.value, u.waveplate.crystals,
+                u.waveplate.recordedAt)
+            from User u where u.id in :ids""")
+    List<UserWaveplate> findWaveplates(@Param("ids") Collection<Long> ids);
 
     /** The role of the user, or nothing if the user no longer exists (D102). */
     @Query("select u.role from User u where u.id = :id")

@@ -5,9 +5,17 @@ describe('contentSecurityPolicy', () => {
   const policy = contentSecurityPolicy('https://resonance-planner-api.onrender.com')
   const directive = (name: string) => policy.split('; ').find((part) => part.startsWith(`${name} `))
 
-  it('lets the page talk only to itself and to the backend', () => {
-    expect(directive('connect-src')).toBe("connect-src 'self' https://resonance-planner-api.onrender.com")
+  it('lets the page talk only to itself and to the backend, with requests and with the WebSocket (D135)', () => {
+    expect(directive('connect-src')).toBe(
+      "connect-src 'self' https://resonance-planner-api.onrender.com wss://resonance-planner-api.onrender.com",
+    )
     expect(directive('default-src')).toBe("default-src 'self'")
+  })
+
+  it('uses the WebSocket without encryption only with a backend on this computer', () => {
+    expect(contentSecurityPolicy('http://localhost:8080')).toContain(
+      "connect-src 'self' http://localhost:8080 ws://localhost:8080;",
+    )
   })
 
   it('does not allow inline or evaluated code', () => {

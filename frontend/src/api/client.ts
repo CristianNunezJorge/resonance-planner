@@ -85,6 +85,24 @@ export async function apiDownload(path: string, fileType: string, options: Reque
   }
 }
 
+/**
+ * The WebSocket address of a path of our backend (D135): wss for https, ws for the http of this computer. Null without
+ * a backend address or for a path that would lead elsewhere: the token travels on this connection too.
+ */
+export function apiSocketUrl(path: string): string | null {
+  const base = baseUrl()
+  if (!base || !isBackendPath(path)) {
+    return null
+  }
+  try {
+    const url = new URL(base + path)
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
 // The envelope of a successful answer, or null for 204; every failure becomes an ApiError
 async function requestEnvelope<T>(path: string, options: RequestOptions): Promise<ApiResponse<T> | null> {
   const response = await sendChecked(path, options, JSON_TYPE)
@@ -104,8 +122,7 @@ async function requestEnvelope<T>(path: string, options: RequestOptions): Promis
 // Sends a request to our backend only, and reports a refused token
 async function sendChecked(path: string, options: RequestOptions, accept: string): Promise<Response> {
   const { method = 'GET', body, token, signal } = options
-  // The token goes only to our backend: a path like //other.site would change the destination
-  if (!path.startsWith('/') || path.startsWith('//')) {
+  if (!isBackendPath(path)) {
     throw new Error(`Invalid API path: ${path}`)
   }
   const response = await send(path, method, buildHeaders(body, token, accept), body, signal)
@@ -114,6 +131,11 @@ async function sendChecked(path: string, options: RequestOptions, accept: string
     unauthorizedHandler?.(token)
   }
   return response
+}
+
+// The token goes only to our backend: a path like //other.site would change the destination
+function isBackendPath(path: string): boolean {
+  return path.startsWith('/') && !path.startsWith('//')
 }
 
 function errorOf(envelope: ApiResponse<unknown>, status: number): ApiError {

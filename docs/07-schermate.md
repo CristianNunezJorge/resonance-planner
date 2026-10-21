@@ -36,6 +36,7 @@ Senza login, le pagine protette portano al login e, dopo l'accesso, riportano al
 - **Barra di navigazione** in alto: Calendario, Roster, Gestione eventi (solo admin), Profilo. Su telefono si apre con il pulsante menu.
 - **Footer**: progetto non ufficiale, crediti a Kuro Games per nomi e immagini, dati dal Wuthering Waves Wiki (CC BY-SA) (D25, D30).
 - **Notifiche brevi** (toast) per confermare un'azione: "Attività segnata come fatta", "Proposta confermata".
+- **Notifiche in tempo reale** (X03, D135): su ogni pagina, con la sessione aperta e la pagina visibile, il server avvisa con le stesse notifiche brevi quando le Waveplate sono quasi piene o già piene, quando un evento finisce oggi o domani e quando l'admin ha cambiato gli eventi; in quest'ultimo caso il calendario si ricarica da solo. Nessun pulsante e nessun messaggio se la connessione cade: il browser riprova da solo.
 - **Finestre di conferma** (modali) per le azioni che non si possono annullare.
 - **Stati di ogni pagina** (D69): caricamento, vuoto (con l'invito all'azione giusta), errore (con il pulsante "Riprova").
 
