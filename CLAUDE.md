@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (21/10/2026)
+## Stato attuale (21/10/2026, giorno 11)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D132.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D134.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -15,7 +15,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 8 (T32-T34) completato:** per scelta dell'utente l'agente usa un **modello gratuito su OpenRouter** (`nvidia/nemotron-3-super-120b-a12b:free`) al posto dell'API Claude, ed è fuori dal programma del corso (D126); client OpenRouter con `RestClient` (T32), i cinque strumenti limitati all'utente del token (D127), ciclo dell'agente con al massimo 6 giri (D128). Tutto online, ma senza endpoint: la chat arriva con T35-T36.
 - **Giorno 9 (T35-T36) completato:** API della chat con salvataggio dei messaggi e limiti (D129: 5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app, un turno alla volta, 20 proposte al giorno), migrazione `V3`; chat nel calendario, laterale da 992 px e a scomparsa sotto, con attesa, passaggi, limiti, "Spiegamelo" e "Chiedi all'agente" (D130). Prova vera riuscita. Tutto online.
 - **Giorno 10 (T37-T38) completato · v2 rilasciata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132); README e checklist di rilascio (`docs/rilascio-v2.md`, tutti i punti ✓ online il 21/10, il punto 8 saltato), tag `v2.0.0`. Tutto online; su Trello T01-T38 sono in "Fatto".
-- **Prossimo passo:** giorni 11-12, margine ed extra in ordine (D90): X01 export del piano in Excel, poi X02-X05. Ogni extra parte da una piccola progettazione e da una decisione nuova. Leggere `HANDOFF.md`.
+- **Giorno 11 (X01-X02) completato · primi extra della v3:** export del piano in Excel con Apache POI (D133: fogli "Piano" ed "Eventi", `GET /api/me/calendar/export`, pulsante "Esporta in Excel"; online la prima esportazione dopo un avvio impiega circa 14 s, accettati) e accesso ospite "Prova la demo" (D134: `POST /api/auth/guest`, ospiti cancellati dopo 24 ore da un job `@Scheduled`, quota dell'agente per gli ospiti con la migrazione `V4`). Tutto online; su Trello X01-X02 sono in "Fatto".
+- **Prossimo passo:** giorno 12, extra X03 (notifiche in tempo reale), poi X04-X05 se resta tempo; giorni 13-14 T39-T43. Ogni extra parte da una piccola progettazione e da una decisione nuova. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -70,7 +71,7 @@ Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm ru
 | Parte | Scelta | Versioni fissate il 10/10/2026 | Decisioni |
 |---|---|---|---|
 | Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105, FullCalendar 7.1.1 con il tema Bootstrap 5 e `temporal-polyfill` 1.0.5 (D119) | D7, D76, D119 |
-| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1 | D5, D45, D77 |
+| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel) | D5, D45, D77, D133 |
 | Database | PostgreSQL, schema con Flyway (Hibernate in `validate`) | PostgreSQL 16 (Docker `postgres:16`) | D38, D98 |
 | IA | OpenRouter con un modello gratuito (`nvidia/nemotron-3-ultra-550b-a55b:free` dal 20/10, D132), chiamato con `RestClient`, ciclo tool-use scritto da noi | — | D54, D59, D126, D132 |
 | Test | JUnit 5 + Mockito, integrazione su PostgreSQL di Docker Compose, Vitest + React Testing Library, checklist manuale | JaCoCo 0.8.15, Vitest 5.0 | D79 |
@@ -80,7 +81,7 @@ Principi da non perdere:
 - I calcoli li fa Java; l'IA sceglie i parametri e spiega (D3).
 - Il modello non scrive mai le attività: la proposta è sempre l'ultima bozza del pianificatore (D56).
 - L'agente propone, l'utente conferma (D2). Esiste un "piano base" senza IA (D64).
-- L'agente deve restare **gratuito**: solo modelli OpenRouter con l'id che finisce in `:free`, controllato all'avvio (D126). Il piano gratuito dà 50 richieste al giorno per tutto l'account, e un messaggio ne usa fino a 6: i limiti di D129 le contano nel database (`agent_model_calls`), giorno UTC.
+- L'agente deve restare **gratuito**: solo modelli OpenRouter con l'id che finisce in `:free`, controllato all'avvio (D126). Il piano gratuito dà 50 richieste al giorno per tutto l'account, e un messaggio ne usa fino a 6: i limiti di D129 le contano nel database (`agent_model_calls`), giorno UTC. Gli ospiti hanno 2 messaggi al giorno e 18 chiamate per tutti insieme (D134).
 - I testi del modello si mostrano sempre come testo semplice, mai HTML (D60, D130).
 - Dati personali solo sotto `/api/me`; l'utente si ricava dal token (D44).
 - Eventi attivi giorno per giorno (D96), effetti con limite giornaliero (D94), eventi della demo ricorrenti (D29).
@@ -98,10 +99,11 @@ backend/
   src/main/java/com/resonanceplanner/
     common/api/               ApiResponse, ApiError (D46)
     common/error/             ErrorCode, eccezioni, GlobalExceptionHandler
-    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig, ClockConfig, Today ("oggi" in ora italiana, D41)
+    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig, ClockConfig, Today ("oggi" in ora italiana, D41), SchedulingConfig (@EnableScheduling, D134)
     common/security/          SecurityConfig (accessi e CORS), ApiSecurityErrorHandler (401/403)
     common/data/              DataFileReader: lettura rigorosa dei JSON di data/
     catalog/                  entità, repository, GameRules, CatalogService e CatalogController, dto/
+    auth/                     registrazione, login e ospite (AuthService), JWT (JwtService, filtro), GuestCleanup (ospiti cancellati dopo 24 ore, D134)
     user/                     User con WaveplateSnapshot, UserService (anche requireAdmin), PlayTimeRules, profilo
     waveplate/                WaveplateRules (calcolo puro), service e API (D28, D105)
     roster/                   OwnedCharacter, RosterRules (livello e grado, D104), service e API
@@ -109,7 +111,7 @@ backend/
     onboarding/               configurazione guidata in una transazione (D50, D109)
     farming/                  NeedCalculator e FarmingCalculator (calcolo puro su FarmingCatalog), service e API (D112)
     event/                    GameEvent, EventCalendar (edizioni e giorni attivi), EventRules, API pubbliche e admin (D113, D114)
-    planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118), proposte (ProposalService, D124)
+    planning/                 PlannedTask, attività manuali e completamento (TaskService, CompletionRewards), calendario (D117, D118), proposte (ProposalService, D124), export Excel (PlanSpreadsheet, CalendarExportService, D133)
     planner/                  pianificatore giorno per giorno: Planner e NeedPool (calcolo puro), PlannerService (legge i dati, D57, D123), PlanInputs (impronta, D125)
     agent/client/             ModelClient e OpenRouterClient: Chat Completions con RestClient, 60 s per chiamata, solo modelli :free (D126)
     agent/tools/              AgentTools (i cinque strumenti), AgentToolDefinitions (schemi), AgentTurn (stato del turno), D127
@@ -119,21 +121,21 @@ backend/
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
-    db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125), V3__agent_model_calls.sql (D129)
+    db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125), V3__agent_model_calls.sql (D129), V4__agent_model_calls_guest.sql (quota degli ospiti, D134)
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
 frontend/
-  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130)
+  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130); apiDownload per i file (D133)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
   src/features/catalog/       tipi, chiamate e catalogSlice (personaggi, regole e materiali caricati una volta), icons.ts
-  src/features/landing/       pagina di presentazione P1 (T16): frase, pulsante, tre passi, personaggi
+  src/features/landing/       pagina di presentazione P1 (T16): frase, "Prova la demo" con l'ospite (D134), tre passi, personaggi
   src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
   src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
-  src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125)
+  src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125), exportFile.ts ed "Esporta in Excel" (D133)
   src/features/chat/          chat con l'agente (T36, D130): chatSlice (bozza, invio, pagine), ChatPanel, ChatMessages, ChatComposer, ChatDrawer, format.ts (plainText, limiti, suggerimenti)
   src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
-  src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121)
+  src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121), o con il nome per l'ospite (D134)
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
   src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss

@@ -1,12 +1,12 @@
-# Handoff · giorni 11-12 (margine ed extra)
+# Handoff · giorno 12 (margine ed extra)
 
-Passaggio di consegne del 21/10/2026. Il giorno 10 è chiuso: la **v2 è rilasciata**, con la checklist online superata e il tag `v2.0.0`. I giorni 11-12 servono al margine e agli extra (D90).
+Passaggio di consegne del 21/10/2026. Il giorno 11 è chiuso: i primi due extra della v3 (D90) sono su `main` e online, **X01** export del piano in Excel (D133) e **X02** accesso ospite "Prova la demo" (D134). Il giorno 12 continua con gli extra, a partire da X03.
 
 ## Messaggio da incollare nella nuova sessione
 
 ```text
 Leggi HANDOFF.md, CLAUDE.md e docs/stato-del-progetto.md.
-Iniziamo i giorni 11-12 con l'extra X01 (export del piano in Excel).
+Continuiamo il giorno 12 con l'extra X03 (notifiche in tempo reale).
 Prima di scrivere codice proponimi la piccola progettazione e la decisione nuova, e chiedimi conferma.
 ```
 
@@ -14,39 +14,35 @@ Prima di scrivere codice proponimi la piccola progettazione e la decisione nuova
 
 | Cosa | Stato |
 |---|---|
-| Giorni completati | **1-10** (T01-T38), su `main` e online |
-| Rilasci | **v1** con tag `v1.0.0` (16/10) e **v2** con tag `v2.0.0` (21/10): checklist online superate (`docs/rilascio-v1.md`, `docs/rilascio-v2.md`) |
-| Ultimo commit su `main` | `4dd1790`, T38 (PR #48), poi la chiusura del giorno 10 |
+| Giorni completati | **1-11** (T01-T38, X01, X02), su `main` e online |
+| Rilasci | **v1** (`v1.0.0`, 16/10) e **v2** (`v2.0.0`, 21/10). Gli extra della v3 entrano su `main` uno alla volta; il tag finale arriva con T43 |
+| Ultimo commit su `main` | `8de7506`, X02 (PR #51), poi la chiusura del giorno 11 |
 | Ramo in corso | Nessuno |
-| Test | Backend 860 (`./mvnw verify`, copertura 98,4%), frontend 539 (`npm test`) |
-| Decisioni | D1-D132, tutte *Confermate* |
-| Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132); alternative: Super e `google/gemma-4-31b-it:free`. Il 21/10 il fornitore era attivo e la checklist ha usato 3 messaggi. Limiti di D129 invariati |
-| Render | `OPENROUTER_MODEL` = Ultra; tutto online. Il database **scade il 10/11/2026** |
-| Trello | T01-T38 in "Fatto"; T39-T43 ed extra X01-X05 in Backlog; P01-P05 in "In verifica" |
-| Account di prova | Nessuno, né in locale né online |
+| Test | Backend 895 (`./mvnw verify`, copertura 98,3%), frontend 560 (`npm test`) |
+| Decisioni | D1-D134, tutte *Confermate* |
+| Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132). Limiti di D129, più quelli degli ospiti (D134): 2 messaggi al giorno per ospite e 18 chiamate al giorno per tutti gli ospiti, sulle 40 dell'app |
+| Render | Tutto online, migrazione `V4` applicata. Il database **scade il 10/11/2026** |
+| Trello | T01-T38, X01 e X02 in "Fatto"; X03-X05 e T39-T43 in Backlog; P01-P05 in "In verifica" |
+| Account di prova | Nessuno. L'ospite creato online il 21/10 per la prova è stato eliminato dal profilo |
+| Chrome dell'utente | Per la prova dell'ospite Claude è uscito dall'account dell'utente sul sito: l'utente rientra da solo con email e password |
 
-## Giorni 11-12 · Cosa fare (D90)
+## Giorno 12 · Cosa fare (D90)
 
-Non ci sono ritardi da recuperare: v1 e v2 sono uscite nei giorni previsti. Il tempo va agli extra, nell'ordine di D90. Con v1 e v2 complete, le loro card possono passare da Backlog a "Da fare" quando si iniziano.
+Gli extra che restano, nell'ordine di D90:
 
 | ID | Extra | Da decidere nella piccola progettazione |
 |---|---|---|
-| X01 | Export del piano in Excel | Apache POI, argomento della settimana 15 (nel programma del corso). Cosa esportare (attività confermate di un intervallo, la proposta in attesa?), endpoint sotto `/api/me` (D44), limite all'intervallo come per il calendario (62 giorni), colonne del foglio, download dal calendario: oggi `api/client.ts` legge solo risposte JSON |
-| X02 | Accesso ospite "Prova la demo" | D15: utente GUEST temporaneo, stessa configurazione guidata, un job pianificato cancella gli ospiti. Da decidere se l'ospite può usare la chat: ogni ospite consumerebbe le 40 chiamate al modello dell'app (D129). Anche i limiti di registrazione (D101) e la pulizia dei dati collegati |
-| X03 | Notifiche in tempo reale (Waveplate quasi piene, evento in scadenza) | WebSocket, settimana 18. Lavoro medio |
-| X04 | GitHub Actions | Facoltativo, strumento nuovo (D81). I test hanno bisogno di `DATABASE_USERNAME` e `DATABASE_PASSWORD` come variabili d'ambiente |
+| X03 | Notifiche in tempo reale (Waveplate quasi piene, evento in scadenza) | WebSocket, argomento della settimana 18 (nel programma). Da decidere: STOMP su WebSocket di Spring o WebSocket semplice; autenticazione con il JWT nella connessione (il token non va nell'URL); chi calcola quando le Waveplate sono quasi piene (il backend sa già "piene alle…", D105); cosa succede con il server gratuito che si addormenta; CSP del sito statico (`connect-src` deve ammettere `wss://` dell'API); un'alternativa più semplice da valutare: notifiche calcolate nel frontend senza server |
+| X04 | GitHub Actions | Facoltativo, strumento nuovo (D81). I test hanno bisogno di PostgreSQL e di `DATABASE_USERNAME` e `DATABASE_PASSWORD` come variabili d'ambiente |
 | X05 | Damage calculator semplificato | Il più costoso: prima una piccola progettazione e dati che oggi non abbiamo (D1) |
 
-Per ogni extra: decisione nuova in `docs/decisioni.md` come *Proposta*, piano riassunto e conferma dell'utente prima del codice, poi il flusso solito della card. Un extra che usa l'agente si prova con la quota piena.
+Per ogni extra: decisione nuova in `docs/decisioni.md` come *Proposta*, piano riassunto e conferma dell'utente prima del codice, poi il flusso solito della card. Se il giorno 12 non basta, X04 e X05 si lasciano: i giorni 13-14 sono per T39-T43 (README completo, Swagger, pulizia e Lighthouse, copione della demo e checklist finale, rilascio finale con tag).
 
-Dopo gli extra, giorni 13-14: T39 README completo, T40 Swagger con descrizioni ed esempi, T41 pulizia, copertura e Lighthouse, T42 copione della demo e checklist finale online, T43 rilascio finale con tag.
+## Cosa ha fatto il giorno 11
 
-## Cosa ha fatto T38
-
-- **Checklist della v2** (`docs/rilascio-v2.md`): 9 punti sul sito online, fatti dall'utente con il suo account e con l'admin di Render. Tutti ✓; il punto 8 (contatore a 5 / 5) è stato saltato perché la checklist usa 3 messaggi, ed è coperto da `AgentQuotaTest` e `ChatPanel.test.tsx`. L'evento di prova è stato eliminato.
-- **README** della v2: stato, funzioni nuove, agente gratuito su OpenRouter, numeri dei test.
-- **Rilascio:** PR #48 con squash merge, tag annotato `v2.0.0` su `main`.
-- Prima della checklist: backend già sveglio e fornitore di Ultra attivo con gli strumenti (`GET https://openrouter.ai/api/v1/models/<id>/endpoints`).
+- **X01 · Export Excel (D133, PR #50):** Apache POI 5.5.1 (`poi-ooxml`). `PlanSpreadsheet` scrive il foglio "Piano" (una riga per attività confermata o fatta, date vere, totali con `SUM`) e il foglio "Eventi"; i testi di utenti e admin restano celle di testo. `GET /api/me/calendar/export` ha gli stessi dati ed errori del calendario. Nel frontend `apiDownload` nel client unico e il pulsante "Esporta in Excel" (`aria-disabled`, un file alla volta). Online: 14,4 s la prima volta dopo il deploy, poi circa 2 s; l'utente ha accettato i 14 s.
+- **X02 · Accesso ospite (D134, PR #51):** `POST /api/auth/guest` crea un utente GUEST (`ospite-xxxxxx`, email `@ospite.invalid` mai mostrata, password che nessuno conosce); al massimo 50 ospiti, 5 ogni 15 minuti per indirizzo; `GuestCleanup` (`@Scheduled`) li cancella dopo 24 ore. Quota dell'agente per gli ospiti con la migrazione `V4` (colonna `guest` in `agent_model_calls`). Nel frontend "Prova la demo" con `enterAsGuest`, "(ospite)" nella barra, profilo senza email e conferma di eliminazione con il nome. Provato online da Claude in Chrome: creazione in 2 s, configurazione dalla pagina, calendario, eliminazione.
+- **Rischi accettati in D134:** l'utente non vuole altri limiti, perché la demo la userà lui. Sono annotati nella decisione (50 posti riempibili da una persona, ospiti scaduti contati fino alla pulizia, BCrypt per ogni ospite, sessione di un'altra scheda sostituita).
 
 ## Come lavoriamo (flusso approvato, invariato)
 
@@ -73,6 +69,7 @@ Altre regole:
 - **Database di Render: scade il 10/11/2026.** Ricrearlo prima e **cambiare anche `JWT_SECRET`** (D100).
 - Se il modello dell'agente smette di rispondere: guardare nei log di Render la riga `OpenRouter answered …` e lo stato del fornitore con `GET https://openrouter.ai/api/v1/models/<id>/endpoints` (gratuito, senza chiave), poi cambiare `OPENROUTER_MODEL` (D132).
 - Per la checklist finale di T42 si possono riusare `docs/rilascio-v1.md` e `docs/rilascio-v2.md`. Il punto del contatore a 5 / 5 non si raggiunge con la checklist: per vederlo si scrive il contatore in locale con `psql` (vedi le note pratiche).
+- **Copione della demo (T42), prima di presentare:** svegliare il backend (circa 3 minuti), poi fare una **esportazione Excel di prova**: la prima dopo un avvio impiega circa 14 secondi, perché POI carica le sue classi (D133, scelta dell'utente del 21/10). Se nella demo si mostra "Prova la demo", farlo dopo il risveglio; l'ospite si elimina dal profilo o sparisce da solo dopo 24 ore (D134).
 
 ## Questioni aperte
 
@@ -88,7 +85,9 @@ Altre regole:
    - modelli gratuiti che possono sparire, cadere o rispondere 429 (D126, D132);
    - più account possono finire le 40 chiamate dell'app (D129);
    - i passaggi si perdono ricaricando la pagina (D130);
-   - il `summary` della proposta lo scrive il modello: rischio residuo accettato, tetto a 2.000 caratteri (06-agente.md, "Sicurezza").
+   - il `summary` della proposta lo scrive il modello: rischio residuo accettato, tetto a 2.000 caratteri (06-agente.md, "Sicurezza");
+   - export Excel: il file è una fotografia, la prima esportazione dopo un avvio è lenta, qualche query in più (D133);
+   - ospiti: i rischi accettati dopo la revisione del 21/10 sono elencati in D134.
 8. `ANTHROPIC_MODEL` su Render non serve più: si può togliere.
 
 ## Note pratiche
@@ -98,6 +97,7 @@ Altre regole:
   - Docker Desktop acceso e `docker compose up -d` per il database sulla 5433. Il container può fermarsi da solo (per esempio dopo un riavvio di Docker): se i test non trovano il database, rilanciare `docker compose up -d`;
   - `./mvnw verify` non riesce a sostituire il jar se il backend acceso con `preview_start` lo sta usando: fermare prima il backend;
   - i test che fanno commit veri lasciano il database di test con il solo utente `admin`;
+  - il 21/10 i comandi `docker` (anche `docker exec`) si sono bloccati mentre il database continuava a rispondere sulla 5433. Per scrivere nel database locale senza Docker c'è il client del PostgreSQL 18 installato: `"/c/Program Files/PostgreSQL/18/bin/psql.exe" -h localhost -p 5433 -U "$DATABASE_USERNAME" -d resonance_planner`, con `DATABASE_USERNAME` e `PGPASSWORD` presi dal `.env` senza stamparli (come per la chiamata di prova di OpenRouter);
   - **Norton** ispeziona HTTPS e rifirma i certificati: Java non se ne fida. Per chiamare OpenRouter da Java in locale serve `-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`); con Maven si passa con `JAVA_TOOL_OPTIONS`. Su Render non serve.
 - **Migrazioni:** una migrazione non ancora unita a `main` si può cambiare, ma i database locali (di sviluppo e di test) la conoscono già con il checksum vecchio. Prima di riprovare: `drop table` della tabella nuova e `delete from flyway_schema_history where version = '…'` in entrambi, con `psql` dentro il container. Anche un commento cambia il checksum.
 - **OpenRouter:**
@@ -122,7 +122,9 @@ Altre regole:
   - guidare la pagina con `javascript_tool` (setter nativo più eventi `input`/`change`) e leggere il testo;
   - FullCalendar disegna gli elementi solo se la scheda è **in primo piano** (`tabs_select`): in una scheda nascosta `requestAnimationFrame` non parte e gli elementi restano invisibili;
   - i server si avviano con `preview_start` (`backend`, `frontend-prod`) e si fermano con `preview_stop`. Per la vista telefono `resize_window` con `mobile`, poi riportarlo a `desktop`;
-  - ricaricare la pagina dentro uno script interrompe lo script: ricaricare con `navigate`, poi leggere con uno script nuovo.
+  - ricaricare la pagina dentro uno script interrompe lo script: ricaricare con `navigate`, poi leggere con uno script nuovo;
+  - per provare un download senza salvare file sul computer si sostituisce `HTMLAnchorElement.prototype.click` (e si cattura il `Blob` da `URL.createObjectURL`) nella scheda di prova, poi si chiude la scheda;
+  - in Chrome tutte le schede del sito condividono il `localStorage`, quindi c'è la sessione dell'utente: per provare "Prova la demo" bisogna uscire dal suo account (con il suo permesso), oppure usare il browser integrato, che è separato.
 - **Render:**
   - nella pagina Environment i valori si caricano solo con "Show secret": per cambiare una variabile si apre **Edit**, si preme "Show secret" sulla sua riga, si scrive il valore nuovo e si salva con "Save, rebuild, and deploy". Gli altri valori, non caricati, restano com'erano. Il 20/10 un primo salvataggio non era stato registrato: dopo, ricontrollare il valore con "Show secret" e nei log;
   - servizi `resonance-planner` (sito statico), `resonance-planner-api` (Docker), `resonance-planner-db`;

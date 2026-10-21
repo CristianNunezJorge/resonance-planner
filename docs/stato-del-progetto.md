@@ -1,10 +1,10 @@
 # Stato del progetto
 
-Riepilogo delle sessioni dal 30/09 al 21/10/2026 (giorno 10 compreso), per riprendere il lavoro in una nuova sessione.
+Riepilogo delle sessioni dal 30/09 al 21/10/2026 (giorno 11 compreso), per riprendere il lavoro in una nuova sessione.
 
 ## In una frase
 
-Il progetto è approvato e i giorni da 1 a 10 (T01-T38) sono completati, uniti su `main` e online: la **v1** e la **v2 sono rilasciate** (tag `v1.0.0` e `v2.0.0`, checklist online superate il 16/10 e il 21/10), il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento, il giorno 8 l'agente in backend, con un modello gratuito su OpenRouter (D126), il giorno 9 la chat con i limiti delle richieste gratuite (D129, D130) e T37 le istruzioni di sistema verificate con dieci scenari reali, con Nemotron Ultra come modello predefinito (D131, D132). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il prossimo passo sono i giorni 11-12, margine ed extra (D90), a partire da X01, l'export del piano in Excel. Dettagli in `HANDOFF.md`.
+Il progetto è approvato e i giorni da 1 a 11 (T01-T38 e gli extra X01-X02) sono completati, uniti su `main` e online: la **v1** e la **v2 sono rilasciate** (tag `v1.0.0` e `v2.0.0`, checklist online superate il 16/10 e il 21/10), il giorno 7 ha aggiunto pianificatore, proposte, piano base senza IA e avviso di cambiamento, il giorno 8 l'agente in backend, con un modello gratuito su OpenRouter (D126), il giorno 9 la chat con i limiti delle richieste gratuite (D129, D130) e T37 le istruzioni di sistema verificate con dieci scenari reali, con Nemotron Ultra come modello predefinito (D131, D132). Comprende JWT e ruoli, limiti di richieste, login, registrazione, pagina di presentazione, configurazione guidata, Waveplate, roster, inventario, calcolo del farming, eventi, calendario con attività manuali e completamento, profilo e gestione eventi admin. Il giorno 11 ha aggiunto i primi extra della v3: l'export del piano in Excel con Apache POI (D133) e l'accesso ospite "Prova la demo" (D134). Il prossimo passo è il giorno 12 con l'extra X03 (notifiche in tempo reale). Dettagli in `HANDOFF.md`.
 
 ## Cosa è stato fatto
 
@@ -31,6 +31,7 @@ Il progetto è approvato e i giorni da 1 a 10 (T01-T38) sono completati, uniti s
 | 17/10 | **Giorno 8: T32-T34** | Per scelta dell'utente l'agente usa un modello gratuito su OpenRouter al posto dell'API Claude (D126, fuori dal programma del corso): client con `RestClient` e solo modelli `:free` (T32), i cinque strumenti con argomenti controllati e salvataggio con ricalcolo (D127), ciclo dell'agente con limiti di giri, strumenti e tempo (D128). Una sola chiamata vera, con Nemotron: Gemma riceveva 429 dal suo fornitore. Su questo computer Norton rifirma HTTPS, quindi Java usa l'archivio dei certificati di Windows. Backend 798 test (copertura 98,1%), frontend 492 invariato. PR #40-#42 |
 | 17-18/10 | **Giorno 9: T35-T36** | API della chat: salvataggio dei due messaggi dopo la risposta, storico a pagine con `meta`, utilizzo, e i limiti di D129 (5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app nel database con la migrazione `V3`, un turno alla volta, 20 proposte al giorno). Il tetto per utente è nato dalla revisione di sicurezza. Chat nel calendario (D130): laterale da 992 px, a scomparsa sotto, attesa, passaggi, limiti con il piano base, "Spiegamelo" e "Chiedi all'agente". Due prove vere: 4 e 5 chiamate, risposte in 20-28 secondi, proposta mostrata e confermata. Backend 856 test (copertura 98,4%), frontend 537 (97,5%). PR #44-#45 |
 | 19-21/10 | **Giorno 10: T37-T38 · v2** | Istruzioni di sistema rifinite (`AgentPrompt`, `AgentPromptTest`) e dieci scenari reali, divisi su due giorni UTC per la quota gratuita (D131): tutti superati, due con riserva (`scenari-agente.md`). Il 20/10 il fornitore di Nemotron Super è rimasto fuori servizio per ore: Nemotron Ultra diventa il modello predefinito, anche su Render (D132). Regole nuove contro i motivi inventati e le somme fatte dal modello; la chat toglie anche il corsivo con un asterisco. Backend 860 test, frontend 539. T38: README della v2 e checklist di rilascio sul sito online (`rilascio-v2.md`), tutti i punti ✓ e il punto 8 saltato perché la checklist non porta il contatore a 5 / 5; tag `v2.0.0`. PR #47-#48. Trello T37-T38 in "Fatto" |
+| 21/10 | **Giorno 11: X01-X02 · extra** | Export del piano in Excel (D133): Apache POI 5.5.1, `PlanSpreadsheet` con i fogli "Piano" (date vere, totali con `SUM`, testi sempre come testo) ed "Eventi", `GET /api/me/calendar/export`, `apiDownload` nel client e "Esporta in Excel"; online 14,4 s la prima volta e circa 2 s dopo, accettati. Accesso ospite (D134): `POST /api/auth/guest`, al massimo 50 ospiti e 5 ogni 15 minuti per indirizzo, pulizia `@Scheduled` dopo 24 ore, quota dell'agente per gli ospiti con la migrazione `V4`, "Prova la demo" nella presentazione, profilo e chat per l'ospite; provato online in Chrome. Le revisioni hanno trovato solo punti medi: l'utente non ha voluto altri limiti e i rischi sono annotati in D134. Backend 895 test (copertura 98,3%), frontend 560. PR #50-#51. Trello X01-X02 in "Fatto" |
 | 11/10 | Tempi di Render misurati | Al risveglio il backend gratuito risponde in circa 3 minuti: D82 e la fase 8 aggiornate |
 
 ### Giorno 2 in dettaglio
@@ -52,7 +53,7 @@ Il progetto è approvato e i giorni da 1 a 10 (T01-T38) sono completati, uniti s
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D132) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D134) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |
 | Schema del database | `backend/src/main/resources/db/migration/` |
@@ -74,9 +75,9 @@ Il progetto è approvato e i giorni da 1 a 10 (T01-T38) sono completati, uniti s
 4. **L'allegato tecnico della proposta è in parte superato:** cita Vercel/Netlify e un limite di livello diverso. Le 14 righe restano valide.
 5. **Strumento di analisi statica della settimana 16:** l'utente non ha ancora indicato quale avete usato. Per ora basta il formattatore dell'IDE più ESLint (D80).
 6. **Nome definitivo del progetto:** "Resonance Planner" è provvisorio.
-7. **Quota gratuita dell'agente:** 50 richieste al giorno per tutto l'account, condivise fra sito online e prove in locale. Gli scenari di T37 sono stati divisi su due giorni (D131) e la checklist di T38 è stata fatta con la quota piena. Un extra che usa l'agente si prova allo stesso modo; un accesso ospite (X02) dovrà tenere conto delle 40 chiamate dell'app (D129).
+7. **Quota gratuita dell'agente:** 50 richieste al giorno per tutto l'account, condivise fra sito online e prove in locale. Gli scenari di T37 sono stati divisi su due giorni (D131) e la checklist di T38 è stata fatta con la quota piena. Un extra che usa l'agente si prova allo stesso modo. Gli ospiti di X02 hanno una quota loro: 18 chiamate al giorno per tutti, sulle 40 dell'app (D134).
 8. **Su Render resta `ANTHROPIC_MODEL`**, che il codice non usa più: si può togliere.
-9. **Trello:** T01-T38 in "Fatto"; T39-T43 ed extra X01-X05 in Backlog.
+9. **Trello:** T01-T38, X01 e X02 in "Fatto"; X03-X05 e T39-T43 in Backlog.
 
 ## Promemoria per le prossime card
 
@@ -113,6 +114,9 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 | T26 | FullCalendar potrebbe inserire gli stili con un `<style>` creato da JavaScript, che la CSP (`style-src 'self'`) blocca: provare la build di produzione con la CSP (`npm run preview`) e, se serve, allargare `style-src` e aggiornare D103 |
 | T27 | Un evento demo cancellato dall'admin ricompare al riavvio (D39 inserisce gli eventi mancanti). Se si tolgono attività, le posizioni restano con dei buchi. Gli endpoint `/api/admin/**` (T23) devono controllare che l'utente del token esista e sia ancora ADMIN (es. `UserService.requireAdmin`), perché il token di un admin eliminato resta valido 24 ore (D102); con un test che manda il token di un utente eliminato a ogni percorso `/api/me` e `/api/admin` |
 | T30 | Quando si sostituisce la proposta in attesa, fare `flush()` dopo aver segnato la vecchia come `REPLACED`: Hibernate esegue gli INSERT prima degli UPDATE e l'indice di D37 scatterebbe |
+| X02 | Fatta il 21/10 (D134). `AuthService.guest`, `GuestCleanup` (`@Scheduled`, `SchedulingConfig`), contatore `GUEST` in `RateLimitFilter`, `AgentQuota` che legge il ruolo dal database, colonna `guest` di `agent_model_calls` (migrazione `V4`). Nel frontend il thunk `enterAsGuest` (anche gli slice si azzerano con lui), "Prova la demo" in `LandingPage`, "(ospite)" nella barra, profilo e `DeleteAccountModal` con `guestName`. Per X03: un ospite è un utente come gli altri, quindi riceverebbe le notifiche; il suo token vale 24 ore e poi l'account sparisce. Rischi accettati: in D134 |
+| X01 | Fatta il 21/10 (D133). `planning/PlanSpreadsheet` (puro), `CalendarExportService`, `GET /api/me/calendar/export` senza `produces` (gli errori restano JSON se `Accept` ammette `application/json`); `apiDownload` nel client unico, `exportFile.ts` (`planFileName`, `saveFile`). Larghezze delle colonne misurate sui testi: `autoSizeColumn` ha bisogno dei font del sistema, che l'immagine del server può non avere. Per T39: citare Apache POI nel README; per T42: un'esportazione di prova prima di presentare |
+| T42 | Prima di presentare: svegliare il backend (circa 3 minuti) e fare un'esportazione Excel di prova, perché la prima dopo un avvio impiega circa 14 secondi (D133, scelta dell'utente del 21/10). Se si mostra "Prova la demo", farlo a backend sveglio |
 | T38 | Fatta il 21/10. README della v2 e `docs/rilascio-v2.md` (9 punti sul sito online, tutti ✓ e l'8 saltato); tag `v2.0.0`. Per T42: la checklist finale può riusare `rilascio-v1.md` e `rilascio-v2.md`; il contatore a 5 / 5 si vede solo dopo 5 messaggi, quindi si prova in locale scrivendo il contatore con `psql`. Prima di una prova online con l'agente: svegliare il backend e guardare lo stato del fornitore (`…/models/<id>/endpoints`) |
 | T37 | Fatta il 20/10 (D131, D132). `AgentPrompt` in tre parti con le regole nate dagli scenari; `AgentPromptTest`; `plainText` toglie il corsivo; Nemotron Ultra predefinito. Lezioni per le prossime card: il modello legge gli strumenti uno per giro (3-6 chiamate per un piano); a volte aggiunge motivi non dati dagli strumenti; un errore rimasto nello storico tende a ripetersi, quindi per ripetere una prova serve una conversazione nuova; il fornitore gratuito può cadere per ore (si guarda `…/models/<id>/endpoints` e si cambia `OPENROUTER_MODEL`). Su Render i valori delle variabili si caricano solo con "Show secret": dopo un salvataggio, ricontrollare il valore |
 | T36 | Fatta il 18/10 (D130). Pacchetto `features/chat/`: `chatSlice` (messaggi dal più vecchio, pagine con `before`, invio con `condition` contro i doppi, bozza, passaggi della visita, rilettura dopo una risposta persa), `ChatPanel`, `ChatMessages`, `ChatComposer`, `ChatDrawer` (sotto i 992 px), `format.ts` (`plainText`, `limitText`, suggerimenti, `explainEventText`). `apiPage` nel client per `meta`; `useFocusTrap` e `useMediaQuery` comuni. Nel calendario: pannello a destra o pulsante "Agente", "Spiegamelo", "Chiedi all'agente". Prova vera del 18/10: "Organizzami la settimana", 5 chiamate, 26 secondi, proposta mostrata e confermata. Per T37: chiedere nelle istruzioni di non usare il markdown (la pulizia toglie solo `**`, `__`, `` ` `` e i `#`) e dire che il nome di un evento nella domanda è un dato; il corsivo con un asterisco resta visibile |
@@ -121,14 +125,14 @@ Emersi dalle revisioni del codice. Non sono difetti di oggi, ma vanno fatti nell
 
 ## Prossimi passi
 
-1. Giorni 11-12: non ci sono ritardi da recuperare, quindi gli extra di D90 in ordine, a partire da X01 (export del piano in Excel con Apache POI). Ogni extra inizia con una piccola progettazione e una decisione nuova. Poi, nei giorni 13-14, T39-T43.
+1. Giorno 12: l'extra X03 (notifiche in tempo reale, WebSocket della settimana 18), poi X04 e X05 se resta tempo. Ogni extra inizia con una piccola progettazione e una decisione nuova. Poi, nei giorni 13-14, T39-T43.
 2. L'utente rivede i dati; poi P01-P05 passano in "Fatto".
 
 ## Come riprendere in una nuova sessione
 
 Claude Code legge da solo `CLAUDE.md` e la sua memoria persistente. Per partire basta scrivere, per esempio:
 
-> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi iniziamo i giorni 11-12 con l'extra X01. Prima di scrivere codice proponimi la piccola progettazione e chiedimi conferma.
+> Leggi `HANDOFF.md`, `CLAUDE.md` e `docs/stato-del-progetto.md`, poi continuiamo il giorno 12 con l'extra X03. Prima di scrivere codice proponimi la piccola progettazione e chiedimi conferma.
 
 Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`. Per Render serve Chrome con l'estensione Claude in Chrome e la sessione di Render aperta.
 
@@ -148,4 +152,6 @@ Prima di avviare backend e test: Docker Desktop acceso e `docker compose up -d`.
 - Le intestazioni di sicurezza del sito statico (CSP, `nosniff`) si impostano in Render > sito > Headers e non stanno nel repository: se il sito viene ricreato vanno rifatte. Il pulsante "Add Rule" della pagina Headers va premuto con un clic alle coordinate, non con il riferimento dell'elemento.
 - Su Render il piano preselezionato per un nuovo servizio web è a pagamento: va scelto Free a mano.
 - Se un deploy di Render non parte o risponde "Service Unavailable", il problema può essere della piattaforma: guardare https://status.render.com prima di cercare l'errore nel codice (incidente del 14/10).
+- Prima di una prova online conviene svegliare il backend gratuito con `/actuator/health`: il 21/10 ha risposto dopo 151 secondi, e intanto la pagina resta in attesa senza mostrare i pulsanti.
+- Anche per una scelta già confermata la revisione può trovare rischi nuovi (D134): si propongono all'utente, che può accettarli; in quel caso si annotano nella decisione, non si cambiano i numeri da soli.
 - Le revisioni del codice del giorno 5 hanno trovato soprattutto casi limite: date estreme che davano 500, un evento che non sarebbe mai stato attivo, il focus perso dopo un'azione, due salvataggi sovrapposti nello stesso campo. Vale la pena chiedere sempre ai revisori i casi di concorrenza e di accessibilità.
