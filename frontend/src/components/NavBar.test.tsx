@@ -66,6 +66,14 @@ describe('NavBar', () => {
     expect(screen.queryByRole('link', { name: 'Eventi' })).not.toBeInTheDocument()
   })
 
+  it('says that the account is a guest of the demo (D134)', () => {
+    renderNav('/calendario', signedIn({ username: 'ospite-k3x9qz', role: 'GUEST' }))
+
+    expect(screen.getByText('ospite-k3x9qz')).toBeInTheDocument()
+    expect(screen.getByText('(ospite)')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Eventi' })).not.toBeInTheDocument()
+  })
+
   it('points to the guided setup instead of the calendar while the setup is still to do', () => {
     renderNav('/', signedIn({ onboardingCompleted: false }))
 

@@ -8,6 +8,7 @@ const usage: ChatUsage = {
   resetsAt: '2026-10-17T22:00:00Z',
   callsLimitReached: false,
   appLimitReached: false,
+  guestLimitReached: false,
 }
 
 // The text of the model is always plain text (D60, D130): only the marks of markdown go away
@@ -64,6 +65,10 @@ describe('limitText', () => {
     )
     expect(limitText({ ...usage, appLimitReached: true })).toBe(
       'Per oggi l’assistente ha finito le richieste gratuite di tutta l’app. Riprova domani.',
+    )
+    // A guest (D134): the share of all the guests is over
+    expect(limitText({ ...usage, guestLimitReached: true })).toBe(
+      'Le prove dell’agente per gli ospiti sono finite per oggi: registrati per continuare.',
     )
   })
 })

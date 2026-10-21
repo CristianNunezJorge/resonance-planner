@@ -157,6 +157,7 @@ const chatUsage: ChatUsage = {
   resetsAt: '2026-10-17T22:00:00Z',
   callsLimitReached: false,
   appLimitReached: false,
+  guestLimitReached: false,
 }
 
 function stubScreen(isPhone: boolean) {

@@ -33,6 +33,13 @@ public class AuthController {
         return ApiResponse.success(authService.register(request));
     }
 
+    @PostMapping("/guest")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Prova la demo", description = "Crea un account ospite temporaneo, senza corpo (D134): risponde come la registrazione, con il ruolo GUEST e il token valido 24 ore. L'account non ha una password conosciuta e si cancella da solo dopo 24 ore. 429 RATE_LIMITED se esistono già 50 ospiti.")
+    public ApiResponse<AuthResponse> guest() {
+        return ApiResponse.success(authService.guest());
+    }
+
     @PostMapping("/login")
     @Operation(summary = "Login", description = "Restituisce il token valido 24 ore. 401 BAD_CREDENTIALS con un messaggio unico se email o password non sono corrette.")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {

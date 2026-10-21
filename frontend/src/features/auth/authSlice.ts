@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/tool
 import { describeError, type RequestFailure } from '../../api/client'
 import { toastShown } from '../../app/toastSlice'
 import type { AppThunk, RootState } from '../../app/store'
-import { getProfile, login as loginRequest, register as registerRequest } from './authApi'
+import { getProfile, login as loginRequest, register as registerRequest, startGuest } from './authApi'
 import { clearToken, readToken, saveToken } from './tokenStorage'
 import type { AuthResponse, LoginRequest, RegisterRequest, User } from './types'
 
@@ -52,6 +52,20 @@ export const register = createAsyncThunk<AuthResponse, RegisterRequest, AuthThun
   async (data, { rejectWithValue }) => {
     try {
       const response = await registerRequest(data)
+      saveToken(response.token)
+      return response
+    } catch (error) {
+      return rejectWithValue(describeError(error))
+    }
+  },
+)
+
+// "Prova la demo" (D134): the server creates a temporary account, and the session opens like after a login
+export const enterAsGuest = createAsyncThunk<AuthResponse, void, AuthThunkConfig>(
+  'auth/enterAsGuest',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await startGuest()
       saveToken(response.token)
       return response
     } catch (error) {
@@ -119,6 +133,7 @@ const authSlice = createSlice({
     builder
       .addCase(login.fulfilled, signIn)
       .addCase(register.fulfilled, signIn)
+      .addCase(enterAsGuest.fulfilled, signIn)
       .addCase(restoreSession.pending, (state) => {
         state.sessionStatus = 'restoring'
         state.sessionError = null

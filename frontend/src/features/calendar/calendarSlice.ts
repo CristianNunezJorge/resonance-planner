@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { describeError, type RequestFailure } from '../../api/client'
 import type { RootState } from '../../app/store'
-import { login, register, restoreSession, sessionEnded } from '../auth/authSlice'
+import { enterAsGuest, login, register, restoreSession, sessionEnded } from '../auth/authSlice'
 import {
   completeTask,
   confirmProposal,
@@ -182,6 +182,7 @@ const calendarSlice = createSlice({
       .addCase(sessionEnded, () => initialState)
       .addCase(login.fulfilled, () => initialState)
       .addCase(register.fulfilled, () => initialState)
+      .addCase(enterAsGuest.fulfilled, () => initialState)
       .addCase(restoreSession.fulfilled, () => initialState)
       .addCase(loadCalendar.pending, (state, action) => {
         state.loadRequestId = action.meta.requestId

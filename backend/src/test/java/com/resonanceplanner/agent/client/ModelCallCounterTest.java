@@ -64,6 +64,31 @@ class ModelCallCounterTest {
                 Integer.class, UTC_DAY, ROVER)).isEqualTo(2);
     }
 
+    // The guests of D134 have a share of their own: the flag is taken from the role in the same statement
+    @Test
+    void countsTheCallsOfTheGuestsApartAndKeepsThemAfterTheGuestIsDeleted() {
+        String username = "ospite-count-" + Long.toString(System.nanoTime() % 100_000_000L, 36);
+        Long guest = jdbc.queryForObject("""
+                insert into users (username, email, password_hash, role) values (?, ?, 'hash', 'GUEST') returning id""",
+                Long.class, username, username + "@ospite.invalid");
+        try {
+            ModelCallCounter counter = new ModelCallCounter(repository, clock);
+            counter.add(guest);
+            counter.add(guest);
+            counter.add(ROVER);
+
+            assertThat(counter.guestCallsToday()).isEqualTo(2);
+            assertThat(counter.callsToday()).isEqualTo(3);
+
+            // No foreign key, on purpose: the cleanup of the guests does not give their calls back
+            jdbc.update("delete from users where id = ?", guest);
+            assertThat(counter.guestCallsToday()).isEqualTo(2);
+            assertThat(counter.callsToday()).isEqualTo(3);
+        } finally {
+            jdbc.update("delete from users where id = ?", guest);
+        }
+    }
+
     @Test
     void startsAgainAtMidnightUtcLikeOpenRouter() {
         ModelCallCounter counter = new ModelCallCounter(repository, clock);

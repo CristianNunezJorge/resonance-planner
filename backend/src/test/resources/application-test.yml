@@ -24,4 +24,5 @@ app:
   # so high that they never get in the way. RateLimitIntegrationTest sets its own small ones.
   rate-limit:
     auth-attempts: 100000
+    guest-creations: 100000
     general-requests: 100000

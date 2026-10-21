@@ -68,6 +68,8 @@ Senza login, le pagine protette portano al login e, dopo l'accesso, riportano al
 ```
 "Prova la demo" porta alla registrazione; in v3 farà entrare come ospite (D15).
 
+**Nel giorno 11 (X02, D134):** "Prova la demo" è un pulsante che crea un account ospite e apre la configurazione guidata; accanto c'è il link "Registrati". Mentre aspetta dice "Preparazione della demo…" e resta raggiungibile con la tastiera (`aria-disabled`); se il server rifiuta (per esempio 50 ospiti già presenti) il messaggio compare sotto i pulsanti. Nella barra in alto il nome dell'ospite ha accanto "(ospite)".
+
 ### P2 · Login e registrazione `/login`, `/registrati`
 
 **Dati:** `POST /api/auth/login`, `POST /api/auth/register`.
@@ -217,6 +219,7 @@ Su telefono il calendario diventa un elenco per giorno e la chat si apre in un p
 - Pulsante **Esci**.
 - **Zona pericolosa:** "Elimina account", con conferma scrivendo la propria email (F12).
 - **In T27 (D121):** "Salva" manda solo i campi cambiati; l'email si confronta senza badare a maiuscole e spazi; dopo l'eliminazione si torna alla presentazione come con "Esci".
+- **Ospite (X02, D134):** al posto dell'email compare "Account ospite" con la spiegazione che l'account e i dati si cancellano da soli entro 24 ore dall'ingresso e l'invito a registrarsi; la conferma di "Elimina account" chiede di scrivere il nome dell'ospite, perché l'email non la conosce. Nella chat il contatore è "x / 2 messaggi oggi" e, finita la quota comune degli ospiti, la chat spiega "Le prove dell'agente per gli ospiti sono finite per oggi: registrati per continuare." con il piano base.
 
 ### P7 · Gestione eventi `/admin/eventi`
 

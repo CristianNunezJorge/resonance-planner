@@ -21,6 +21,8 @@ export interface ChatUsage {
   resetsAt: string
   callsLimitReached: boolean
   appLimitReached: boolean
+  // For a guest (D134): all the guests used their share of the calls of today
+  guestLimitReached: boolean
 }
 
 export interface ChatAnswer {

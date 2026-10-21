@@ -112,7 +112,9 @@ public record AppProperties(
             @DefaultValue("10") int authAttempts,
             @DefaultValue("15") @DurationUnit(ChronoUnit.MINUTES) Duration authWindow,
             @DefaultValue("120") int generalRequests,
-            @DefaultValue("60") @DurationUnit(ChronoUnit.SECONDS) Duration generalWindow) {
+            @DefaultValue("60") @DurationUnit(ChronoUnit.SECONDS) Duration generalWindow,
+            // Guests of "Prova la demo" (D134), in the window of the authentication: a counter of their own
+            @DefaultValue("5") int guestCreations) {
 
         private static final int MAX_REQUESTS = 1_000_000;
         private static final Duration MIN_WINDOW = Duration.ofSeconds(1);
@@ -123,6 +125,7 @@ public record AppProperties(
             requireWindow("app.rate-limit.auth-window", authWindow);
             requireRequests("app.rate-limit.general-requests", generalRequests);
             requireWindow("app.rate-limit.general-window", generalWindow);
+            requireRequests("app.rate-limit.guest-creations", guestCreations);
         }
 
         private static void requireRequests(String property, int value) {
@@ -152,13 +155,18 @@ public record AppProperties(
      * @param dailyModelCalls the calls to the model in a day in the whole app, from midnight UTC like OpenRouter
      * @param concurrentTurns the turns of the agent that can run at the same time in the whole app
      * @param dailyBasicPlans the proposals of each user in a day after which the basic plan is refused
+     * @param guestDailyMessages the messages of each guest in a day, in place of dailyMessages (D134)
+     * @param guestDailyModelCalls the calls to the model in a day of all the guests together, part of dailyModelCalls:
+     *     the rest stays for the registered users (D134)
      */
     public record AgentLimits(
             @DefaultValue("5") int dailyMessages,
             @DefaultValue("24") int dailyUserModelCalls,
             @DefaultValue("40") int dailyModelCalls,
             @DefaultValue("2") int concurrentTurns,
-            @DefaultValue("20") int dailyBasicPlans) {
+            @DefaultValue("20") int dailyBasicPlans,
+            @DefaultValue("2") int guestDailyMessages,
+            @DefaultValue("18") int guestDailyModelCalls) {
 
         // A whole turn makes up to 6 calls (D61): with fewer a day, the agent could never start one
         private static final int ONE_TURN_OF_CALLS = 6;
@@ -172,6 +180,9 @@ public record AppProperties(
             requireBetween("app.agent-limits.daily-model-calls", dailyModelCalls, ONE_TURN_OF_CALLS, MAX_DAILY);
             requireBetween("app.agent-limits.concurrent-turns", concurrentTurns, 1, MAX_CONCURRENT_TURNS);
             requireBetween("app.agent-limits.daily-basic-plans", dailyBasicPlans, 1, MAX_DAILY);
+            requireBetween("app.agent-limits.guest-daily-messages", guestDailyMessages, 1, MAX_DAILY);
+            requireBetween("app.agent-limits.guest-daily-model-calls", guestDailyModelCalls, ONE_TURN_OF_CALLS,
+                    dailyModelCalls);
         }
 
         private static void requireBetween(String property, int value, int min, int max) {

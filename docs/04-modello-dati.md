@@ -345,6 +345,7 @@ Indici su (`user_id`, `created_at`) e su `proposal_id`.
 | `call_date` | `date` | Il giorno UTC, come il limite di OpenRouter |
 | `user_id` | `bigint` | L'utente del turno. Nessuna chiave esterna, apposta: le righe di un account cancellato restano fino alla fine del giorno, altrimenti il totale dell'app scenderebbe e chi si cancella e si registra di nuovo potrebbe consumare le chiamate senza fine |
 | `calls` | `integer` | Obbligatorio, ≥ 0; aumentato con un solo upsert prima di ogni chiamata, anche dei turni che poi falliscono |
+| `guest` | `boolean` | Obbligatorio, `false` di default (migrazione `V4`, D134). Vero se l'utente è un ospite: l'upsert lo legge dal ruolo nella stessa istruzione. Resta anche dopo la pulizia degli ospiti, così la quota comune degli ospiti conta ancora le loro chiamate |
 
 Chiave primaria su (`call_date`, `user_id`).
 

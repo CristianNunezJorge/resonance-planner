@@ -1,12 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../api/client'
 import { setupStore } from '../../app/store'
-import { getProfile, login as loginRequest, register as registerRequest } from './authApi'
-import { expireSession, login, logout, register, restoreSession, retrySession, userUpdated } from './authSlice'
+import { getProfile, login as loginRequest, register as registerRequest, startGuest } from './authApi'
+import {
+  enterAsGuest,
+  expireSession,
+  login,
+  logout,
+  register,
+  restoreSession,
+  retrySession,
+  userUpdated,
+} from './authSlice'
 import { clearToken, readToken, saveToken } from './tokenStorage'
 import type { AuthResponse, User } from './types'
 
-vi.mock('./authApi', () => ({ login: vi.fn(), register: vi.fn(), getProfile: vi.fn() }))
+vi.mock('./authApi', () => ({ login: vi.fn(), register: vi.fn(), getProfile: vi.fn(), startGuest: vi.fn() }))
 
 const rover: User = {
   id: 7,
@@ -27,6 +36,37 @@ describe('authSlice', () => {
     vi.mocked(loginRequest).mockReset()
     vi.mocked(registerRequest).mockReset()
     vi.mocked(getProfile).mockReset()
+    vi.mocked(startGuest).mockReset()
+  })
+
+  // "Prova la demo" (D134): a temporary account of the server, opened like a login
+  describe('enterAsGuest', () => {
+    const guest: User = { ...rover, id: 90, username: 'ospite-k3x9qz', email: 'x@ospite.invalid', role: 'GUEST' }
+
+    it('opens the session of the guest and saves its token like a login', async () => {
+      vi.mocked(startGuest).mockResolvedValue({ token: 'guest.jwt.token', user: guest })
+      const store = setupStore()
+
+      await store.dispatch(enterAsGuest())
+
+      expect(startGuest).toHaveBeenCalledOnce()
+      expect(store.getState().auth.user).toEqual(guest)
+      expect(store.getState().auth.token).toBe('guest.jwt.token')
+      expect(readToken()).toBe('guest.jwt.token')
+    })
+
+    it('rejects with the message of the server and keeps nobody logged in', async () => {
+      vi.mocked(startGuest).mockRejectedValue(
+        new ApiError('RATE_LIMITED', 'Troppe prove in corso: riprova più tardi o registrati.', 429),
+      )
+      const store = setupStore()
+
+      const action = await store.dispatch(enterAsGuest())
+
+      expect(action.payload).toMatchObject({ code: 'RATE_LIMITED', status: 429 })
+      expect(store.getState().auth.user).toBeNull()
+      expect(readToken()).toBeNull()
+    })
   })
 
   describe('login and register', () => {

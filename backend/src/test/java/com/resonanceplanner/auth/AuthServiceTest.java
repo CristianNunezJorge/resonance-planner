@@ -65,8 +65,8 @@ class AuthServiceTest {
                 new AppProperties.Admin("Admin@Example.com", "admin-password"),
                 new AppProperties.Cors(List.of("http://localhost:5173")),
                 new AppProperties.Agent("test-openrouter-key", "google/gemma-4-31b-it:free"),
-                new AppProperties.RateLimit(10, Duration.ofMinutes(15), 120, Duration.ofMinutes(1)),
-                new AppProperties.AgentLimits(5, 24, 40, 2, 20));
+                new AppProperties.RateLimit(10, Duration.ofMinutes(15), 120, Duration.ofMinutes(1), 5),
+                new AppProperties.AgentLimits(5, 24, 40, 2, 20, 2, 18));
     }
 
     @Test

@@ -146,6 +146,39 @@ describe('ProfilePage', () => {
     expect(lastToast(store)?.message).toBe('Sei uscito dall\'account.')
   })
 
+  // The guest of "Prova la demo" (D134) has an address that cannot exist and a life of 24 hours
+  describe('guest account', () => {
+    const guestSession = () =>
+      renderRoutes(routes, '/profilo', signedIn({ username: 'ospite-k3x9qz', email: 'abc@ospite.invalid', role: 'GUEST' }))
+
+    it('says it is a guest account that goes away by itself, and never shows its address', async () => {
+      guestSession()
+
+      const form = await accountForm()
+      expect(within(form).getByText('Account ospite')).toBeInTheDocument()
+      expect(within(form).getByText(/si cancellano da soli entro 24 ore/)).toBeInTheDocument()
+      expect(screen.queryByText('abc@ospite.invalid')).not.toBeInTheDocument()
+      expect(within(form).getByLabelText('Username')).toHaveValue('ospite-k3x9qz')
+    })
+
+    it('asks the guest to write its name, which it knows, before it can delete', async () => {
+      vi.mocked(deleteAccount).mockResolvedValue(undefined)
+      guestSession()
+      fireEvent.click(await screen.findByRole('button', { name: 'Elimina account' }))
+
+      const dialog = screen.getByRole('dialog', { name: 'Eliminare l’account?' })
+      const confirm = within(dialog).getByRole('button', { name: 'Elimina definitivamente' })
+      expect(within(dialog).getByLabelText('Il tuo nome')).toHaveFocus()
+      expect(within(dialog).queryByText('abc@ospite.invalid')).not.toBeInTheDocument()
+      fireEvent.change(within(dialog).getByLabelText('Il tuo nome'), { target: { value: ' ospite-k3x9qz ' } })
+      expect(confirm).not.toHaveAttribute('aria-disabled')
+      fireEvent.click(confirm)
+
+      expect(await screen.findByRole('heading', { name: 'Presentazione' })).toBeInTheDocument()
+      expect(deleteAccount).toHaveBeenCalledWith(TOKEN)
+    })
+  })
+
   describe('deletion of the account (F12)', () => {
     it('asks to write the email before it can delete', async () => {
       renderPage()

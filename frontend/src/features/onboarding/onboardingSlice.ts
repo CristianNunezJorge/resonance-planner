@@ -3,7 +3,7 @@ import { describeError, type RequestFailure } from '../../api/client'
 import { toastShown } from '../../app/toastSlice'
 import type { AppThunk, RootState } from '../../app/store'
 import { getProfile } from '../auth/authApi'
-import { login, register, restoreSession, sessionEnded, userUpdated } from '../auth/authSlice'
+import { enterAsGuest, login, register, restoreSession, sessionEnded, userUpdated } from '../auth/authSlice'
 import type { User } from '../auth/types'
 import type { CharacterSummary, GameRules } from '../catalog/types'
 import { mapFailure } from './failureMapping'
@@ -139,6 +139,7 @@ const onboardingSlice = createSlice({
       // A login that replaces the user without a logout (a login in another tab) is a new user too
       .addCase(login.fulfilled, () => initialState)
       .addCase(register.fulfilled, () => initialState)
+      .addCase(enterAsGuest.fulfilled, () => initialState)
       .addCase(restoreSession.fulfilled, () => initialState)
       .addCase(submitOnboarding.pending, (state, action) => {
         state.submitStatus = 'submitting'
