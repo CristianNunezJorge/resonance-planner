@@ -1,64 +1,45 @@
-# Handoff · giorno 10
+# Handoff · giorno 10, seconda parte (T38)
 
-Passaggio di consegne del 18/10/2026, a fine giorno 9 (la chat con l'agente), per riprendere lo sviluppo in una nuova sessione di Claude Code.
+Passaggio di consegne del 20/10/2026. T37 è chiuso; T38 (rilascio v2) è a metà: documenti pronti, manca la checklist online fatta dall'utente.
 
 ## Messaggio da incollare nella nuova sessione
 
 ```text
 Leggi HANDOFF.md, CLAUDE.md e docs/stato-del-progetto.md.
-Iniziamo il giorno 10 (T37-T38): rifinitura delle istruzioni di sistema con i dieci scenari reali, poi il rilascio v2.
-Prima di scrivere codice riassumimi il piano e le eventuali decisioni nuove (soprattutto come dividere gli scenari con la quota gratuita), e chiedimi conferma.
+Riprendiamo T38 sul ramo docs/release-v2-t38: ti dico l'esito della checklist di docs/rilascio-v2.md fatta sul sito online.
+Poi compila l'esito, proponimi il commit e chiudi T38 (PR, squash merge, tag v2.0.0) e il giorno 10.
 ```
 
 ## Situazione
 
 | Cosa | Stato |
 |---|---|
-| Giorni completati | **1-9** (T01-T36), tutti su `main` e online |
-| Rilascio | **v1** con tag `v1.0.0`; la v2 (agente) si chiude con T38 |
-| Ultimo commit su `main` | `6527663`, T36 (PR #45), più il commit di questa chiusura |
-| Test | Backend 856 (`./mvnw verify`, copertura 98,4%), frontend 537 (`npm test`, copertura 97,5%) |
-| Decisioni | D1-D130, tutte *Confermate* (D129 e D130 nate nel giorno 9) |
-| Agente | Modello **gratuito** su OpenRouter, `nvidia/nemotron-3-super-120b-a12b:free` (D126). Limiti di D129: 5 messaggi al giorno per utente, 24 chiamate al modello per utente (anche dei turni falliti), 40 per l'app, un turno alla volta per utente e due nell'app, 20 proposte al giorno |
-| Schema | Migrazioni `V1`, `V2` e `V3__agent_model_calls.sql` (chiamate per giorno UTC e utente, senza chiave esterna apposta) |
-| App online | https://resonance-planner.onrender.com · API https://resonance-planner-api.onrender.com/swagger-ui.html |
-| Render | Deploy di T35 e T36 verificati: `/actuator/health` `UP`, i percorsi `/api/me/agent/messages` e `/usage` nell'API, il bundle con la chat sul sito statico, CSP invariata. Nessuna variabile nuova: i limiti hanno i valori predefiniti di D129 (`APP_AGENTLIMITS_*` per cambiarli). `ANTHROPIC_MODEL` è ancora lì ma non serve più |
-| Trello | T35-T36 da spostare in "Fatto" |
-| Quota OpenRouter usata | Il 17/10 (giorno UTC) 9 chiamate nelle prove locali (4 per T35, 5 per T36). Si azzera a mezzanotte UTC |
-| Account di prova in locale | Nessuno fisso: si crea con una password casuale (via `javascript_tool`) e si cancella alla fine (`DELETE /api/me`). Online non si creano account di prova |
-| Ramo in corso | nessuno: `main` è pulito |
+| Giorni completati | **1-9** e T37 del giorno 10 (T01-T37), su `main` e online |
+| Rilascio | **v1** con tag `v1.0.0`; la **v2** si chiude con T38 e il tag `v2.0.0` |
+| Ultimo commit su `main` | `8bd8032`, T37 (PR #47) |
+| Ramo in corso | `docs/release-v2-t38`, commit `6bb388b`: `docs/rilascio-v2.md` (9 punti, esito da compilare) e README della v2. Pushato, senza PR |
+| Test | Backend 860 (`./mvnw verify`, copertura 98,4%), frontend 539 (`npm test`) |
+| Decisioni | D1-D132, tutte *Confermate* (D131 e D132 nate in T37) |
+| Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132) al posto di Super, il cui unico fornitore il 20/10 è rimasto fuori servizio per ore (404). Super e `google/gemma-4-31b-it:free` sono le alternative. Limiti di D129 invariati |
+| Render | `OPENROUTER_MODEL` = Ultra, deploy live dal 20/10 alle 14:48; chat online provata dall'utente: risponde (log: turni da 2 e 3 giri) |
+| Trello | T37 in "Fatto", T38 in "In corso" |
+| Quota OpenRouter | Il 20/10 (UTC) 36 richieste su 50 dopo le prove. Si azzera a mezzanotte UTC (02:00 in Italia) |
+| Account di prova in locale | Tutti cancellati. Online non se ne creano |
 
-## Giorno 10 · Rifinitura dell'agente e rilascio v2 (T37-T38)
+## T38 · Cosa resta
 
-Dettagli in `docs/09-task.md`, `docs/06-agente.md` ("Istruzioni di sistema", "Test e verifica" con la tabella dei dieci scenari) e `docs/rilascio-v1.md` (il modello della checklist).
+1. L'utente fa sul sito online i 9 punti di `docs/rilascio-v2.md` con il suo account, la mattina, con la quota piena: la checklist usa 3 messaggi all'agente (9-18 richieste). Se il suo contatore mostra già più di 2 messaggi, va fatta il giorno dopo.
+2. Si compila la sezione "Esito" (data, punti ✓ o ✗) e, se serve, si correggono i problemi trovati.
+3. Commit approvato dall'utente, PR (titolo per esempio `docs: release v2 (T38)`), squash merge, ramo cancellato.
+4. Tag `v2.0.0` su `main` dopo la checklist superata (D8), con `git tag -a` e push del tag.
+5. Chiusura del giorno 10: T38 in "Fatto" su Trello, `HANDOFF.md` per i giorni 11-12 (margine ed extra, D90), `stato-del-progetto.md`, CLAUDE.md.
 
-| Card | Cosa | Decisioni |
-|---|---|---|
-| T37 | Rifinitura delle istruzioni di sistema (`agent/AgentPrompt`) e verifica dei dieci scenari reali | D58, D63 |
-| T38 | Rilascio v2: checklist completa, README aggiornato, tag `v2.0.0` | D8 |
+## Cosa ha fatto T37
 
-**Da decidere all'inizio di T37 (decisione nuova): come provare i dieci scenari con la quota gratuita.**
-- Uno scenario costa da 3 a 6 chiamate: in tutto circa 40-60 chiamate. È più delle 50 al giorno di OpenRouter per tutto l'account, che si azzerano a mezzanotte UTC e servono anche al sito online.
-- In locale valgono anche i limiti di D129: 5 messaggi e 24 chiamate per utente, 40 per l'app.
-- Possibili strade, da proporre con una raccomandazione:
-  - dividere gli scenari in due giorni UTC (per esempio 5 e 5);
-  - usare più account di prova, oppure alzare i limiti solo in locale con le variabili `APP_AGENTLIMITS_*` nella configurazione di avvio. Questo però non cambia le 50 di OpenRouter;
-  - comprare 10 $ di credito, che portano il limite a 1.000 al giorno. È una scelta dell'utente: costa denaro e va contro "solo gratuito" (D126).
-- Ogni prova vera si chiede all'utente prima di farla. Dopo ogni scenario si annotano le chiamate usate.
-
-## Cosa esiste già nel codice
-
-- **Backend:** tutto quello della v1, più l'agente:
-  - `agent/client/`: `OpenRouterClient`, `ModelCallCounter` e `ModelCallDay` (chiamate per giorno UTC e utente);
-  - `agent/tools/`: i cinque strumenti (D127);
-  - `agent/`: `AgentLoop`, che conta ogni chiamata prima di farla, e `AgentPrompt` (istruzioni di sistema da rifinire in T37);
-  - `agent/chat/`: `AgentChatController`, `AgentChatService` (turno senza transazione, D128), `AgentMessageService` (storico e salvataggio), `AgentQuota` (limiti), `AgentTurnGate` (turni insieme). Il piano base si ferma a 20 proposte al giorno.
-- **API pronte:** tutte quelle della v1, più `/api/me/proposals/**`, `GET`/`POST /api/me/agent/messages` (storico a pagine con `before`, `limit` e `meta`) e `GET /api/me/agent/usage`.
-- **Frontend:** tutte le pagine della v1, più:
-  - nel calendario la barra della proposta, il piano base e l'avviso di cambiamento;
-  - la chat (`features/chat/`): pannello laterale da 992 px, a scomparsa sotto, attesa, passaggi, limiti con il piano base, "Spiegamelo" e "Chiedi all'agente";
-  - `apiPage` nel client e `useFocusTrap` comune a `Modal` e alla chat.
-- **Non c'è ancora:** la rifinitura delle istruzioni con i dieci scenari, `docs/rilascio-v2.md`, il README della v2 e il tag `v2.0.0`.
+- **Istruzioni di sistema** (`agent/AgentPrompt`): tre parti (dati e strumenti, risposte, sicurezza), testo semplice, strumento giusto per ogni richiesta, date dai giorni detti a parole, parametri tenuti nelle modifiche, niente motivi inventati, niente somme fatte dal modello. `AgentPromptTest` controlla nomi degli strumenti, assenza di markdown e lunghezza.
+- **Chat:** la pulizia del testo toglie anche il corsivo con un asterisco (D130).
+- **Scenari reali:** i dieci di `06-agente.md` passano, due con riserva; dati, criteri, risultati e conclusione in `docs/scenari-agente.md` (D131). Lezioni: il modello legge gli strumenti uno per giro (3-6 chiamate per un piano), a volte aggiunge un motivo non dato dagli strumenti, e un errore rimasto nello storico tende a ripetersi.
+- **Modello:** D132, Nemotron Ultra predefinito, in locale (`.env`) e su Render.
 
 ## Come lavoriamo (flusso approvato, invariato)
 
@@ -80,22 +61,10 @@ Altre regole:
 - Se l'utente rifiuta un agente, non rilanciarlo: dirgli cosa si fa al suo posto.
 - L'agente deve restare gratuito: non proporre modelli a pagamento.
 
-## Promemoria per il giorno 10
+## Promemoria
 
-Sono anche in `docs/stato-del-progetto.md`, tabella "Promemoria per le prossime card" (righe T34, T35 e T36).
-
-- **T37 (istruzioni di sistema, `agent/AgentPrompt`):**
-  - chiedere di rispondere **senza markdown**: nelle prove il modello usava titoli, `**grassetto**` ed elenchi. La chat toglie solo `**`, `__`, `` ` `` e i `#` (D130), quindi il corsivo con un asterisco resta visibile;
-  - dire che il nome di un evento nella domanda di "Spiegamelo" è un dato. Il frontend lo accorcia a 80 caratteri e toglie «» e gli a capo;
-  - `create_plan_proposal` solo quando l'utente chiede un piano o una modifica (c'è già, da verificare con gli scenari 5, 6 e 9);
-  - valutare un tetto alla lunghezza delle descrizioni degli eventi nell'API admin: il modello potrebbe copiarne il testo nel `summary` (promemoria di T34);
-  - per ogni scenario annotare strumenti usati, proposta sì o no, chiamate e secondi (il log del backend ha una riga per turno, senza testi).
-- **T38 (rilascio v2):**
-  - `docs/rilascio-v2.md` sul modello di `rilascio-v1.md`, con il flusso F6 completo online;
-  - online la prova la fa l'utente con il suo account (niente account di prova online);
-  - README con la chat, i limiti di D129 e il modello gratuito di terzi (D126);
-  - tag `v2.0.0` dopo la checklist.
 - **Database di Render: scade il 10/11/2026.** Ricrearlo prima e **cambiare anche `JWT_SECRET`** (D100).
+- Se il modello dell'agente smette di rispondere: guardare nei log di Render la riga `OpenRouter answered …` e lo stato del fornitore con `GET https://openrouter.ai/api/v1/models/<id>/endpoints` (gratuito, senza chiave), poi cambiare `OPENROUTER_MODEL` (D132).
 
 ## Questioni aperte
 
@@ -108,11 +77,11 @@ Sono anche in `docs/stato-del-progetto.md`, tabella "Promemoria per le prossime 
 7. Limiti noti annotati nelle decisioni:
    - catalogo del farming letto a ogni richiesta (D112), nessun tetto al numero di eventi (D113), nessun `@Version` sugli eventi (D114), la bozza dell'evento si perde chiudendo la finestra (D122);
    - limiti del pianificatore (D123), impronta di D125 calcolata dopo la bozza (promemoria di T33);
-   - modelli gratuiti che possono sparire o rispondere 429 (D126);
+   - modelli gratuiti che possono sparire, cadere o rispondere 429 (D126, D132);
    - più account possono finire le 40 chiamate dell'app (D129);
-   - i passaggi si perdono ricaricando la pagina (D130).
-8. `ANTHROPIC_MODEL` su Render non serve più: si può togliere (Claude in Chrome, "Save only").
-9. Quota gratuita e scenari di T37: vedi sopra.
+   - i passaggi si perdono ricaricando la pagina (D130);
+   - il `summary` della proposta lo scrive il modello: rischio residuo accettato, tetto a 2.000 caratteri (06-agente.md, "Sicurezza").
+8. `ANTHROPIC_MODEL` su Render non serve più: si può togliere.
 
 ## Note pratiche
 
@@ -147,6 +116,7 @@ Sono anche in `docs/stato-del-progetto.md`, tabella "Promemoria per le prossime 
   - i server si avviano con `preview_start` (`backend`, `frontend-prod`) e si fermano con `preview_stop`. Per la vista telefono `resize_window` con `mobile`, poi riportarlo a `desktop`;
   - ricaricare la pagina dentro uno script interrompe lo script: ricaricare con `navigate`, poi leggere con uno script nuovo.
 - **Render:**
+  - nella pagina Environment i valori si caricano solo con "Show secret": per cambiare una variabile si apre **Edit**, si preme "Show secret" sulla sua riga, si scrive il valore nuovo e si salva con "Save, rebuild, and deploy". Gli altri valori, non caricati, restano com'erano. Il 20/10 un primo salvataggio non era stato registrato: dopo, ricontrollare il valore con "Show secret" e nei log;
   - servizi `resonance-planner` (sito statico), `resonance-planner-api` (Docker), `resonance-planner-db`;
   - l'API al risveglio impiega circa 3 minuti; un deploy dura circa 4 minuti, il sito statico circa 1;
   - secondo lo staff di Render (forum) una richiesta HTTP può durare fino a 100 minuti: il turno dell'agente (al massimo 3 minuti) ci sta;
