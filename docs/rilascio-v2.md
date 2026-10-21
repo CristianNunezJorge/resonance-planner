@@ -16,18 +16,18 @@ La v2 aggiunge il piano base, le proposte, l'avviso di cambiamento e l'agente co
 
 | # | Cosa fare | Cosa deve succedere | Esito |
 |---|---|---|---|
-| 1 | **Calendario** → **"Genera piano base"** | Notifica *"Piano base pronto: controllalo e confermalo."*; compare la barra **"Proposta in attesa"** e le attività proposte sono **tratteggiate** | |
-| 2 | Nella barra della proposta, **"Conferma"** | Notifica *"Piano confermato: …"*; la barra sparisce e le attività diventano normali | |
-| 3 | Apri un'attività di **farming** di oggi → **"Segna come fatta"** | Notifica *"Attività segnata come fatta. Aggiunti all'inventario: …"*; in **Roster → Inventario** le quantità sono aumentate | |
-| 4 | Nella chat dell'agente (a destra), clic sul suggerimento **"Organizzami la settimana"** | Indicatore *"L'assistente sta lavorando…"*; poi una risposta in italiano, in testo semplice, con sotto i **passaggi** ("Ho calcolato il piano", "Ho preparato la proposta"); nel calendario la nuova **proposta tratteggiata**. Il contatore passa a un messaggio in più | |
-| 5 | Scrivi **"Non gioco sabato e domenica"** e invia | Nuova risposta; la proposta nuova **sostituisce** quella di prima e non ha attività sabato e domenica. Poi **"Conferma"** | |
-| 6 | **"Esci"**, accedi come **admin** → **"Eventi"** → **"+ Nuovo evento"**: date fisse da domani a dopodomani (giorni feriali, che sono nel piano del punto 5), tipo a piacere → **"Salva"**. Poi esci e accedi con il tuo account | Notifica *"Evento creato."*; nel calendario compare l'**avviso** *"Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano."* con **"Chiedi all'agente"** | |
-| 7 | Clic su **"Chiedi all'agente"** | La chat riceve il messaggio *"Roster, obiettivi o eventi sono cambiati dopo il mio ultimo piano: aggiornalo."* e risponde con una proposta nuova, che tiene conto dell'evento | |
-| 8 | Se il contatore è arrivato a **5 / 5** (altrimenti salta il punto) | Il campo della chat è disattivato, la chat dice che i messaggi di oggi sono finiti e offre **"Genera piano base"** | |
-| 9 | Apri il calendario **da telefono** (o con gli strumenti per sviluppatori del browser a una larghezza sotto i 992 px) | In basso a destra il pulsante **"Agente"** apre la chat a scomparsa; **Esc** la chiude e il fuoco torna sul pulsante | |
+| 1 | **Calendario** → **"Genera piano base"** | Notifica *"Piano base pronto: controllalo e confermalo."*; compare la barra **"Proposta in attesa"** e le attività proposte sono **tratteggiate** | ✓ |
+| 2 | Nella barra della proposta, **"Conferma"** | Notifica *"Piano confermato: …"*; la barra sparisce e le attività diventano normali | ✓ |
+| 3 | Apri un'attività di **farming** di oggi → **"Segna come fatta"** | Notifica *"Attività segnata come fatta. Aggiunti all'inventario: …"*; in **Roster → Inventario** le quantità sono aumentate | ✓ |
+| 4 | Nella chat dell'agente (a destra), clic sul suggerimento **"Organizzami la settimana"** | Indicatore *"L'assistente sta lavorando…"*; poi una risposta in italiano, in testo semplice, con sotto i **passaggi** ("Ho calcolato il piano", "Ho preparato la proposta"); nel calendario la nuova **proposta tratteggiata**. Il contatore passa a un messaggio in più | ✓ |
+| 5 | Scrivi **"Non gioco sabato e domenica"** e invia | Nuova risposta; la proposta nuova **sostituisce** quella di prima e non ha attività sabato e domenica. Poi **"Conferma"** | ✓ |
+| 6 | **"Esci"**, accedi come **admin** → **"Eventi"** → **"+ Nuovo evento"**: date fisse da domani a dopodomani (giorni feriali, che sono nel piano del punto 5), tipo a piacere → **"Salva"**. Poi esci e accedi con il tuo account | Notifica *"Evento creato."*; nel calendario compare l'**avviso** *"Roster, obiettivi o eventi sono cambiati dopo il tuo ultimo piano."* con **"Chiedi all'agente"** | ✓ |
+| 7 | Clic su **"Chiedi all'agente"** | La chat riceve il messaggio *"Roster, obiettivi o eventi sono cambiati dopo il mio ultimo piano: aggiornalo."* e risponde con una proposta nuova, che tiene conto dell'evento | ✓ |
+| 8 | Se il contatore è arrivato a **5 / 5** (altrimenti salta il punto) | Il campo della chat è disattivato, la chat dice che i messaggi di oggi sono finiti e offre **"Genera piano base"** | — (saltato: il contatore non è arrivato a 5 / 5) |
+| 9 | Apri il calendario **da telefono** (o con gli strumenti per sviluppatori del browser a una larghezza sotto i 992 px) | In basso a destra il pulsante **"Agente"** apre la chat a scomparsa; **Esc** la chiude e il fuoco torna sul pulsante | ✓ |
 
 **Pulizia:** nella barra della proposta del punto 7 scegli **"Scarta"** (o "Conferma", se il piano ti va bene), poi accedi come admin ed elimina l'evento creato al punto 6 (pulsante **"Elimina"** nella tabella).
 
 ## Esito
 
-*Da compilare dopo la prova.* Con tutti i punti ✓ si crea il tag `v2.0.0` su `main` (D8).
+**21/10/2026 · tutti i punti ✓, il punto 8 saltato.** Prova fatta dall'autore del progetto sul sito online, con il suo account abituale e con l'account admin di Render per il punto 6; l'evento di prova è stato poi eliminato. Il punto 8 non si poteva provare, perché la checklist non porta il contatore a 5 / 5: il limite di messaggi è coperto dai test automatici (`AgentQuotaTest` nel backend, `ChatPanel.test.tsx` nel frontend). Nessun problema trovato. Con questo esito si crea il tag `v2.0.0` su `main` (D8).
