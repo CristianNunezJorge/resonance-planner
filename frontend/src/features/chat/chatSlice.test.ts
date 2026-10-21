@@ -35,6 +35,7 @@ const usage: ChatUsage = {
   resetsAt: '2026-10-17T22:00:00Z',
   callsLimitReached: false,
   appLimitReached: false,
+  guestLimitReached: false,
 }
 
 // From the newest, like the API
@@ -269,6 +270,13 @@ describe('chatSlice', () => {
 
   it('does not let the user write when a daily limit is over', async () => {
     vi.mocked(getUsage).mockResolvedValue({ ...usage, used: 5 })
+    const store = await loadedStore()
+
+    expect(selectCanSend(store.getState())).toBe(false)
+  })
+
+  it('does not let a guest write when the guests used their share of the calls (D134)', async () => {
+    vi.mocked(getUsage).mockResolvedValue({ ...usage, limit: 2, guestLimitReached: true })
     const store = await loadedStore()
 
     expect(selectCanSend(store.getState())).toBe(false)

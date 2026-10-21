@@ -9,6 +9,7 @@ import com.resonanceplanner.common.config.Today;
 import com.resonanceplanner.common.error.ErrorCode;
 import com.resonanceplanner.common.error.TooManyRequestsException;
 import com.resonanceplanner.common.error.UnauthorizedException;
+import com.resonanceplanner.user.Role;
 import com.resonanceplanner.user.UserRepository;
 import java.time.Clock;
 import java.time.Duration;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  * in Italy (D40, D41): a failed turn saves nothing, so it does not count there (D61). The calls to the model count from
  * midnight UTC like OpenRouter (D126), also the ones of the failed turns: 24 a day for each user, so one account alone
  * never uses the calls of everyone, and 40 a day in the whole app. A turn starts only if a whole turn of calls is left.
+ * A guest (D134) has 2 messages a day, and all the guests together 18 of the 40 calls: the rest stays for the
+ * registered users.
  */
 @Service
 @Transactional(readOnly = true)
@@ -34,6 +37,8 @@ public class AgentQuota {
             + "riusciti le consumano. Riprova domani o usa il piano base.";
     static final String APP_LIMIT = "Per oggi l'assistente ha finito le richieste gratuite di tutta l'app: riprova "
             + "domani o usa il piano base.";
+    static final String GUEST_LIMIT = "Le prove dell'agente per gli ospiti sono finite per oggi: registrati per "
+            + "continuare, oppure usa il piano base.";
 
     private static final Logger log = LoggerFactory.getLogger(AgentQuota.class);
 
@@ -57,16 +62,25 @@ public class AgentQuota {
     /**
      * Checks that the user can send one more message today.
      *
-     * @throws TooManyRequestsException with AGENT_DAILY_LIMIT if the user or the whole app reached a daily limit
+     * @throws TooManyRequestsException with AGENT_DAILY_LIMIT if the user, the guests or the whole app reached a
+     *     daily limit
+     * @throws UnauthorizedException if the user of the token no longer exists (401, D102)
      */
     public void requireRoom(Long userId) {
+        boolean guest = isGuest(userId);
+        int dailyMessages = dailyMessagesOf(guest);
         Instant now = clock.instant();
-        if (usedToday(userId) >= limits.dailyMessages()) {
+        if (usedToday(userId) >= dailyMessages) {
             throw new TooManyRequestsException(ErrorCode.AGENT_DAILY_LIMIT,
-                    USER_LIMIT.formatted(limits.dailyMessages()), Duration.between(now, today.startOfNextDay()));
+                    USER_LIMIT.formatted(dailyMessages), Duration.between(now, today.startOfNextDay()));
         }
         if (callsLimitReached(userId)) {
             throw new TooManyRequestsException(ErrorCode.AGENT_DAILY_LIMIT, USER_CALLS_LIMIT,
+                    Duration.between(now, modelCalls.nextReset()));
+        }
+        if (guest && guestLimitReached()) {
+            log.info("Agent message of guest {} refused: the calls of the guests of today are over", userId);
+            throw new TooManyRequestsException(ErrorCode.AGENT_DAILY_LIMIT, GUEST_LIMIT,
                     Duration.between(now, modelCalls.nextReset()));
         }
         if (appLimitReached()) {
@@ -82,11 +96,18 @@ public class AgentQuota {
      * @throws UnauthorizedException if the user of the token no longer exists (401, D102)
      */
     public AgentUsageResponse usage(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UnauthorizedException();
-        }
-        return new AgentUsageResponse(usedToday(userId), limits.dailyMessages(), today.startOfNextDay(),
-                callsLimitReached(userId), appLimitReached());
+        boolean guest = isGuest(userId);
+        return new AgentUsageResponse(usedToday(userId), dailyMessagesOf(guest), today.startOfNextDay(),
+                callsLimitReached(userId), appLimitReached(), guest && guestLimitReached());
+    }
+
+    // The role is read from the database, like the existence of the user: a deleted guest gets 401 (D102)
+    private boolean isGuest(Long userId) {
+        return userRepository.findRoleById(userId).orElseThrow(UnauthorizedException::new) == Role.GUEST;
+    }
+
+    private int dailyMessagesOf(boolean guest) {
+        return guest ? limits.guestDailyMessages() : limits.dailyMessages();
     }
 
     private int usedToday(Long userId) {
@@ -101,5 +122,9 @@ public class AgentQuota {
 
     private boolean appLimitReached() {
         return limits.dailyModelCalls() - modelCalls.callsToday() < AgentLoop.MAX_ROUNDS;
+    }
+
+    private boolean guestLimitReached() {
+        return limits.guestDailyModelCalls() - modelCalls.guestCallsToday() < AgentLoop.MAX_ROUNDS;
     }
 }

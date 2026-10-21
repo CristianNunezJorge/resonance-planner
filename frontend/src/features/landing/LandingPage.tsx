@@ -1,27 +1,77 @@
-import { useEffect, useRef } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import ErrorState from '../../components/ErrorState'
 import LoadingState from '../../components/LoadingState'
 import { usePageTitle } from '../../components/usePageTitle'
+import { enterAsGuest } from '../auth/authSlice'
 import { CALENDAR_PATH, homePath } from '../auth/navigation'
 import { fetchCharacters } from '../catalog/catalogSlice'
 import CharacterCard from './CharacterCard'
 import HowItWorks from './HowItWorks'
 
+type CallToAction = { kind: 'home'; to: string; label: string } | { kind: 'visitor' }
+
 // The button of the presentation: a visitor tries the demo, a logged user goes back to their own home (D72, D73)
-function useCallToAction(): { to: string; label: string } | null {
+function useCallToAction(): CallToAction | null {
   const { user, sessionStatus } = useAppSelector((state) => state.auth)
   if (user) {
     const to = homePath(user)
-    return { to, label: to === CALENDAR_PATH ? 'Vai al calendario' : 'Continua la configurazione' }
+    return { kind: 'home', to, label: to === CALENDAR_PATH ? 'Vai al calendario' : 'Continua la configurazione' }
   }
   // While the saved session is checked we do not know yet who is looking: no button, instead of a wrong one.
   // If the server could not be reached ('failed') the user is still unknown: like the NavBar, we show the visitor button.
   if (sessionStatus === 'restoring') {
     return null
   }
-  return { to: '/registrati', label: 'Prova la demo' }
+  return { kind: 'visitor' }
+}
+
+// "Prova la demo" (D134): one click opens a temporary guest account and the guided setup; "Registrati" stays next to it
+function VisitorButtons() {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const [starting, setStarting] = useState(false)
+  const [failure, setFailure] = useState<string | null>(null)
+
+  const tryTheDemo = async () => {
+    if (starting) {
+      return
+    }
+    setStarting(true)
+    setFailure(null)
+    const action = await dispatch(enterAsGuest())
+    if (enterAsGuest.fulfilled.match(action)) {
+      void navigate(homePath(action.payload.user))
+      return
+    }
+    setStarting(false)
+    setFailure(action.payload?.message ?? 'Non è stato possibile aprire la demo. Riprova.')
+  }
+
+  return (
+    <>
+      <div className="d-flex flex-wrap gap-2">
+        {/* aria-disabled and not disabled: the free server may need minutes to wake up, and the focus stays here */}
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={() => void tryTheDemo()}
+          aria-disabled={starting || undefined}
+        >
+          {starting ? 'Preparazione della demo…' : 'Prova la demo'}
+        </button>
+        <Link to="/registrati" className="btn btn-outline-light btn-lg">
+          Registrati
+        </Link>
+      </div>
+      {failure && (
+        <p className="text-danger-emphasis mt-2 mb-0" role="alert">
+          {failure}
+        </p>
+      )}
+    </>
+  )
 }
 
 // Page P1: what the app does, how it works and the characters of the demo
@@ -50,11 +100,12 @@ function LandingPage() {
           Il planner per Wuthering Waves che unisce eventi a tempo, Waveplate e obiettivi di crescita in un solo
           calendario.
         </p>
-        {callToAction && (
+        {callToAction?.kind === 'home' && (
           <Link to={callToAction.to} className="btn btn-primary btn-lg">
             {callToAction.label}
           </Link>
         )}
+        {callToAction?.kind === 'visitor' && <VisitorButtons />}
       </div>
 
       <HowItWorks />

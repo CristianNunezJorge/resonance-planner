@@ -28,13 +28,14 @@ class RateLimitFilterTest {
     private static final Instant START = Instant.parse("2026-10-12T10:00:00Z");
     private static final String LOGIN = "/api/auth/login";
     private static final String REGISTER = "/api/auth/register";
+    private static final String GUEST = "/api/auth/guest";
     private static final String CLIENT = "198.51.100.10";
 
     private final MutableClock clock = new MutableClock(START);
 
     // 3 attempts every 15 minutes for login and registration, 5 requests every minute for the rest
     private final AppProperties.RateLimit limits =
-            new AppProperties.RateLimit(3, Duration.ofMinutes(15), 5, Duration.ofMinutes(1));
+            new AppProperties.RateLimit(3, Duration.ofMinutes(15), 5, Duration.ofMinutes(1), 2);
 
     private final ApiSecurityErrorHandler errorWriter = new ApiSecurityErrorHandler(JsonMapper.builder().build());
 
@@ -105,6 +106,21 @@ class RateLimitFilterTest {
         assertThat(send("POST", REGISTER, CLIENT).passed()).isTrue();
         exhaust("POST", REGISTER, CLIENT, 2);
         assertThat(send("POST", REGISTER, CLIENT).passed()).isFalse();
+    }
+
+    @Test
+    void givesTheGuestsACounterOfTheirOwnWithTheWindowOfTheAuthentication() throws Exception {
+        // 2 guests every 15 minutes (D134), without touching login and registration
+        exhaust("POST", GUEST, CLIENT, 2);
+
+        Outcome refused = send("POST", GUEST, CLIENT);
+        assertThat(refused.passed()).isFalse();
+        assertThat(refused.response().getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("900");
+        assertThat(send("POST", LOGIN, CLIENT).passed()).isTrue();
+        assertThat(send("POST", REGISTER, CLIENT).passed()).isTrue();
+
+        clock.advance(Duration.ofMinutes(15));
+        assertThat(send("POST", GUEST, CLIENT).passed()).isTrue();
     }
 
     @Test

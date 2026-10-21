@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 class AuthControllerTest {
 
     private static final String PASSWORD = "S3cret-pass";
+    private static final String GUEST = "/api/auth/guest";
 
     @Autowired
     private MockMvc mockMvc;
@@ -230,6 +231,78 @@ class AuthControllerTest {
         mockMvc.perform(get("/api/probe/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.role").value("USER"));
+    }
+
+    // The guest of "Prova la demo" (D134): one click, no body, a temporary account that only the token opens
+    @Test
+    void createsAGuestWithOneClickAndAnswersWithItsToken() throws Exception {
+        String body = mockMvc.perform(post(GUEST))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.user.role").value("GUEST"))
+                .andExpect(jsonPath("$.data.user.onboardingCompleted").value(false))
+                .andReturn().getResponse().getContentAsString();
+
+        String username = JsonPath.read(body, "$.data.user.username");
+        String email = JsonPath.read(body, "$.data.user.email");
+        assertThat(username).matches("ospite-[a-z0-9]{6}");
+        // A domain reserved for names that can never exist (RFC 2606)
+        assertThat(email).matches("[0-9a-f-]{36}@ospite\\.invalid");
+        Number id = JsonPath.read(body, "$.data.user.id");
+        String token = JsonPath.read(body, "$.data.token");
+        assertThat(jwtService.parse(token)).contains(new AuthenticatedUser(id.longValue(), Role.GUEST));
+        mockMvc.perform(get("/api/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.username").value(username));
+    }
+
+    @Test
+    void givesEveryGuestADifferentAccount() throws Exception {
+        String first = mockMvc.perform(post(GUEST)).andReturn().getResponse().getContentAsString();
+        String second = mockMvc.perform(post(GUEST)).andReturn().getResponse().getContentAsString();
+
+        assertThat((Number) JsonPath.read(first, "$.data.user.id"))
+                .isNotEqualTo(JsonPath.read(second, "$.data.user.id"));
+        assertThat((String) JsonPath.read(first, "$.data.user.username"))
+                .isNotEqualTo(JsonPath.read(second, "$.data.user.username"));
+    }
+
+    @Test
+    void neverLetsAnyoneLogInAsAGuest() throws Exception {
+        String body = mockMvc.perform(post(GUEST)).andReturn().getResponse().getContentAsString();
+        String email = JsonPath.read(body, "$.data.user.email");
+
+        // Nobody knows the password: its hash is of a random value, and the login gives the usual answer
+        login(email, PASSWORD)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("BAD_CREDENTIALS"));
+        String hash = jdbc.queryForObject("SELECT password_hash FROM users WHERE email = ?", String.class, email);
+        assertThat(hash).startsWith("$2");
+    }
+
+    @Test
+    void keepsTheGuestsOutOfTheAdminArea() throws Exception {
+        String body = mockMvc.perform(post(GUEST)).andReturn().getResponse().getContentAsString();
+        String token = JsonPath.read(body, "$.data.token");
+
+        mockMvc.perform(get("/api/admin/events").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void refusesANewGuestWhenFiftyAlreadyExist() throws Exception {
+        long existing = jdbc.queryForObject("SELECT count(*) FROM users WHERE role = 'GUEST'", Long.class);
+        for (long i = existing; i < 50; i++) {
+            jdbc.update("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, 'hash', 'GUEST')",
+                    "ospite-test" + i, "test" + i + "@ospite.invalid");
+        }
+
+        mockMvc.perform(post(GUEST))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"))
+                .andExpect(jsonPath("$.error.message").value("Troppe prove in corso: riprova più tardi o registrati."))
+                .andExpect(result -> assertThat(result.getResponse().getHeader(HttpHeaders.RETRY_AFTER)).isNotBlank());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM users WHERE role = 'GUEST'", Long.class)).isEqualTo(50);
     }
 
     private ResultActions register(String username, String email, String password) throws Exception {

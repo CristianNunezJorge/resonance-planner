@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { describeError, type RequestFailure } from '../../api/client'
 import type { RootState } from '../../app/store'
-import { login, register, restoreSession, sessionEnded } from '../auth/authSlice'
+import { enterAsGuest, login, register, restoreSession, sessionEnded } from '../auth/authSlice'
 import { loadCalendar } from '../calendar/calendarSlice'
 import { getMessages, getUsage, sendMessage } from './chatApi'
 import type { ChatAnswer, ChatMessage, ChatPage, ChatUsage } from './types'
@@ -174,7 +174,8 @@ export function selectCanSend(state: RootState): boolean {
     sending === null &&
     usage.used < usage.limit &&
     !usage.callsLimitReached &&
-    !usage.appLimitReached
+    !usage.appLimitReached &&
+    !usage.guestLimitReached
   )
 }
 
@@ -192,6 +193,7 @@ const chatSlice = createSlice({
       .addCase(sessionEnded, () => initialState)
       .addCase(login.fulfilled, () => initialState)
       .addCase(register.fulfilled, () => initialState)
+      .addCase(enterAsGuest.fulfilled, () => initialState)
       // A session restored for the same user (a login in another tab) keeps the chat and the message that waits
       .addCase(restoreSession.fulfilled, (state, action) =>
         action.payload.user.id === state.ownerId ? state : initialState,

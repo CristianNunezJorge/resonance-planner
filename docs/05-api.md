@@ -80,11 +80,12 @@ Gli altri errori della richiesta che non hanno una riga propria (metodo HTTP non
 |---|---|---|---|
 | POST | `/api/auth/register` | Registra un utente | 201, token e utente |
 | POST | `/api/auth/login` | Login | 200, token e utente |
-| POST | `/api/auth/guest` | Entra come ospite (v3, D15) | 201, token e utente |
+| POST | `/api/auth/guest` | Entra come ospite (X02, D134) | 201, token e utente |
 
 - **Registrazione:** `{ "username", "email", "password" }`. Username da 3 a 30 caratteri tra lettere, numeri, punto, trattino e underscore; password da 8 caratteri a 72 byte (D100). `admin` e l'email dell'admin non si possono registrare. L'email si salva in minuscolo. 409 `CONFLICT` se email o username sono già usati.
 - **Login:** `{ "email", "password" }`. Email o password sbagliate danno sempre lo stesso 401 `BAD_CREDENTIALS`.
 - **Risposta di entrambi:** `{ "token": "eyJ...", "user": { "id", "username", "email", "role", "playTimeMinutes", "onboardingCompleted" } }`. Il token vale 24 ore e contiene identificativo e ruolo (D45, D99).
+- **Ospite (X02, D134):** senza corpo; risponde come la registrazione, con `role: "GUEST"`, un nome `ospite-` più 6 lettere o cifre e un'email `<uuid>@ospite.invalid` che non si mostra. La password è l'hash di un valore casuale: con il login non si entra come ospite. L'account si cancella da solo 24 ore dopo la creazione, con tutti i suoi dati. 429 `RATE_LIMITED` con `Retry-After` se esistono già 50 ospiti ("Troppe prove in corso: riprova più tardi o registrati."), oppure oltre i 5 ospiti ogni 15 minuti dallo stesso indirizzo (`RateLimitFilter`). Un ospite non entra nell'area admin (403).
 
 ### Profilo
 | Metodo | Percorso | Cosa fa | Risposta |
@@ -224,7 +225,7 @@ Le proposte nascono solo dal pianificatore, attraverso l'agente o il piano base:
 **Chat (T35, D129).** Un messaggio è `{ "id", "role", "content", "proposalId", "createdAt" }`, con `role` `USER` o `ASSISTANT` e `proposalId` vuoto se il messaggio non ha prodotto una proposta.
 - **Storico:** `GET /messages` restituisce i messaggi dal più recente, `limit` da 1 a 50 (20 se manca). Per la pagina successiva si passa come `before` l'id del messaggio più vecchio ricevuto. La risposta ha `meta: { "limit": 20, "hasMore": true }`. La pagina parte da un id e non da un numero, così un messaggio nuovo non fa scorrere le pagine.
 - **Invio:** `POST /messages` con `content` da 1 a 1.000 caratteri (400 sul campo `content`). Il messaggio dell'utente e la risposta si salvano solo se l'agente risponde (D61); la risposta salvata ha al massimo 4.000 caratteri, perché torna nello storico di ogni richiesta.
-- **Utilizzo:** `GET /usage` restituisce `{ "used", "limit", "resetsAt", "callsLimitReached", "appLimitReached" }`. `callsLimitReached` è vero quando all'utente non resta un turno intero di chiamate al modello (contano anche i turni falliti), `appLimitReached` quando non resta a tutta l'app; entrambi ripartono a mezzanotte UTC (D129).
+- **Utilizzo:** `GET /usage` restituisce `{ "used", "limit", "resetsAt", "callsLimitReached", "appLimitReached", "guestLimitReached" }`. `callsLimitReached` è vero quando all'utente non resta un turno intero di chiamate al modello (contano anche i turni falliti), `appLimitReached` quando non resta a tutta l'app; entrambi ripartono a mezzanotte UTC (D129). Per un ospite (D134) `limit` è 2 e `guestLimitReached` è vero quando tutti gli ospiti insieme hanno usato le loro 18 chiamate del giorno; per gli altri utenti è sempre `false`.
 - **429** ai limiti giornalieri dell'utente (messaggi o chiamate) o di tutta l'app (`AGENT_DAILY_LIMIT`), con un turno già in corso o con troppi turni insieme (`RATE_LIMITED`); sempre con `Retry-After`.
 - **502** se l'agente non risponde (`AGENT_UNAVAILABLE`, D61, D126).
 - **401** se l'utente del token non esiste più (D102).
@@ -357,7 +358,7 @@ Le 3 run sono tutte entro il limite di 3, quindi valgono doppio: 3 × 2 × 1,10 
   "message": { "id": 88, "role": "ASSISTANT", "content": "Ho preparato un piano di 5 giorni...", "proposalId": 7, "createdAt": "2026-10-01T14:02:10Z" },
   "proposal": { "id": 7, "summary": "Concentro la Simulation Training nei giorni dell'evento...", "tasks": [] },
   "steps": ["Ho letto il tuo roster e le Waveplate", "Ho calcolato il piano", "Ho preparato la proposta"],
-  "usage": { "used": 3, "limit": 5, "resetsAt": "2026-10-01T22:00:00Z", "callsLimitReached": false, "appLimitReached": false }
+  "usage": { "used": 3, "limit": 5, "resetsAt": "2026-10-01T22:00:00Z", "callsLimitReached": false, "appLimitReached": false, "guestLimitReached": false }
 }
 ```
 `proposal` è vuoto se l'agente ha solo risposto senza preparare un piano. `steps` elenca i passaggi fatti, ricavati dagli strumenti chiamati (D62). `resetsAt` è la mezzanotte italiana (D41) espressa in UTC.

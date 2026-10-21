@@ -56,6 +56,7 @@ function ProfileContent({ user }: { user: User }) {
   const playTimeRef = useRef<HTMLFieldSetElement>(null)
   const accountTitleId = useId()
   const dangerTitleId = useId()
+  const isGuest = user.role === 'GUEST'
 
   useEffect(() => {
     void dispatch(fetchRules())
@@ -146,11 +147,22 @@ function ProfileContent({ user }: { user: User }) {
               error={errors.username}
               inputRef={usernameRef}
             />
-            <div className="mb-3">
-              <p className="form-label mb-1">Email</p>
-              <p className="mb-0 text-break">{user.email}</p>
-              <p className="form-text mt-0">L’email non si può cambiare.</p>
-            </div>
+            {isGuest ? (
+              // The guest of "Prova la demo" (D134): its address cannot exist, so it is never shown
+              <div className="mb-3">
+                <p className="form-label mb-1">Account ospite</p>
+                <p className="form-text mt-0">
+                  Sei entrato con «Prova la demo»: l’account e i suoi dati si cancellano da soli entro 24 ore
+                  dall’ingresso. Per usare l’app con i tuoi dati, esci e registrati.
+                </p>
+              </div>
+            ) : (
+              <div className="mb-3">
+                <p className="form-label mb-1">Email</p>
+                <p className="mb-0 text-break">{user.email}</p>
+                <p className="form-text mt-0">L’email non si può cambiare.</p>
+              </div>
+            )}
             {rulesStatus === 'failed' && rulesError && (
               <ErrorState
                 message={`Non è stato possibile caricare le scelte del tempo di gioco. ${rulesError}`}
@@ -215,7 +227,12 @@ function ProfileContent({ user }: { user: User }) {
         </div>
       </section>
       {deleting && (
-        <DeleteAccountModal email={user.email} onDelete={handleDelete} onClose={() => setDeleting(false)} />
+        <DeleteAccountModal
+          email={user.email}
+          guestName={isGuest ? user.username : undefined}
+          onDelete={handleDelete}
+          onClose={() => setDeleting(false)}
+        />
       )}
     </section>
   )

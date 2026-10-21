@@ -32,6 +32,11 @@ public class ModelCallCounter {
         return Math.toIntExact(repository.callsOn(day()));
     }
 
+    /** The calls of all the guests today (D134), part of the calls of the whole app. */
+    public int guestCallsToday() {
+        return Math.toIntExact(repository.guestCallsOn(day()));
+    }
+
     /** The calls of one user today. */
     public int callsToday(Long userId) {
         return repository.callsOn(day(), userId).orElse(0);

@@ -39,6 +39,8 @@ class AppPropertiesTest {
             assertThat(limits.authWindow()).isEqualTo(Duration.ofMinutes(15));
             assertThat(limits.generalRequests()).isEqualTo(120);
             assertThat(limits.generalWindow()).isEqualTo(Duration.ofMinutes(1));
+            // Guests of D134: 5 every 15 minutes, the window of the authentication
+            assertThat(limits.guestCreations()).isEqualTo(5);
         });
     }
 
@@ -46,7 +48,8 @@ class AppPropertiesTest {
     void readsTheRateLimitPropertiesWhenTheyAreSet() {
         contextRunner.withPropertyValues(VALID_PROPERTIES)
                 .withPropertyValues("app.rate-limit.auth-attempts=50", "app.rate-limit.auth-window=30m",
-                        "app.rate-limit.general-requests=600", "app.rate-limit.general-window=10s")
+                        "app.rate-limit.general-requests=600", "app.rate-limit.general-window=10s",
+                        "app.rate-limit.guest-creations=20")
                 .run(context -> {
                     assertThat(context).hasNotFailed();
                     AppProperties.RateLimit limits = context.getBean(AppProperties.class).rateLimit();
@@ -54,6 +57,7 @@ class AppPropertiesTest {
                     assertThat(limits.authWindow()).isEqualTo(Duration.ofMinutes(30));
                     assertThat(limits.generalRequests()).isEqualTo(600);
                     assertThat(limits.generalWindow()).isEqualTo(Duration.ofSeconds(10));
+                    assertThat(limits.guestCreations()).isEqualTo(20);
                 });
     }
 
@@ -79,6 +83,9 @@ class AppPropertiesTest {
             assertThat(limits.dailyModelCalls()).isEqualTo(40);
             assertThat(limits.concurrentTurns()).isEqualTo(2);
             assertThat(limits.dailyBasicPlans()).isEqualTo(20);
+            // Guests of D134: 2 messages each, 18 calls for all of them, so 22 of the 40 stay for registered users
+            assertThat(limits.guestDailyMessages()).isEqualTo(2);
+            assertThat(limits.guestDailyModelCalls()).isEqualTo(18);
         });
     }
 
@@ -87,7 +94,8 @@ class AppPropertiesTest {
         contextRunner.withPropertyValues(VALID_PROPERTIES)
                 .withPropertyValues("app.agent-limits.daily-messages=8", "app.agent-limits.daily-user-model-calls=60",
                         "app.agent-limits.daily-model-calls=900",
-                        "app.agent-limits.concurrent-turns=3", "app.agent-limits.daily-basic-plans=50")
+                        "app.agent-limits.concurrent-turns=3", "app.agent-limits.daily-basic-plans=50",
+                        "app.agent-limits.guest-daily-messages=3", "app.agent-limits.guest-daily-model-calls=100")
                 .run(context -> {
                     assertThat(context).hasNotFailed();
                     AppProperties.AgentLimits limits = context.getBean(AppProperties.class).agentLimits();
@@ -96,6 +104,8 @@ class AppPropertiesTest {
                     assertThat(limits.dailyModelCalls()).isEqualTo(900);
                     assertThat(limits.concurrentTurns()).isEqualTo(3);
                     assertThat(limits.dailyBasicPlans()).isEqualTo(50);
+                    assertThat(limits.guestDailyMessages()).isEqualTo(3);
+                    assertThat(limits.guestDailyModelCalls()).isEqualTo(100);
                 });
     }
 
@@ -109,7 +119,11 @@ class AppPropertiesTest {
         "app.agent-limits.daily-model-calls=100001",
         "app.agent-limits.concurrent-turns=0",
         "app.agent-limits.concurrent-turns=101",
-        "app.agent-limits.daily-basic-plans=-1"
+        "app.agent-limits.daily-basic-plans=-1",
+        "app.agent-limits.guest-daily-messages=0",
+        "app.agent-limits.guest-daily-model-calls=5",
+        // The guests share the calls of the app: they cannot have more than all of it
+        "app.agent-limits.guest-daily-model-calls=41"
     })
     void stopsWhenAnAgentLimitIsOutOfTheAllowedRange(String invalidProperty) {
         contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(invalidProperty).run(context -> {
@@ -127,7 +141,8 @@ class AppPropertiesTest {
         "app.rate-limit.auth-window=500ms",
         "app.rate-limit.auth-window=25h",
         "app.rate-limit.general-window=-1m",
-        "app.rate-limit.general-window=PT99999999999H"
+        "app.rate-limit.general-window=PT99999999999H",
+        "app.rate-limit.guest-creations=0"
     })
     void stopsWhenARateLimitIsOutOfTheAllowedRange(String invalidProperty) {
         contextRunner.withPropertyValues(VALID_PROPERTIES).withPropertyValues(invalidProperty).run(context -> {

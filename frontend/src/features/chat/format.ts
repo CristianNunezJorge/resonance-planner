@@ -36,6 +36,10 @@ export function limitText(usage: ChatUsage): string | null {
   if (usage.appLimitReached) {
     return 'Per oggi l’assistente ha finito le richieste gratuite di tutta l’app. Riprova domani.'
   }
+  if (usage.guestLimitReached) {
+    // The panel adds the basic plan by itself, like for the other limits
+    return 'Le prove dell’agente per gli ospiti sono finite per oggi: registrati per continuare.'
+  }
   if (usage.used >= usage.limit) {
     return `Hai usato i ${usage.limit} messaggi di oggi: puoi scrivere di nuovo da mezzanotte.`
   }

@@ -16,7 +16,7 @@ public final class TestAppProperties {
                 new AppProperties.Admin("admin@example.com", "admin-password"),
                 new AppProperties.Cors(List.of("http://localhost:5173")),
                 new AppProperties.Agent("test-openrouter-key", "test/model:free"),
-                new AppProperties.RateLimit(10, Duration.ofMinutes(15), 120, Duration.ofMinutes(1)),
+                new AppProperties.RateLimit(10, Duration.ofMinutes(15), 120, Duration.ofMinutes(1), 5),
                 agentLimits);
     }
 }

@@ -94,6 +94,8 @@ function NavBar() {
                 <span className="navbar-text">
                   <span className="visually-hidden">Account: </span>
                   {user.username}
+                  {/* The temporary account of "Prova la demo" (D134) */}
+                  {user.role === 'GUEST' && <span className="ms-1">(ospite)</span>}
                 </span>
                 <button type="button" className="btn btn-outline-light btn-sm" onClick={() => void handleLogout()}>
                   Esci

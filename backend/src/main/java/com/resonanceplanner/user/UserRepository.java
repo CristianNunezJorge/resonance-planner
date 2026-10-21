@@ -1,10 +1,12 @@
 package com.resonanceplanner.user;
 
+import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -14,6 +16,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
+
+    long countByRole(Role role);
+
+    /** The role of the user, or nothing if the user no longer exists (D102). */
+    @Query("select u.role from User u where u.id = :id")
+    Optional<Role> findRoleById(@Param("id") Long id);
+
+    /**
+     * Deletes with a single statement the guests created before a moment, and with them everything they have (D42,
+     * D134). It has its own transaction, because the scheduled cleanup has none.
+     */
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from User u where u.role = com.resonanceplanner.user.Role.GUEST and u.createdAt < :before")
+    int deleteGuestsCreatedBefore(@Param("before") Instant before);
 
     /**
      * Deletes the user with a single statement: the database deletes everything that depends on it (D42, ON DELETE

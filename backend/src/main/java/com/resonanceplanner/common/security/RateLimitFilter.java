@@ -42,6 +42,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final Duration PURGE_INTERVAL = Duration.ofMinutes(1);
     private static final String LOGIN_PATH = "/api/auth/login";
     private static final String REGISTER_PATH = "/api/auth/register";
+    private static final String GUEST_PATH = "/api/auth/guest";
     // The hosting service calls it all the time: a 429 here could make it restart the application
     private static final String HEALTH_PATH = "/actuator/health";
     private static final Rule HEALTH_RULE = new Rule(600, Duration.ofMinutes(1));
@@ -54,7 +55,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     // Auth buckets are refused when the memory is full; the others are let through without a counter
     private enum Bucket {
-        LOGIN(true), REGISTER(true), GENERAL(false), HEALTH(false);
+        LOGIN(true), REGISTER(true), GUEST(true), GENERAL(false), HEALTH(false);
 
         private final boolean protectsAccounts;
 
@@ -83,14 +84,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
     RateLimitFilter(AppProperties.RateLimit limits, Clock clock, ApiSecurityErrorHandler errorWriter,
             int maxTrackedCounters) {
         Rule auth = new Rule(limits.authAttempts(), limits.authWindow());
-        this.rules = new EnumMap<>(Map.of(Bucket.LOGIN, auth, Bucket.REGISTER, auth,
+        // A guest is an account too (D134): its counter has the window of the authentication
+        Rule guest = new Rule(limits.guestCreations(), limits.authWindow());
+        this.rules = new EnumMap<>(Map.of(Bucket.LOGIN, auth, Bucket.REGISTER, auth, Bucket.GUEST, guest,
                 Bucket.GENERAL, new Rule(limits.generalRequests(), limits.generalWindow()), Bucket.HEALTH, HEALTH_RULE));
         this.clock = clock;
         this.errorWriter = errorWriter;
         this.maxTrackedCounters = maxTrackedCounters;
         this.nextPurge = new AtomicReference<>(clock.instant().plus(PURGE_INTERVAL));
-        log.info("Rate limits: login and registration {} per {} each, other requests {} per {}",
-                auth.requests(), auth.window(), limits.generalRequests(), limits.generalWindow());
+        log.info("Rate limits: login and registration {} per {} each, guests {} per {}, other requests {} per {}",
+                auth.requests(), auth.window(), guest.requests(), guest.window(), limits.generalRequests(),
+                limits.generalWindow());
     }
 
     @Override
@@ -143,6 +147,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             }
             if (REGISTER_PATH.equals(path)) {
                 return Bucket.REGISTER;
+            }
+            if (GUEST_PATH.equals(path)) {
+                return Bucket.GUEST;
             }
         }
         return HEALTH_PATH.equals(path) ? Bucket.HEALTH : Bucket.GENERAL;

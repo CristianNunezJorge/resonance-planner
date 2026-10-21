@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Timeout;
 class AgentTurnGateTest {
 
     private final AgentTurnGate gate =
-            new AgentTurnGate(TestAppProperties.withAgentLimits(new AppProperties.AgentLimits(5, 24, 40, 2, 20)));
+            new AgentTurnGate(TestAppProperties.withAgentLimits(new AppProperties.AgentLimits(5, 24, 40, 2, 20, 2, 18)));
 
     @Test
     void refusesASecondTurnOfTheSameUserWhileTheFirstRuns() {

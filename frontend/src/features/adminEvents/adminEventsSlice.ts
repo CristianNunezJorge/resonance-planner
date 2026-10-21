@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { describeError, type RequestFailure } from '../../api/client'
 import type { RootState } from '../../app/store'
-import { login, register, restoreSession, sessionEnded } from '../auth/authSlice'
+import { enterAsGuest, login, register, restoreSession, sessionEnded } from '../auth/authSlice'
 import { createEvent, deleteEvent, listEvents, updateEvent } from './adminEventsApi'
 import type { AdminEvent, EventRequest } from './types'
 
@@ -104,6 +104,7 @@ const adminEventsSlice = createSlice({
       .addCase(sessionEnded, () => initialState)
       .addCase(login.fulfilled, () => initialState)
       .addCase(register.fulfilled, () => initialState)
+      .addCase(enterAsGuest.fulfilled, () => initialState)
       .addCase(restoreSession.fulfilled, () => initialState)
       .addCase(loadAdminEvents.pending, (state, action) => {
         state.loadRequestId = action.meta.requestId

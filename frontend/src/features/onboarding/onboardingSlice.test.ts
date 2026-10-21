@@ -4,8 +4,8 @@ import { setupStore } from '../../app/store'
 import { catalogCharacters, gameRules } from '../../test/fixtures'
 import { rover, signedIn } from '../../test/utils'
 import { getProfile } from '../auth/authApi'
-import { login, sessionEnded } from '../auth/authSlice'
-import { login as loginRequest } from '../auth/authApi'
+import { enterAsGuest, login, sessionEnded } from '../auth/authSlice'
+import { login as loginRequest, startGuest } from '../auth/authApi'
 import { postOnboarding } from './onboardingApi'
 import {
   advance,
@@ -20,7 +20,7 @@ import {
 } from './onboardingSlice'
 
 vi.mock('./onboardingApi', () => ({ postOnboarding: vi.fn() }))
-vi.mock('../auth/authApi', () => ({ login: vi.fn(), register: vi.fn(), getProfile: vi.fn() }))
+vi.mock('../auth/authApi', () => ({ login: vi.fn(), register: vi.fn(), getProfile: vi.fn(), startGuest: vi.fn() }))
 
 const MAX_LEVEL = gameRules.maxLevel
 const setupDone = { ...rover, onboardingCompleted: true, playTimeMinutes: 60 }
@@ -375,6 +375,19 @@ describe('onboardingSlice · sending the setup', () => {
     fillEverything(store)
 
     await store.dispatch(login({ email: 'bob@example.com', password: 'S3cret-pass' }))
+
+    expect(store.getState().onboarding).toMatchObject({ step: 1, selected: [], waveplate: '' })
+  })
+
+  it('forgets the draft when a guest of the demo comes in (D134)', async () => {
+    vi.mocked(startGuest).mockResolvedValue({
+      token: 'guest.jwt.token',
+      user: { ...rover, id: 90, username: 'ospite-k3x9qz', role: 'GUEST', onboardingCompleted: false },
+    })
+    const store = newStore()
+    fillEverything(store)
+
+    await store.dispatch(enterAsGuest())
 
     expect(store.getState().onboarding).toMatchObject({ step: 1, selected: [], waveplate: '' })
   })
