@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiPage, apiRequest, describeError, setUnauthorizedHandler } from './client'
+import { ApiError, apiDownload, apiPage, apiRequest, describeError, setUnauthorizedHandler } from './client'
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -208,6 +208,95 @@ describe('apiRequest', () => {
 
       await expect(apiRequest('/api/me', { token: 'old.token' })).rejects.toBeInstanceOf(ApiError)
     })
+  })
+})
+
+// A file of the backend (D133): the bytes when it answers 200, the same errors as apiRequest otherwise
+describe('apiDownload', () => {
+  const fetchMock = vi.fn<typeof fetch>()
+  const EXCEL = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+  beforeEach(() => {
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com')
+  })
+
+  afterEach(() => {
+    fetchMock.mockReset()
+    setUnauthorizedHandler(null)
+    vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+  })
+
+  it('returns the file, asking for its type and for JSON, which the errors use', async () => {
+    fetchMock.mockResolvedValue(new Response('the bytes', { status: 200, headers: { 'Content-Type': EXCEL } }))
+
+    const file = await apiDownload('/api/me/calendar/export?from=2026-10-19&to=2026-10-25', EXCEL, { token: 'the.token' })
+
+    expect(await file.text()).toBe('the bytes')
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.example.com/api/me/calendar/export?from=2026-10-19&to=2026-10-25',
+      expect.objectContaining({ method: 'GET' }),
+    )
+    const headers = fetchMock.mock.calls[0][1]?.headers as Headers
+    expect(headers.get('Accept')).toBe(`${EXCEL}, application/json`)
+    expect(headers.get('Authorization')).toBe('Bearer the.token')
+  })
+
+  it('fails with the ApiError of the server when the answer is an error', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Alcuni campi non sono validi.',
+            fields: { to: 'L\x27intervallo può coprire al massimo 62 giorni.' },
+          },
+        },
+        400,
+      ),
+    )
+
+    await expect(apiDownload('/api/me/calendar/export', EXCEL)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+      status: 400,
+      fields: { to: 'L\x27intervallo può coprire al massimo 62 giorni.' },
+    })
+  })
+
+  it('asks to wait when the gateway answers while the server is still starting', async () => {
+    fetchMock.mockResolvedValue(new Response('<html>Service Unavailable</html>', { status: 503 }))
+
+    await expect(apiDownload('/api/me/calendar/export', EXCEL)).rejects.toMatchObject({
+      code: 'SERVICE_UNAVAILABLE',
+      status: 503,
+    })
+  })
+
+  it('tells the handler when the token is refused, so the session can end', async () => {
+    const handler = vi.fn()
+    setUnauthorizedHandler(handler)
+    fetchMock.mockResolvedValue(
+      jsonResponse({ success: false, data: null, error: { code: 'UNAUTHORIZED', message: 'Devi accedere.' } }, 401),
+    )
+
+    await expect(apiDownload('/api/me/calendar/export', EXCEL, { token: 'old.token' })).rejects.toMatchObject({
+      code: 'UNAUTHORIZED',
+    })
+    expect(handler).toHaveBeenCalledExactlyOnceWith('old.token')
+  })
+
+  it('reports a network failure with a message in Italian', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'))
+
+    await expect(apiDownload('/api/me/calendar/export', EXCEL)).rejects.toMatchObject({ code: 'NETWORK_ERROR' })
+  })
+
+  it('never sends a request to another address', async () => {
+    await expect(apiDownload('//evil.example/file', EXCEL, { token: 'the.token' })).rejects.toThrow('Invalid API path')
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })
 

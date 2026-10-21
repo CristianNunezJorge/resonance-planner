@@ -15,6 +15,7 @@ import ChatPanel from '../chat/ChatPanel'
 import { loadChat, selectCanSend, sendChatMessage } from '../chat/chatSlice'
 import { explainEventText, UPDATE_PLAN_TEXT } from '../chat/format'
 import WaveplatePanel from '../waveplate/WaveplatePanel'
+import { exportPlan } from './calendarApi'
 import { eventKey, toCalendarItems, type ItemProps } from './calendarItems'
 import {
   completeCalendarTask,
@@ -29,6 +30,7 @@ import {
 import CalendarToolbar from './CalendarToolbar'
 import CalendarView, { type CalendarViewName } from './CalendarView'
 import EventDetailModal from './EventDetailModal'
+import { planFileName, saveFile } from './exportFile'
 import { addedText, dayText } from './format'
 import TaskDetailModal from './TaskDetailModal'
 import TaskFormModal from './TaskFormModal'
@@ -70,6 +72,8 @@ function CalendarPage() {
   const [busy, setBusy] = useState(false)
   // A request on the plan is running (basic plan, confirm, reject): its buttons wait
   const [planning, setPlanning] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const exportRunning = useRef(false)
   // The range on the screen: asked again if the data are forgotten while the page is open
   const shownRange = useRef<DateRange | null>(null)
   // After Conferma or Scarta the bar goes away with the focused button: the focus moves to the title of the page
@@ -218,6 +222,33 @@ function CalendarPage() {
       true,
     )
 
+  // The period on the screen as an Excel file (D133). The file is not a state of the app, so it does not go through
+  // Redux; the answer for a session that ended meanwhile is not saved, like the other answers (D103)
+  const exportExcel = async () => {
+    const token = store.getState().auth.token
+    const range = shownRange.current
+    // The button stays clickable while it waits (aria-disabled): one file at a time
+    if (!token || !range || exportRunning.current) {
+      return
+    }
+    exportRunning.current = true
+    setExporting(true)
+    try {
+      const file = await exportPlan(token, range)
+      if (store.getState().auth.token === token) {
+        saveFile(file, planFileName(range))
+        dispatch(toastShown('Piano esportato.'))
+      }
+    } catch (error) {
+      if (store.getState().auth.token === token) {
+        dispatch(toastShown(describeError(error).message, 'danger'))
+      }
+    } finally {
+      exportRunning.current = false
+      setExporting(false)
+    }
+  }
+
   // A question for the agent from outside the chat: below 992 px the chat opens to show the answer; on a wide screen
   // the answer arrives in the side column, and a toast says so (D130)
   const askAgent = (content: string) => {
@@ -326,6 +357,8 @@ function CalendarPage() {
             onAddTask={() => setDialog({ kind: 'form', task: null })}
             onGeneratePlan={makeBasicPlan}
             isPlanning={planning}
+            onExport={() => void exportExcel()}
+            isExporting={exporting}
           />
           {planOutdated && (
             <div className="alert alert-warning d-flex flex-wrap align-items-center gap-2">

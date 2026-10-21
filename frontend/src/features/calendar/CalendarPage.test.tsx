@@ -17,11 +17,13 @@ import {
   createBasicPlan,
   createTask,
   deleteTask,
+  exportPlan,
   getCalendar,
   rejectProposal,
   updateTask,
 } from './calendarApi'
 import CalendarPage from './CalendarPage'
+import { saveFile } from './exportFile'
 import type { CalendarData, CalendarTask, GameEvent, Proposal } from './types'
 
 vi.mock('../catalog/catalogApi', () => ({ getCharacters: vi.fn(), getGameRules: vi.fn(), getMaterials: vi.fn() }))
@@ -36,6 +38,12 @@ vi.mock('./calendarApi', () => ({
   createBasicPlan: vi.fn(),
   confirmProposal: vi.fn(),
   rejectProposal: vi.fn(),
+  exportPlan: vi.fn(),
+}))
+// jsdom cannot download files: the name and the content of the file are checked here, the link in exportFile.test.ts
+vi.mock('./exportFile', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./exportFile')>()),
+  saveFile: vi.fn(),
 }))
 // FullCalendar needs a real browser to measure its grid: here a list of buttons stands in for it, with the same
 // props. It reports the week of 12 October as the range on the screen, like FullCalendar does when it is drawn.
@@ -352,6 +360,59 @@ describe('CalendarPage', () => {
 
       await waitFor(() => expect(lastToast(store)?.variant).toBe('danger'))
       expect(lastToast(store)?.message).toMatch(/^Il roster è vuoto/)
+    })
+  })
+
+  describe('export to Excel (D133)', () => {
+    it('downloads the period on the screen and says so, waiting for the file', async () => {
+      const file = new Blob(['xlsx'])
+      let resolveFile: (value: Blob) => void = () => undefined
+      vi.mocked(exportPlan).mockReturnValue(new Promise((resolve) => (resolveFile = resolve)))
+      const store = renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Esporta in Excel' }))
+      // It keeps the focus while it waits, and a second click does not ask for a second file
+      const waiting = screen.getByRole('button', { name: 'Esportazione…' })
+      expect(waiting).toHaveAttribute('aria-disabled', 'true')
+      fireEvent.click(waiting)
+      resolveFile(file)
+
+      await waitFor(() => expect(lastToast(store)?.message).toBe('Piano esportato.'))
+      expect(exportPlan).toHaveBeenCalledExactlyOnceWith(TOKEN, WEEK)
+      expect(saveFile).toHaveBeenCalledExactlyOnceWith(file, 'resonance-planner_2026-10-12_2026-10-18.xlsx')
+      expect(screen.getByRole('button', { name: 'Esporta in Excel' })).not.toHaveAttribute('aria-disabled')
+    })
+
+    it('says why the file could not be made', async () => {
+      vi.mocked(exportPlan).mockRejectedValue(
+        new ApiError('SERVICE_UNAVAILABLE', 'Il server non è ancora pronto: riprova tra qualche istante.', 503),
+      )
+      const store = renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Esporta in Excel' }))
+
+      await waitFor(() => expect(lastToast(store)?.variant).toBe('danger'))
+      expect(lastToast(store)?.message).toBe('Il server non è ancora pronto: riprova tra qualche istante.')
+      expect(saveFile).not.toHaveBeenCalled()
+    })
+
+    it('does not save the file of a session that ended while it was coming', async () => {
+      let resolveFile: (value: Blob) => void = () => undefined
+      vi.mocked(exportPlan).mockReturnValue(new Promise((resolve) => (resolveFile = resolve)))
+      const store = renderPage()
+      await screen.findByRole('button', { name: 'Giro dei boss' })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Esporta in Excel' }))
+      store.dispatch(restoreSession.fulfilled({ token: 'another.jwt.token', user: rover }, 'other-tab'))
+      resolveFile(new Blob(['xlsx']))
+
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Esporta in Excel' })).not.toHaveAttribute('aria-disabled'),
+      )
+      expect(saveFile).not.toHaveBeenCalled()
+      expect(lastToast(store)?.message).not.toBe('Piano esportato.')
     })
   })
 

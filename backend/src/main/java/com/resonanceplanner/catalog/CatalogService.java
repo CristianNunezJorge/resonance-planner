@@ -7,6 +7,8 @@ import com.resonanceplanner.catalog.dto.GameRulesResponse;
 import com.resonanceplanner.catalog.dto.MaterialResponse;
 import com.resonanceplanner.common.error.NotFoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,5 +53,17 @@ public class CatalogService {
 
     public GameRulesResponse getRules() {
         return GameRulesResponse.from(gameRules);
+    }
+
+    /** Id → name of every character, for the files that show names instead of ids (D133). */
+    public Map<String, String> characterNames() {
+        return gameCharacterRepository.findAllByOrderByNameAsc().stream()
+                .collect(Collectors.toUnmodifiableMap(GameCharacter::getId, GameCharacter::getName));
+    }
+
+    /** Id → name of every farming source, without loading the drops (D133). */
+    public Map<String, String> farmingSourceNames() {
+        return farmingSourceRepository.findAllByOrderByTypeAscNameAsc().stream()
+                .collect(Collectors.toUnmodifiableMap(FarmingSource::getId, FarmingSource::getName));
     }
 }

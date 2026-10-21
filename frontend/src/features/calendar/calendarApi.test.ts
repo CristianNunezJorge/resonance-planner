@@ -1,17 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiRequest } from '../../api/client'
+import { apiDownload, apiRequest } from '../../api/client'
 import {
   completeTask,
   confirmProposal,
   createBasicPlan,
   createTask,
   deleteTask,
+  exportPlan,
   getCalendar,
   rejectProposal,
   updateTask,
 } from './calendarApi'
 
-vi.mock('../../api/client', () => ({ apiRequest: vi.fn() }))
+vi.mock('../../api/client', () => ({ apiRequest: vi.fn(), apiDownload: vi.fn() }))
 
 const TOKEN = 'some.jwt.token'
 const form = { title: 'Giro dei boss', taskDate: '2026-10-16', minutes: 30, notes: '' }
@@ -19,6 +20,20 @@ const form = { title: 'Giro dei boss', taskDate: '2026-10-16', minutes: 30, note
 describe('calendarApi', () => {
   afterEach(() => {
     vi.mocked(apiRequest).mockReset()
+    vi.mocked(apiDownload).mockReset()
+  })
+
+  it('downloads the plan of a range as an Excel file (D133)', async () => {
+    const file = new Blob(['xlsx'])
+    vi.mocked(apiDownload).mockResolvedValue(file)
+
+    await expect(exportPlan(TOKEN, { from: '2026-10-19', to: '2026-10-25' })).resolves.toBe(file)
+
+    expect(apiDownload).toHaveBeenCalledWith(
+      '/api/me/calendar/export?from=2026-10-19&to=2026-10-25',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      { token: TOKEN },
+    )
   })
 
   it('reads the calendar of a range, with the dates in the query', async () => {

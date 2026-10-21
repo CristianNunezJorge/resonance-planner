@@ -177,6 +177,7 @@ Nel roster il personaggio si indica con il suo identificativo (`jinhsi`): ogni u
 | Metodo | Percorso | Cosa fa | Risposta |
 |---|---|---|---|
 | GET | `/api/me/calendar?from=&to=` | Eventi, attività e proposta in attesa dell'intervallo, in una sola risposta (D51) | 200 |
+| GET | `/api/me/calendar/export?from=&to=` | Il piano dell'intervallo in un file Excel (D133) | 200 con il file `.xlsx` |
 | POST | `/api/me/tasks` | Crea un'attività manuale (D24) | 201 |
 | PUT | `/api/me/tasks/{id}` | Modifica un'attività manuale | 200; 409 se non è manuale |
 | DELETE | `/api/me/tasks/{id}` | Cancella un'attività manuale | 204; 409 se non è manuale |
@@ -195,6 +196,8 @@ Ogni attività nelle risposte ha `id`, `origin`, `kind`, `status`, `taskDate`, `
 - **404** e **401** come sopra.
 
 **Calendario (T25, D117).** L'intervallo può coprire al massimo 62 giorni, con gli stessi errori 400 di `/api/events`. `events` sono le voci di `/api/events` (una per edizione, con `activeDates`); `tasks` sono le attività `CONFIRMED` e `DONE` dell'utente nell'intervallo, per giorno e poi in ordine di creazione. `pendingProposal` è la proposta in attesa con tutte le sue attività `PROPOSED`, anche fuori dall'intervallo, oppure `null` (T30, D124). `planOutdated` è `true` quando roster, obiettivi o eventi dei giorni dell'ultimo piano sono cambiati dopo che è stato fatto (T31, D125).
+
+**Export in Excel (X01, D133).** `GET /api/me/calendar/export` ha lo stesso intervallo, gli stessi dati e gli stessi errori del calendario, ma risponde con un file (`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="resonance-planner_2026-10-19_2026-10-25.xlsx"`). Il foglio "Piano" ha una riga per attività `CONFIRMED` o `DONE` (Data, Giorno, Tipo, Attività, Personaggio, Fonte, Run, Waveplate, Minuti, Stato, Note) e una riga "Totale" con le formule `SUM` di Waveplate e Minuti; il foglio "Eventi" ha nome, tipo, inizio, fine e giorni attivi nel periodo. La proposta in attesa non c'è. I testi di utenti e admin sono sempre celle di testo, mai formule. Gli errori (400, 401) restano JSON con `ApiResponse`: l'header `Accept` deve ammettere anche `application/json` (il frontend manda `Accept: <tipo del file>, application/json`).
 
 ### Proposte dell'agente
 | Metodo | Percorso | Cosa fa | Risposta |
