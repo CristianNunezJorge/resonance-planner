@@ -1,45 +1,52 @@
-# Handoff · giorno 10, seconda parte (T38)
+# Handoff · giorni 11-12 (margine ed extra)
 
-Passaggio di consegne del 20/10/2026. T37 è chiuso; T38 (rilascio v2) è a metà: documenti pronti, manca la checklist online fatta dall'utente.
+Passaggio di consegne del 21/10/2026. Il giorno 10 è chiuso: la **v2 è rilasciata**, con la checklist online superata e il tag `v2.0.0`. I giorni 11-12 servono al margine e agli extra (D90).
 
 ## Messaggio da incollare nella nuova sessione
 
 ```text
 Leggi HANDOFF.md, CLAUDE.md e docs/stato-del-progetto.md.
-Riprendiamo T38 sul ramo docs/release-v2-t38: ti dico l'esito della checklist di docs/rilascio-v2.md fatta sul sito online.
-Poi compila l'esito, proponimi il commit e chiudi T38 (PR, squash merge, tag v2.0.0) e il giorno 10.
+Iniziamo i giorni 11-12 con l'extra X01 (export del piano in Excel).
+Prima di scrivere codice proponimi la piccola progettazione e la decisione nuova, e chiedimi conferma.
 ```
 
 ## Situazione
 
 | Cosa | Stato |
 |---|---|
-| Giorni completati | **1-9** e T37 del giorno 10 (T01-T37), su `main` e online |
-| Rilascio | **v1** con tag `v1.0.0`; la **v2** si chiude con T38 e il tag `v2.0.0` |
-| Ultimo commit su `main` | `8bd8032`, T37 (PR #47) |
-| Ramo in corso | `docs/release-v2-t38`, commit `6bb388b`: `docs/rilascio-v2.md` (9 punti, esito da compilare) e README della v2. Pushato, senza PR |
+| Giorni completati | **1-10** (T01-T38), su `main` e online |
+| Rilasci | **v1** con tag `v1.0.0` (16/10) e **v2** con tag `v2.0.0` (21/10): checklist online superate (`docs/rilascio-v1.md`, `docs/rilascio-v2.md`) |
+| Ultimo commit su `main` | `4dd1790`, T38 (PR #48), poi la chiusura del giorno 10 |
+| Ramo in corso | Nessuno |
 | Test | Backend 860 (`./mvnw verify`, copertura 98,4%), frontend 539 (`npm test`) |
-| Decisioni | D1-D132, tutte *Confermate* (D131 e D132 nate in T37) |
-| Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132) al posto di Super, il cui unico fornitore il 20/10 è rimasto fuori servizio per ore (404). Super e `google/gemma-4-31b-it:free` sono le alternative. Limiti di D129 invariati |
-| Render | `OPENROUTER_MODEL` = Ultra, deploy live dal 20/10 alle 14:48; chat online provata dall'utente: risponde (log: turni da 2 e 3 giri) |
-| Trello | T37 in "Fatto", T38 in "In corso" |
-| Quota OpenRouter | Il 20/10 (UTC) 36 richieste su 50 dopo le prove. Si azzera a mezzanotte UTC (02:00 in Italia) |
-| Account di prova in locale | Tutti cancellati. Online non se ne creano |
+| Decisioni | D1-D132, tutte *Confermate* |
+| Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132); alternative: Super e `google/gemma-4-31b-it:free`. Il 21/10 il fornitore era attivo e la checklist ha usato 3 messaggi. Limiti di D129 invariati |
+| Render | `OPENROUTER_MODEL` = Ultra; tutto online. Il database **scade il 10/11/2026** |
+| Trello | T01-T38 in "Fatto"; T39-T43 ed extra X01-X05 in Backlog; P01-P05 in "In verifica" |
+| Account di prova | Nessuno, né in locale né online |
 
-## T38 · Cosa resta
+## Giorni 11-12 · Cosa fare (D90)
 
-1. L'utente fa sul sito online i 9 punti di `docs/rilascio-v2.md` con il suo account, la mattina, con la quota piena: la checklist usa 3 messaggi all'agente (9-18 richieste). Se il suo contatore mostra già più di 2 messaggi, va fatta il giorno dopo.
-2. Si compila la sezione "Esito" (data, punti ✓ o ✗) e, se serve, si correggono i problemi trovati.
-3. Commit approvato dall'utente, PR (titolo per esempio `docs: release v2 (T38)`), squash merge, ramo cancellato.
-4. Tag `v2.0.0` su `main` dopo la checklist superata (D8), con `git tag -a` e push del tag.
-5. Chiusura del giorno 10: T38 in "Fatto" su Trello, `HANDOFF.md` per i giorni 11-12 (margine ed extra, D90), `stato-del-progetto.md`, CLAUDE.md.
+Non ci sono ritardi da recuperare: v1 e v2 sono uscite nei giorni previsti. Il tempo va agli extra, nell'ordine di D90. Con v1 e v2 complete, le loro card possono passare da Backlog a "Da fare" quando si iniziano.
 
-## Cosa ha fatto T37
+| ID | Extra | Da decidere nella piccola progettazione |
+|---|---|---|
+| X01 | Export del piano in Excel | Apache POI, argomento della settimana 15 (nel programma del corso). Cosa esportare (attività confermate di un intervallo, la proposta in attesa?), endpoint sotto `/api/me` (D44), limite all'intervallo come per il calendario (62 giorni), colonne del foglio, download dal calendario: oggi `api/client.ts` legge solo risposte JSON |
+| X02 | Accesso ospite "Prova la demo" | D15: utente GUEST temporaneo, stessa configurazione guidata, un job pianificato cancella gli ospiti. Da decidere se l'ospite può usare la chat: ogni ospite consumerebbe le 40 chiamate al modello dell'app (D129). Anche i limiti di registrazione (D101) e la pulizia dei dati collegati |
+| X03 | Notifiche in tempo reale (Waveplate quasi piene, evento in scadenza) | WebSocket, settimana 18. Lavoro medio |
+| X04 | GitHub Actions | Facoltativo, strumento nuovo (D81). I test hanno bisogno di `DATABASE_USERNAME` e `DATABASE_PASSWORD` come variabili d'ambiente |
+| X05 | Damage calculator semplificato | Il più costoso: prima una piccola progettazione e dati che oggi non abbiamo (D1) |
 
-- **Istruzioni di sistema** (`agent/AgentPrompt`): tre parti (dati e strumenti, risposte, sicurezza), testo semplice, strumento giusto per ogni richiesta, date dai giorni detti a parole, parametri tenuti nelle modifiche, niente motivi inventati, niente somme fatte dal modello. `AgentPromptTest` controlla nomi degli strumenti, assenza di markdown e lunghezza.
-- **Chat:** la pulizia del testo toglie anche il corsivo con un asterisco (D130).
-- **Scenari reali:** i dieci di `06-agente.md` passano, due con riserva; dati, criteri, risultati e conclusione in `docs/scenari-agente.md` (D131). Lezioni: il modello legge gli strumenti uno per giro (3-6 chiamate per un piano), a volte aggiunge un motivo non dato dagli strumenti, e un errore rimasto nello storico tende a ripetersi.
-- **Modello:** D132, Nemotron Ultra predefinito, in locale (`.env`) e su Render.
+Per ogni extra: decisione nuova in `docs/decisioni.md` come *Proposta*, piano riassunto e conferma dell'utente prima del codice, poi il flusso solito della card. Un extra che usa l'agente si prova con la quota piena.
+
+Dopo gli extra, giorni 13-14: T39 README completo, T40 Swagger con descrizioni ed esempi, T41 pulizia, copertura e Lighthouse, T42 copione della demo e checklist finale online, T43 rilascio finale con tag.
+
+## Cosa ha fatto T38
+
+- **Checklist della v2** (`docs/rilascio-v2.md`): 9 punti sul sito online, fatti dall'utente con il suo account e con l'admin di Render. Tutti ✓; il punto 8 (contatore a 5 / 5) è stato saltato perché la checklist usa 3 messaggi, ed è coperto da `AgentQuotaTest` e `ChatPanel.test.tsx`. L'evento di prova è stato eliminato.
+- **README** della v2: stato, funzioni nuove, agente gratuito su OpenRouter, numeri dei test.
+- **Rilascio:** PR #48 con squash merge, tag annotato `v2.0.0` su `main`.
+- Prima della checklist: backend già sveglio e fornitore di Ultra attivo con gli strumenti (`GET https://openrouter.ai/api/v1/models/<id>/endpoints`).
 
 ## Come lavoriamo (flusso approvato, invariato)
 
@@ -65,6 +72,7 @@ Altre regole:
 
 - **Database di Render: scade il 10/11/2026.** Ricrearlo prima e **cambiare anche `JWT_SECRET`** (D100).
 - Se il modello dell'agente smette di rispondere: guardare nei log di Render la riga `OpenRouter answered …` e lo stato del fornitore con `GET https://openrouter.ai/api/v1/models/<id>/endpoints` (gratuito, senza chiave), poi cambiare `OPENROUTER_MODEL` (D132).
+- Per la checklist finale di T42 si possono riusare `docs/rilascio-v1.md` e `docs/rilascio-v2.md`. Il punto del contatore a 5 / 5 non si raggiunge con la checklist: per vederlo si scrive il contatore in locale con `psql` (vedi le note pratiche).
 
 ## Questioni aperte
 
