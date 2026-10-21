@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (21/10/2026, giorno 11)
+## Stato attuale (21/10/2026, giorno 12)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D134.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D135.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -16,7 +16,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 9 (T35-T36) completato:** API della chat con salvataggio dei messaggi e limiti (D129: 5 messaggi al giorno per utente, 24 chiamate al modello per utente anche dei turni falliti, 40 per l'app, un turno alla volta, 20 proposte al giorno), migrazione `V3`; chat nel calendario, laterale da 992 px e a scomparsa sotto, con attesa, passaggi, limiti, "Spiegamelo" e "Chiedi all'agente" (D130). Prova vera riuscita. Tutto online.
 - **Giorno 10 (T37-T38) completato · v2 rilasciata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132); README e checklist di rilascio (`docs/rilascio-v2.md`, tutti i punti ✓ online il 21/10, il punto 8 saltato), tag `v2.0.0`. Tutto online; su Trello T01-T38 sono in "Fatto".
 - **Giorno 11 (X01-X02) completato · primi extra della v3:** export del piano in Excel con Apache POI (D133: fogli "Piano" ed "Eventi", `GET /api/me/calendar/export`, pulsante "Esporta in Excel"; online la prima esportazione dopo un avvio impiega circa 14 s, accettati) e accesso ospite "Prova la demo" (D134: `POST /api/auth/guest`, ospiti cancellati dopo 24 ore da un job `@Scheduled`, quota dell'agente per gli ospiti con la migrazione `V4`). Tutto online; su Trello X01-X02 sono in "Fatto".
-- **Prossimo passo:** giorno 12, extra X03 (notifiche in tempo reale), poi X04-X05 se resta tempo; giorni 13-14 T39-T43. Ogni extra parte da una piccola progettazione e da una decisione nuova. Leggere `HANDOFF.md`.
+- **Giorno 12 (X03) completato:** notifiche in tempo reale (D135) con un **WebSocket semplice** su `/ws`, senza STOMP (scelta dell'utente). Il token viaggia nel primo messaggio `AUTH`, poi c'è un `PING` ogni 25 secondi. Il job di ogni minuto avvisa per le Waveplate quasi piene e gli eventi in scadenza, e dopo una modifica dell'admin dice a tutti che gli eventi sono cambiati. CSP con `wss://`, anche su Render. Online le notifiche arrivano; su Render però le chiusure decise dal server non arrivano al browser (limite accettato in D135). Tutto online; su Trello X01-X03 sono in "Fatto".
+- **Prossimo passo:** giorni 13-14, T39-T43 (README completo, Swagger, pulizia e Lighthouse, copione della demo e checklist finale, rilascio finale con tag). X04 e X05 si lasciano (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -71,7 +72,7 @@ Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm ru
 | Parte | Scelta | Versioni fissate il 10/10/2026 | Decisioni |
 |---|---|---|---|
 | Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105, FullCalendar 7.1.1 con il tema Bootstrap 5 e `temporal-polyfill` 1.0.5 (D119) | D7, D76, D119 |
-| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel) | D5, D45, D77, D133 |
+| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc, WebSocket | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel), `spring-boot-starter-websocket` (WebSocket semplice, senza STOMP) | D5, D45, D77, D133, D135 |
 | Database | PostgreSQL, schema con Flyway (Hibernate in `validate`) | PostgreSQL 16 (Docker `postgres:16`) | D38, D98 |
 | IA | OpenRouter con un modello gratuito (`nvidia/nemotron-3-ultra-550b-a55b:free` dal 20/10, D132), chiamato con `RestClient`, ciclo tool-use scritto da noi | — | D54, D59, D126, D132 |
 | Test | JUnit 5 + Mockito, integrazione su PostgreSQL di Docker Compose, Vitest + React Testing Library, checklist manuale | JaCoCo 0.8.15, Vitest 5.0 | D79 |
@@ -86,6 +87,7 @@ Principi da non perdere:
 - Dati personali solo sotto `/api/me`; l'utente si ricava dal token (D44).
 - Eventi attivi giorno per giorno (D96), effetti con limite giornaliero (D94), eventi della demo ricorrenti (D29).
 - Calcolo dei materiali fino al livello 40, fase SOL3 4 (D27, D92).
+- Notifiche in tempo reale (D135): il server decide (D3), il token arriva nel primo messaggio del WebSocket e mai nell'indirizzo, la connessione è aperta solo a pagina visibile, e il testo si mostra come testo semplice.
 
 ## Struttura del progetto
 
@@ -118,6 +120,7 @@ backend/
     agent/                    AgentLoop (ciclo, al massimo 6 giri, conta ogni chiamata), AgentPrompt (istruzioni di sistema), AgentReply, D128
     agent/client/             anche ModelCallCounter e ModelCallDay: chiamate al modello per giorno UTC e utente (D129)
     agent/chat/               AgentChatController (/api/me/agent/messages e /usage), AgentChatService (turno senza transazione), AgentMessageService, AgentQuota (limiti), AgentTurnGate (turni insieme), D129
+    notification/             notifiche in tempo reale (D135): NotificationSocketConfig e NotificationSocketHandler (/ws, AUTH e PING), NotificationSessions (connessioni in memoria), NotificationRules (calcolo puro), Notifier (job di ogni minuto, controllo dopo l'AUTH, avviso dopo le modifiche dell'admin), SentNotices
     seed/                     caricamento di catalogo ed eventi demo all'avvio (D39)
   src/main/resources/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
@@ -125,7 +128,7 @@ backend/
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
 frontend/
-  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130); apiDownload per i file (D133)
+  src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130); apiDownload per i file (D133); apiSocketUrl per l'indirizzo del WebSocket (D135)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
   src/features/catalog/       tipi, chiamate e catalogSlice (personaggi, regole e materiali caricati una volta), icons.ts
   src/features/landing/       pagina di presentazione P1 (T16): frase, "Prova la demo" con l'ospite (D134), tre passi, personaggi
@@ -134,10 +137,11 @@ frontend/
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
   src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125), exportFile.ts ed "Esporta in Excel" (D133)
   src/features/chat/          chat con l'agente (T36, D130): chatSlice (bozza, invio, pagine), ChatPanel, ChatMessages, ChatComposer, ChatDrawer, format.ts (plainText, limiti, suggerimenti)
+  src/features/notifications/ notifiche in tempo reale (D135): notificationSocket.ts (WebSocket nativo, AUTH, PING, riconnessione), useNotifications (montato in RootLayout)
   src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
   src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121), o con il nome per l'ospite (D134)
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
-  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, pagine 404 ed errore
+  src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, usePageVisible, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
   public/characters/          6 icone WebP 256×256
 docs/                         progettazione (fasi 01-09, decisioni, stato)
@@ -170,7 +174,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
-- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico.
+- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico. Dopo un merge controllare in Events che il deploy parta (il 21/10 per #53 non è partito). Dietro il proxy di Render le chiusure dei WebSocket decise dal server non arrivano al browser (D135).
 - **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10). La chiamata di prova vera è `OpenRouterClientLiveTest`, spenta di default: il comando è in `HANDOFF.md`.
 - **Norton su questo computer** ispeziona HTTPS e rifirma i certificati: Java non se ne fida (`PKIX path building failed`). Per chiamare OpenRouter da Java in locale si usa l'archivio di Windows: `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`). Su Render non serve.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
