@@ -378,7 +378,7 @@ Un WebSocket semplice, senza STOMP: `wss://<backend>/ws` (in locale `ws://localh
 | Server | `{ "type": "EVENTS_CHANGED", "message": "Gli eventi sono cambiati: il calendario è aggiornato." }` | A tutti i collegati, dopo che l'admin ha creato, modificato o eliminato un evento |
 
 - Il server controlla il token come le API (JWT valido e utente che esiste ancora, D102). Le notifiche arrivano subito dopo l'`AUTH` e poi al controllo di ogni minuto.
-- **Chiusure:** `4401` se il token è rifiutato, scaduto o l'utente non esiste più (il browser non riprova); `4408` se la connessione tace da più di 90 secondi; `1008` per un primo messaggio diverso da `AUTH` o un messaggio che non si legge; `1009` per un messaggio oltre 8 KB. Con le chiusure diverse da `4401` il browser riprova dopo 1, 2, 4… fino a 60 secondi.
+- **Chiusure:** `4401` se il token è rifiutato, scaduto o l'utente non esiste più (il browser non riprova); `4408` se la connessione tace da più di 90 secondi; `1008` per un primo messaggio diverso da `AUTH` o un messaggio che non si legge; `1009` per un messaggio oltre 8 KB. Con le chiusure diverse da `4401` il browser riprova dopo 1, 2, 4… fino a 60 secondi. **Online, dietro il proxy di Render, questi codici non arrivano al browser:** la connessione cade dopo 20 secondi con `1006` e il browser riprova (limite noto, D135).
 
 ## Limiti di richieste (D48)
 
