@@ -7,6 +7,7 @@ import com.resonanceplanner.roster.dto.AddCharacterRequest;
 import com.resonanceplanner.roster.dto.RosterEntryResponse;
 import com.resonanceplanner.roster.dto.UpdateCharacterRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -53,14 +54,18 @@ public class RosterController {
     @PutMapping("/{characterId}")
     @Operation(summary = "Modifica livelli e obiettivo", description = "Stesse regole dell'aggiunta. 404 se il personaggio non è nel tuo roster. Se un valore non è valido non si salva niente.")
     public ApiResponse<RosterEntryResponse> update(@AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable String characterId, @Valid @RequestBody UpdateCharacterRequest request) {
+            @Parameter(description = "Identificativo del personaggio", example = "jinhsi")
+            @PathVariable String characterId,
+            @Valid @RequestBody UpdateCharacterRequest request) {
         return ApiResponse.success(rosterService.update(user.id(), characterId, request));
     }
 
     @DeleteMapping("/{characterId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Togli un personaggio", description = "Toglie il personaggio dal roster. 404 se non c'è. 204 senza contenuto.")
-    public void delete(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable String characterId) {
+    public void delete(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Identificativo del personaggio", example = "jinhsi")
+            @PathVariable String characterId) {
         rosterService.delete(user.id(), characterId);
     }
 }

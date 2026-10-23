@@ -5,6 +5,7 @@ import com.resonanceplanner.common.api.ApiResponse;
 import com.resonanceplanner.common.config.OpenApiConfig;
 import com.resonanceplanner.planning.dto.ProposalResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -45,14 +46,14 @@ public class ProposalController {
     @PostMapping("/{id}/confirm")
     @Operation(summary = "Conferma la proposta", description = "Le attività entrano nel calendario e sostituiscono quelle dell'agente confermate da oggi in poi; quelle fatte e quelle manuali restano. 404 se la proposta non è tua; 409 se non è più in attesa o è di un giorno precedente.")
     public ApiResponse<ProposalResponse> confirm(@AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long id) {
+            @Parameter(description = "Identificativo della proposta", example = "15") @PathVariable Long id) {
         return ApiResponse.success(proposalService.confirm(user.id(), id));
     }
 
     @PostMapping("/{id}/reject")
     @Operation(summary = "Scarta la proposta", description = "La proposta resta nello storico, le sue attività si cancellano. 404 se la proposta non è tua; 409 se non è più in attesa.")
     public ApiResponse<ProposalResponse> reject(@AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long id) {
+            @Parameter(description = "Identificativo della proposta", example = "15") @PathVariable Long id) {
         return ApiResponse.success(proposalService.reject(user.id(), id));
     }
 }

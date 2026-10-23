@@ -7,6 +7,7 @@ import com.resonanceplanner.planning.dto.CompletionResponse;
 import com.resonanceplanner.planning.dto.TaskRequest;
 import com.resonanceplanner.planning.dto.TaskResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,7 +45,8 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Modifica un'attività manuale", description = "Stessi campi e regole della creazione; lo stato resta com'è. 404 se l'attività non è tua; 409 se l'ha creata l'agente.")
-    public ApiResponse<TaskResponse> update(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long id,
+    public ApiResponse<TaskResponse> update(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Identificativo dell'attività", example = "42") @PathVariable Long id,
             @Valid @RequestBody TaskRequest request) {
         return ApiResponse.success(taskService.update(user.id(), id, request));
     }
@@ -52,14 +54,15 @@ public class TaskController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Cancella un'attività manuale", description = "204 senza contenuto. 404 se l'attività non è tua; 409 se l'ha creata l'agente.")
-    public void delete(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long id) {
+    public void delete(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Identificativo dell'attività", example = "42") @PathVariable Long id) {
         taskService.delete(user.id(), id);
     }
 
     @PostMapping("/{id}/complete")
     @Operation(summary = "Segna come fatta", description = "Solo per un'attività confermata del calendario (409 se è già fatta o è ancora una proposta). Un'attività di farming aggiunge all'inventario la quantità media di ogni materiale per le sue run, arrotondata per difetto; se quel giorno un evento potenzia quel tipo di fonte, il moltiplicatore vale per le prime run del giorno fino al suo limite. `addedToInventory` dice cosa è stato aggiunto. Non si può annullare: l'inventario si corregge a mano.")
     public ApiResponse<CompletionResponse> complete(@AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long id) {
+            @Parameter(description = "Identificativo dell'attività", example = "42") @PathVariable Long id) {
         return ApiResponse.success(taskService.complete(user.id(), id));
     }
 }

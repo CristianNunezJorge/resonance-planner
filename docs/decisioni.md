@@ -1423,3 +1423,20 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - una scheda nascosta perde l'avviso "eventi cambiati": tornando, il calendario si aggiorna solo cambiando periodo o ricaricando;
   - con l'avviso degli eventi tutti i collegati ricaricano il calendario insieme, anche fuori dalla pagina del calendario;
   - ogni `AUTH` valido costa due o tre query; in produzione i log di `org.springframework.web.socket` restano a INFO, perché a DEBUG o TRACE mostrerebbero il token del primo messaggio.
+
+## D136 · Esempi di Swagger sui campi dei DTO, controllati da un test
+**Stato:** Confermata · 23/10/2026 · nata da T40 · precisa D53
+
+- **Cosa:** Swagger mostra per ogni endpoint, oltre alla descrizione, un esempio realistico di richiesta e di risposta, e in cima una descrizione generale dell'API.
+- **Come:**
+  1. **esempi sui campi:** ogni campo dei DTO di richiesta e di risposta ha `@Schema(example = ...)` con valori veri della demo (`jinhsi`, `loongs-pearl`, date di ottobre 2026); i campi che il nome non spiega hanno anche una breve `description` (unità, `null`, limiti). Swagger compone da solo l'esempio di ogni endpoint, anche negli elenchi e dentro `ApiResponse`. I parametri del percorso e della query hanno `@Parameter` con descrizione ed esempio;
+  2. **esempi validi:** gli esempi delle richieste sono scelti in modo che passino la validazione, così "Try it out" con l'esempio già compilato funziona;
+  3. **descrizione generale** (`OpenApiConfig`): titolo "Resonance Planner API", versione 1.0 (la versione del contratto delle API, non quella dell'app), come avere il token e usare "Authorize", il formato `ApiResponse` con un esempio di successo e uno di errore, i codici di errore, i limiti di richieste con `Retry-After`, il formato delle date e il rimando a `05-api.md` per il WebSocket `/ws`, che Swagger non mostra;
+  4. **errori:** documentati una volta nella descrizione generale; i codici di ogni endpoint restano nella sua descrizione;
+  5. **tipo delle risposte:** `springdoc.default-produces-media-type: application/json`, così Swagger mostra JSON invece di `*/*`; il comportamento delle API non cambia;
+  6. **test:** un test di integrazione legge `/v3/api-docs` e controlla che ci siano tutti gli endpoint dei controller (uno nascosto per errore fa fallire il test), ognuno con titolo e descrizione; che ogni campo e ogni parametro abbia un esempio del tipo giusto (per un enum, uno dei suoi valori); che l'esempio di ogni corpo di richiesta, ricomposto dallo schema, superi la validazione del suo DTO. Poi manda gli esempi come richieste vere, uno dopo l'altro (registrazione, roster, configurazione guidata, profilo, Waveplate, inventario, attività, login, evento dell'admin), così valgono anche le regole dei servizi; resta fuori solo l'agente, che chiamerebbe il modello. Un campo nuovo senza esempio, o un esempio che il server rifiuta, fa fallire il test.
+- **Perché:** D53 chiede descrizione ed esempi per ogni endpoint, e chi valuta il progetto prova le API da Swagger senza leggere il codice. Gli esempi sui campi sono il modo standard di springdoc e valgono per tutti gli endpoint che usano lo stesso DTO; il test impedisce che la documentazione resti indietro rispetto al codice.
+- **Scartate:**
+  - un esempio JSON completo per ogni endpoint in file separati, collegati da un `OpenApiCustomizer`: DTO più corti ed esempi più coerenti tra loro, ma un meccanismo in più da spiegare e da tenere allineato (scelta dell'autore del 23/10);
+  - le risposte di errore con un esempio per ogni endpoint: circa 100 annotazioni che ripetono quello che dicono già le descrizioni (scelta dell'autore del 23/10).
+- **Limiti noti:** gli esempi delle risposte sono composti campo per campo, quindi non sempre descrivono il caso di quell'endpoint: la risposta di `POST /api/me/tasks`, per esempio, mostra un'attività di farming dell'agente invece di una manuale. Gli esempi della registrazione (`rover`, `rover@example.com`) sono uguali per tutti: sul sito online un secondo visitatore che li prova riceve 409 e deve cambiarli.

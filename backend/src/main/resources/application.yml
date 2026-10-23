@@ -61,6 +61,8 @@ spring:
 
 # Swagger stays public, also in production (D53)
 springdoc:
+  # The responses are JSON: without this Swagger shows */*, because the controllers do not declare it (D136)
+  default-produces-media-type: application/json
   api-docs:
     enabled: true
   swagger-ui:

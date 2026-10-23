@@ -6,6 +6,7 @@ import com.resonanceplanner.common.config.OpenApiConfig;
 import com.resonanceplanner.planning.CalendarExportService.PlanFile;
 import com.resonanceplanner.planning.dto.CalendarResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -39,7 +40,9 @@ public class CalendarController {
     @GetMapping
     @Operation(summary = "Il mio calendario", description = "Tra `from` e `to` (date `AAAA-MM-GG`, comprese, al massimo 62 giorni): `events` sono le edizioni degli eventi, come in `/api/events`, con i giorni in cui sono attivi; `tasks` sono le tue attività confermate e fatte, per giorno e poi in ordine di creazione. Stessi errori 400 di `/api/events` per le date.")
     public ApiResponse<CalendarResponse> between(@AuthenticationPrincipal AuthenticatedUser user,
-            @RequestParam LocalDate from, @RequestParam LocalDate to) {
+            @Parameter(description = "Primo giorno, compreso", example = "2026-10-19") @RequestParam LocalDate from,
+            @Parameter(description = "Ultimo giorno, compreso (al massimo 62 giorni)", example = "2026-10-25")
+            @RequestParam LocalDate to) {
         return ApiResponse.success(calendarService.between(user.id(), from, to));
     }
 
@@ -50,7 +53,9 @@ public class CalendarController {
             content = @Content(mediaType = PlanSpreadsheet.CONTENT_TYPE,
                     schema = @Schema(type = "string", format = "binary")))
     public ResponseEntity<byte[]> export(@AuthenticationPrincipal AuthenticatedUser user,
-            @RequestParam LocalDate from, @RequestParam LocalDate to) {
+            @Parameter(description = "Primo giorno, compreso", example = "2026-10-19") @RequestParam LocalDate from,
+            @Parameter(description = "Ultimo giorno, compreso (al massimo 62 giorni)", example = "2026-10-25")
+            @RequestParam LocalDate to) {
         PlanFile file = calendarExportService.export(user.id(), from, to);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(PlanSpreadsheet.CONTENT_TYPE))
