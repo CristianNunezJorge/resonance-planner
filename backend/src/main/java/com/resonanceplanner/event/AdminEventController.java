@@ -6,6 +6,7 @@ import com.resonanceplanner.common.config.OpenApiConfig;
 import com.resonanceplanner.event.dto.AdminEventResponse;
 import com.resonanceplanner.event.dto.EventRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -52,14 +53,16 @@ public class AdminEventController {
     @PutMapping("/{id}")
     @Operation(summary = "Modifica un evento", description = "Sostituisce tutto, con le stesse regole della creazione; un evento della demo conserva il suo `code`. 404 se l'evento non esiste.")
     public ApiResponse<AdminEventResponse> update(@AuthenticationPrincipal AuthenticatedUser user,
-            @PathVariable Long id, @Valid @RequestBody EventRequest request) {
+            @Parameter(description = "Identificativo dell'evento", example = "4") @PathVariable Long id,
+            @Valid @RequestBody EventRequest request) {
         return ApiResponse.success(adminEventService.update(user.id(), id, request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Cancella un evento", description = "Le attività del calendario collegate restano, senza il collegamento. Un evento della demo cancellato ricompare al riavvio del server (D39). 404 se non esiste.")
-    public void delete(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long id) {
+    public void delete(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Identificativo dell'evento", example = "4") @PathVariable Long id) {
         adminEventService.delete(user.id(), id);
     }
 }

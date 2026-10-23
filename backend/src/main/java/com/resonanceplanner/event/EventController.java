@@ -3,6 +3,7 @@ package com.resonanceplanner.event;
 import com.resonanceplanner.common.api.ApiResponse;
 import com.resonanceplanner.event.dto.EventResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.List;
@@ -26,13 +27,17 @@ public class EventController {
 
     @GetMapping
     @Operation(summary = "Eventi di un intervallo", description = "Una voce per ogni edizione che ha giorni attivi tra `from` e `to` (date `AAAA-MM-GG`, comprese, al massimo 62 giorni): `startDate` e `endDate` sono le date intere dell'edizione, `activeDates` i giorni attivi dentro l'intervallo. Lo stesso evento può comparire più volte. `activeWeekdays` è `null` se l'evento è attivo tutti i giorni.")
-    public ApiResponse<List<EventResponse>> between(@RequestParam LocalDate from, @RequestParam LocalDate to) {
+    public ApiResponse<List<EventResponse>> between(
+            @Parameter(description = "Primo giorno, compreso", example = "2026-10-19") @RequestParam LocalDate from,
+            @Parameter(description = "Ultimo giorno, compreso (al massimo 62 giorni)", example = "2026-10-25")
+            @RequestParam LocalDate to) {
         return ApiResponse.success(eventService.between(from, to));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Dettaglio di un evento", description = "L'edizione in corso oggi (ora italiana) oppure la prossima, con tutti i suoi giorni attivi. Un evento a date fisse già finito mantiene le sue date.")
-    public ApiResponse<EventResponse> get(@PathVariable Long id) {
+    public ApiResponse<EventResponse> get(
+            @Parameter(description = "Identificativo dell'evento", example = "1") @PathVariable Long id) {
         return ApiResponse.success(eventService.get(id));
     }
 }

@@ -2,6 +2,7 @@ package com.resonanceplanner.common.error;
 
 import com.resonanceplanner.common.api.ApiResponse;
 import com.resonanceplanner.common.api.PageMeta;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /** Exists only in the tests: one endpoint for each kind of error the handler must translate. */
+// Not part of the documented API (D136)
+@Hidden
 @RestController
 @RequestMapping("/test")
 class ErrorTestController {

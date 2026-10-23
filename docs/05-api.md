@@ -9,7 +9,7 @@
 - Tutte le risposte hanno lo stesso formato, sia in caso di successo sia di errore (D46).
 - Il backend riceve e restituisce DTO (Java `record`), mai le entità JPA (D47).
 - Date dei giorni nel formato `2026-10-01`; momenti in ISO 8601 UTC, per esempio `2026-10-01T14:00:00Z`.
-- La documentazione interattiva è su Swagger, all'indirizzo `/swagger-ui.html` (D53).
+- La documentazione interattiva è su Swagger, all'indirizzo `/swagger-ui.html` (D53): ogni endpoint ha descrizione ed esempi, e gli esempi delle richieste sono richieste valide (D136).
 
 ## Autenticazione e ruoli
 

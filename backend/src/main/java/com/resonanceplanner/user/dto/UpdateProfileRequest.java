@@ -1,6 +1,7 @@
 package com.resonanceplanner.user.dto;
 
 import com.resonanceplanner.user.UsernameRules;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 
 /**
@@ -9,7 +10,9 @@ import jakarta.validation.constraints.Pattern;
  * here: if the request contains them, they are ignored.
  */
 public record UpdateProfileRequest(
+        @Schema(description = "Nuovo username; assente o null = non cambia", example = "rover.new")
         @Pattern(regexp = UsernameRules.PATTERN, message = UsernameRules.MESSAGE)
         String username,
 
+        @Schema(description = "Minuti di gioco al giorno: 30, 60 o 120; assente o null = non cambia", example = "120")
         Integer playTimeMinutes) {}

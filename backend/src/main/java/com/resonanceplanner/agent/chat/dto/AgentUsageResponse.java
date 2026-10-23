@@ -1,5 +1,6 @@
 package com.resonanceplanner.agent.chat.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 
 /**
@@ -8,5 +9,12 @@ import java.time.Instant;
  * turns that failed; appLimitReached is true when the whole app has; guestLimitReached is true for a guest when all
  * the guests have used their share of the calls (D134). They start again at midnight UTC.
  */
-public record AgentUsageResponse(int used, int limit, Instant resetsAt, boolean callsLimitReached,
-        boolean appLimitReached, boolean guestLimitReached) {}
+public record AgentUsageResponse(
+        @Schema(description = "Messaggi scritti oggi", example = "1") int used,
+        @Schema(description = "Messaggi al giorno: 5, o 2 per un ospite", example = "5") int limit,
+        @Schema(description = "Mezzanotte in Italia", example = "2026-10-22T22:00:00Z") Instant resetsAt,
+        @Schema(description = "true se hai finito le tue chiamate al modello di oggi", example = "false")
+        boolean callsLimitReached,
+        @Schema(description = "true se le ha finite tutta l'app", example = "false") boolean appLimitReached,
+        @Schema(description = "true per un ospite se le hanno finite tutti gli ospiti", example = "false")
+        boolean guestLimitReached) {}

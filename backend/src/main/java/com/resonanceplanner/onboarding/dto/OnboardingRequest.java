@@ -2,6 +2,7 @@ package com.resonanceplanner.onboarding.dto;
 
 import com.resonanceplanner.roster.dto.AddCharacterRequest;
 import com.resonanceplanner.waveplate.dto.UpdateWaveplateRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ public record OnboardingRequest(
         @Valid
         UpdateWaveplateRequest waveplate,
 
+        @Schema(description = "Minuti di gioco al giorno: 30, 60 o 120", example = "60")
         @NotNull(message = "Scegli quanto giochi al giorno.")
         Integer playTimeMinutes) {
 

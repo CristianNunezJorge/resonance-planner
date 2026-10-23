@@ -7,6 +7,7 @@ import com.resonanceplanner.catalog.dto.GameRulesResponse;
 import com.resonanceplanner.catalog.dto.MaterialResponse;
 import com.resonanceplanner.common.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,8 @@ public class CatalogController {
 
     @GetMapping("/characters/{id}")
     @Operation(summary = "Dettaglio di un personaggio", description = "Il personaggio con i materiali di ogni ascensione. 404 se l'identificativo non esiste.")
-    public ApiResponse<CharacterDetailResponse> getCharacter(@PathVariable String id) {
+    public ApiResponse<CharacterDetailResponse> getCharacter(
+            @Parameter(description = "Identificativo del personaggio", example = "jinhsi") @PathVariable String id) {
         return ApiResponse.success(catalogService.getCharacter(id));
     }
 

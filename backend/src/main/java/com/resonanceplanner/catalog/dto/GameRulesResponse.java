@@ -1,6 +1,7 @@
 package com.resonanceplanner.catalog.dto;
 
 import com.resonanceplanner.catalog.GameRules;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -10,13 +11,17 @@ import java.util.List;
  */
 public record GameRulesResponse(
         Regeneration waveplate,
-        Regeneration waveplateCrystals,
-        List<Integer> ascensionLevels,
-        int maxLevel,
+        @Schema(example = "{\"max\": 480, \"regenMinutes\": 12}") Regeneration waveplateCrystals,
+        @Schema(description = "I livelli in cui si fa un'ascensione", example = "[20, 40]") List<Integer> ascensionLevels,
+        @Schema(example = "40") int maxLevel,
+        @Schema(description = "Minuti di gioco al giorno che si possono scegliere", example = "[30, 60, 120]")
         List<Integer> playTimeOptionsMinutes,
+        @Schema(description = "Il giorno da cui si contano le partenze degli eventi ricorrenti", example = "2026-10-01")
         LocalDate demoEventsAnchorDate) {
 
-    public record Regeneration(int max, int regenMinutes) {}
+    public record Regeneration(
+            @Schema(example = "240") int max,
+            @Schema(description = "Minuti per ricaricarne una", example = "6") int regenMinutes) {}
 
     public static GameRulesResponse from(GameRules rules) {
         return new GameRulesResponse(

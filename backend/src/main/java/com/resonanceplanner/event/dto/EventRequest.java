@@ -5,6 +5,7 @@ import com.resonanceplanner.event.ActivityFrequency;
 import com.resonanceplanner.event.EffectType;
 import com.resonanceplanner.event.EventType;
 import com.resonanceplanner.event.ScheduleType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -26,13 +27,19 @@ import java.util.Set;
  * day (D96); no rewards, activities or effect means none.
  */
 public record EventRequest(
+        @Schema(description = "Da 1 a 120 caratteri", example = "Weekend di ricompense doppie")
         @NotBlank(message = "Inserisci il nome.")
         @Size(max = 120, message = "Il nome può avere al massimo 120 caratteri.") String name,
-        @NotNull(message = "Scegli il tipo di evento.") EventType type,
+        @Schema(example = "DOUBLE_DROP") @NotNull(message = "Scegli il tipo di evento.") EventType type,
+        @Schema(description = "Da 1 a 2000 caratteri",
+                example = "Nel weekend Simulation Training dà ricompense doppie, fino a 3 volte al giorno.")
         @NotBlank(message = "Inserisci la descrizione.")
         @Size(max = 2000, message = "La descrizione può avere al massimo 2.000 caratteri.") String description,
         @NotNull(message = "Scegli le date dell'evento.") @Valid Schedule schedule,
+        @Schema(description = "Giorni della settimana in cui è attivo; assente o vuoto = tutti",
+                example = "[\"SATURDAY\", \"SUNDAY\"]")
         Set<@NotNull(message = "Giorno della settimana non valido.") DayOfWeek> activeWeekdays,
+        @Schema(description = "Al massimo 10", example = "[\"Ricompense doppie in Simulation Training\"]")
         @Size(max = 10, message = "Un evento può avere al massimo 10 ricompense.")
         List<@NotBlank(message = "La ricompensa non può essere vuota.")
                 @Size(max = 120, message = "Una ricompensa può avere al massimo 120 caratteri.") String> rewards,
@@ -53,31 +60,43 @@ public record EventRequest(
     }
 
     /** FIXED uses the two dates, RECURRING the three numbers (D29); the values of the other kind are ignored. */
+    @Schema(name = "EventScheduleRequest")
     public record Schedule(
+            @Schema(description = "FIXED usa le due date, RECURRING i tre numeri", example = "FIXED")
             @NotNull(message = "Scegli se l'evento ha date fisse o si ripete.") ScheduleType type,
-            LocalDate startDate,
-            LocalDate endDate,
+            @Schema(description = "Solo FIXED", example = "2026-10-24") LocalDate startDate,
+            @Schema(description = "Solo FIXED", example = "2026-10-25") LocalDate endDate,
+            @Schema(description = "Solo RECURRING: giorni dalla data di partenza della demo", nullable = true,
+                    example = "null")
             Integer startOffsetDays,
-            Integer durationDays,
-            Integer repeatEveryDays) {}
+            @Schema(description = "Solo RECURRING", nullable = true, example = "null") Integer durationDays,
+            @Schema(description = "Solo RECURRING", nullable = true, example = "null") Integer repeatEveryDays) {}
 
+    @Schema(name = "EventActivityRequest")
     public record Activity(
+            @Schema(example = "Obiettivi del weekend")
             @NotBlank(message = "Inserisci il titolo dell'attività.")
             @Size(max = 120, message = "Il titolo può avere al massimo 120 caratteri.") String title,
+            @Schema(description = "Da 1 a 600", example = "10")
             @NotNull(message = "Inserisci i minuti.")
             @Min(value = 1, message = "I minuti vanno da 1 a 600.")
             @Max(value = 600, message = "I minuti vanno da 1 a 600.") Integer minutes,
-            @NotNull(message = "Scegli la frequenza.") ActivityFrequency frequency,
+            @Schema(example = "DAILY") @NotNull(message = "Scegli la frequenza.") ActivityFrequency frequency,
+            @Schema(description = "Giorno dell'edizione da cui è disponibile; assente = dal primo", example = "1")
             @Min(value = 1, message = "Il giorno di sblocco parte da 1.") Integer unlockDay) {}
 
+    @Schema(name = "EventEffectRequest")
     public record Effect(
-            @NotNull(message = "Scegli il tipo di effetto.") EffectType type,
-            @NotNull(message = "Scegli il tipo di fonte.") FarmingSourceType sourceType,
+            @Schema(example = "DROP_MULTIPLIER") @NotNull(message = "Scegli il tipo di effetto.") EffectType type,
+            @Schema(example = "SIMULATION_TRAINING") @NotNull(message = "Scegli il tipo di fonte.")
+            FarmingSourceType sourceType,
+            @Schema(description = "Più di 1 e al massimo 10, con due decimali", example = "2")
             @NotNull(message = "Inserisci il moltiplicatore.")
             @DecimalMin(value = "1", inclusive = false, message = "Il moltiplicatore deve essere maggiore di 1.")
             @DecimalMax(value = "10", message = "Il moltiplicatore può essere al massimo 10.")
             @Digits(integer = 2, fraction = 2, message = "Il moltiplicatore può avere al massimo due decimali.")
             BigDecimal multiplier,
+            @Schema(description = "Run al giorno con il moltiplicatore, da 1 a 100; assente = tutte", example = "3")
             @Min(value = 1, message = "Il limite giornaliero va da 1 a 100.")
             @Max(value = 100, message = "Il limite giornaliero va da 1 a 100.") Integer dailyLimit) {}
 }

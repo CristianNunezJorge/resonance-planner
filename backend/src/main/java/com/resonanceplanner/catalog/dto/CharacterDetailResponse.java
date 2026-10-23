@@ -4,19 +4,33 @@ import com.resonanceplanner.catalog.AscensionCost;
 import com.resonanceplanner.catalog.Element;
 import com.resonanceplanner.catalog.GameCharacter;
 import com.resonanceplanner.catalog.WeaponType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /** A character with the materials of each ascension (D34). */
-public record CharacterDetailResponse(String id, String name, Element element, WeaponType weaponType, Integer rarity,
-        String role, String icon, List<AscensionResponse> ascensions) {
+public record CharacterDetailResponse(
+        @Schema(example = "jinhsi") String id,
+        @Schema(example = "Jinhsi") String name,
+        @Schema(example = "SPECTRO") Element element,
+        @Schema(example = "BROADBLADE") WeaponType weaponType,
+        @Schema(description = "Stelle: 4 o 5", example = "5") Integer rarity,
+        @Schema(example = "Main Damage Dealer") String role,
+        @Schema(description = "Percorso dell'icona nel sito", example = "characters/jinhsi.webp") String icon,
+        List<AscensionResponse> ascensions) {
 
     // atLevel: the level at which this ascension is done, from the game rules (D27)
-    public record AscensionResponse(int toRank, Integer atLevel, List<CostResponse> costs) {}
+    public record AscensionResponse(
+            @Schema(description = "Il grado che si raggiunge", example = "2") int toRank,
+            @Schema(description = "Il livello in cui si fa l'ascensione", example = "40") Integer atLevel,
+            List<CostResponse> costs) {}
 
-    public record CostResponse(String materialId, String materialName, int quantity) {
+    public record CostResponse(
+            @Schema(example = "elegy-tacet-core") String materialId,
+            @Schema(example = "Elegy Tacet Core") String materialName,
+            @Schema(example = "3") int quantity) {
 
         static CostResponse from(AscensionCost cost) {
             return new CostResponse(cost.getMaterial().getId(), cost.getMaterial().getName(), cost.getQuantity());

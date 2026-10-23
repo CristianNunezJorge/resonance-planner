@@ -9,6 +9,7 @@ import com.resonanceplanner.auth.AuthenticatedUser;
 import com.resonanceplanner.common.api.ApiResponse;
 import com.resonanceplanner.common.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,7 +47,10 @@ public class AgentChatController {
     @GetMapping("/messages")
     @Operation(summary = "Storico della chat", description = "I messaggi dal più recente, `limit` per pagina (da 1 a 50, 20 se manca). Per la pagina successiva si passa come `before` l'id del messaggio più vecchio ricevuto; `meta.hasMore` dice se ce ne sono altri.")
     public ApiResponse<List<AgentMessageResponse>> messages(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Id del messaggio più vecchio già ricevuto; assente = dai più recenti",
+                    example = "120")
             @RequestParam(required = false) @Positive(message = "Indica l'id di un messaggio.") Long before,
+            @Parameter(description = "Messaggi per pagina, da 1 a 50", example = "20")
             @RequestParam(defaultValue = "20") @Min(value = 1, message = WRONG_LIMIT) @Max(value = 50, message = WRONG_LIMIT)
             int limit) {
         AgentMessagePage page = messageService.page(user.id(), before, limit);

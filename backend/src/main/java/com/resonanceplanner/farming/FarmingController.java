@@ -6,6 +6,7 @@ import com.resonanceplanner.common.config.OpenApiConfig;
 import com.resonanceplanner.farming.dto.CharacterRequirementsResponse;
 import com.resonanceplanner.farming.dto.FarmingPlanResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +37,7 @@ public class FarmingController {
     @GetMapping("/roster/{characterId}/requirements")
     @Operation(summary = "Cosa manca a un personaggio", description = "Lo stesso calcolo per un solo personaggio, come se tutto l'inventario fosse per lui, più `completionPercent` (da 0 a 100): la media della parte già posseduta di ogni materiale. 404 se il personaggio non è nel tuo roster.")
     public ApiResponse<CharacterRequirementsResponse> requirements(@AuthenticationPrincipal AuthenticatedUser user,
+            @Parameter(description = "Identificativo del personaggio", example = "jinhsi")
             @PathVariable String characterId) {
         return ApiResponse.success(farmingService.requirementsFor(user.id(), characterId));
     }
