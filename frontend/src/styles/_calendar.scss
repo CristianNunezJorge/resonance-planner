@@ -14,6 +14,13 @@
   --rp-on-task-proposed: #e6ecff;
 }
 
+// Every event and task can be clicked: at least 24 px high, the smallest target of WCAG 2.2 AA (2.5.8, D70).
+// The bars of the events were 22 px in the week and month views
+.calendar-event,
+.calendar-task {
+  min-height: 24px;
+}
+
 // A done task is marked with ✓ in its title (D70) and crossed out
 .calendar-task--done {
   text-decoration: line-through;

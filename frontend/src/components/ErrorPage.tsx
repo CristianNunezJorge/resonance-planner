@@ -9,7 +9,8 @@ function ErrorPage() {
     <main className="container py-4 text-center">
       <h1>Qualcosa è andato storto</h1>
       <p>Ricarica la pagina o torna alla presentazione.</p>
-      <Link to="/" className="btn btn-primary">
+      {/* A full reload: after a new deploy the old file of a page can be gone (D137), and only a reload gets the new one */}
+      <Link to="/" reloadDocument className="btn btn-primary">
         Torna alla presentazione
       </Link>
     </main>
