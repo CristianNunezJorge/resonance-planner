@@ -24,7 +24,9 @@ Le fasi vanno fatte in quest'ordine: ognuna usa le decisioni di quella prima.
 
 La raccolta dei dati reali è stata completata il 02/10/2026: i file sono in `backend/src/main/resources/data/`, con fonti e stime nel loro README. Ha portato alle decisioni D92-D97.
 
-**Rilasci:** la checklist della v1, da seguire sul sito online, e il suo esito sono in [rilascio-v1.md](rilascio-v1.md).
+**Rilasci:** le checklist da seguire sul sito online, con il loro esito, sono in [rilascio-v1.md](rilascio-v1.md) e [rilascio-v2.md](rilascio-v2.md).
+
+**Qualità:** copertura dei test, punteggi di Lighthouse e pulizia del codice (T41) sono in [qualita.md](qualita.md).
 
 ## Registro delle decisioni
 

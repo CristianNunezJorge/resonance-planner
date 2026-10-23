@@ -1,0 +1,3 @@
+# Resonance Planner: every page can be indexed; the personal pages ask for the login anyway
+User-agent: *
+Allow: /

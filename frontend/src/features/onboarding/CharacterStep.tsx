@@ -22,7 +22,8 @@ function CharacterStep({ characters, maxLevel }: CharacterStepProps) {
     <fieldset>
       <legend className="visually-hidden">Personaggi della demo</legend>
       <p className="text-body-secondary">Scegli i personaggi che vuoi far crescere: ne serve almeno uno.</p>
-      <div className="row row-cols-2 row-cols-md-3 g-3">
+      {/* Six columns on a wide screen, as on the presentation page: the 256 px portraits are never shown larger */}
+      <div className="row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3">
         {characters.map((character) => (
           <div className="col" key={character.id}>
             <CharacterChoice

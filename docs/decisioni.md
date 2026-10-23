@@ -1087,7 +1087,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 
 - **Cosa:** il calendario P4 usa FullCalendar 7 con il suo tema Bootstrap 5 (D7, D67).
 - **Come:**
-  - pacchetti con la versione fissata in `package.json`: `@fullcalendar/react` 7.1.1 (calendario, viste `dayGridWeek`, `dayGridMonth`, `listWeek`, lingua italiana), `@fullcalendar/bootstrap5` 7.1.1, `temporal-polyfill` 1.0.5 (richiesto da FullCalendar 7), `bootstrap-icons` 1.13.1 (richiesto dal tema). Si è scelta la 7.1.1, uscita da più di una settimana, e non la 7.1.2, uscita da tre giorni;
+  - pacchetti con la versione fissata in `package.json`: `@fullcalendar/react` 7.1.3 (7.1.1 fino al 23/10, aggiornato in T41 per le correzioni di accessibilità della 7.1.2; calendario, viste `dayGridWeek`, `dayGridMonth`, `listWeek`, lingua italiana), `@fullcalendar/bootstrap5` 7.1.3, `temporal-polyfill` 1.0.5 (richiesto da FullCalendar 7), `bootstrap-icons` 1.13.1 (richiesto dal tema). Si è scelta la 7.1.1, uscita da più di una settimana, e non la 7.1.2, uscita da tre giorni;
   - gli stili sono file CSS normali (`skeleton.css`, `theme.css`) che Vite mette nella build: la CSP di D103 (`style-src 'self'`) resta com'è. Verificato con la build di produzione e `npm run preview`: nessuna violazione, nessun `<style>` inserito da JavaScript. Gli unici stili in linea sono quelli che React imposta con il DOM (CSSOM), che la CSP permette;
   - il tema prende i colori da Bootstrap e segue `data-bs-theme="dark"`; i colori di eventi e attività sono variabili CSS nostre (`styles/_calendar.scss`), passate agli elementi con `color` e `contrastColor`, con il testo blu notte su sfondi chiari (contrasto da 6:1 a 11:1);
   - la barra dei comandi è nostra, in italiano (periodo precedente, oggi, successivo, Settimana/Mese, "+ Attività"), e guida il calendario con il controller di FullCalendar (`useCalendarController`). Solo `CalendarView` conosce FullCalendar: nei test della pagina è sostituito da un elenco di pulsanti;
@@ -1440,3 +1440,15 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - un esempio JSON completo per ogni endpoint in file separati, collegati da un `OpenApiCustomizer`: DTO più corti ed esempi più coerenti tra loro, ma un meccanismo in più da spiegare e da tenere allineato (scelta dell'autore del 23/10);
   - le risposte di errore con un esempio per ogni endpoint: circa 100 annotazioni che ripetono quello che dicono già le descrizioni (scelta dell'autore del 23/10).
 - **Limiti noti:** gli esempi delle risposte sono composti campo per campo, quindi non sempre descrivono il caso di quell'endpoint: la risposta di `POST /api/me/tasks`, per esempio, mostra un'attività di farming dell'agente invece di una manuale. Gli esempi della registrazione (`rover`, `rover@example.com`) sono uguali per tutti: sul sito online un secondo visitatore che li prova riceve 409 e deve cambiarli.
+
+## D137 · Pagina del calendario caricata solo quando serve
+**Stato:** Confermata · 23/10/2026 · nata da T41 · chiude la questione aperta di D119 sul bundle
+
+- **Cosa:** FullCalendar, `temporal-polyfill` e il font delle icone di Bootstrap si scaricano solo quando l'utente apre il calendario, non con la pagina di presentazione o il login.
+- **Come:** nelle rotte la pagina del calendario si importa con `React.lazy` e un `Suspense` che mostra `LoadingState` mentre arriva il file. Vite mette la pagina e le sue librerie in un file JavaScript (e CSS) separato. La CSP non cambia: il file viene dallo stesso sito (`script-src 'self'`).
+- **Perché:** oggi l'unico file JavaScript pesa circa 680 KB (207 KB compressi) e la build avvisa che supera i 500 KB. La pagina di presentazione è la prima che vede chi valuta il progetto, e su un telefono o una rete lenta scarica una libreria che non usa. `React.lazy` è il modo standard di React per dividere il codice per pagina.
+- **Scartate:** dividere a mano le librerie con le opzioni del bundler (più configurazione, stesso risultato per la prima pagina); alzare il limite dell'avviso (nasconde il problema); caricare in modo differito ogni pagina (le altre sono piccole, e ogni attesa in più si vede).
+- **Risultato (T41):** il JavaScript della prima pagina passa da 679 KB (207 KB compressi) a 434 KB (134 KB); il calendario è un file a parte da 246 KB (73 KB). Il titolo della scheda diventa "Calendario" già durante il download.
+- **Limiti noti (revisione del 23/10):**
+  - se il file del calendario non si scarica (rete assente, o un deploy nuovo ha tolto il file vecchio mentre la scheda era aperta), compare la pagina d'errore dell'app al posto di tutta la pagina, barra compresa; il suo pulsante "Torna alla presentazione" ricarica la pagina, così arrivano i file nuovi;
+  - alla prima apertura del calendario "Caricamento…" compare due volte di seguito (download del file, poi dati del calendario), e l'avviso del server che si sveglia riparte da zero.

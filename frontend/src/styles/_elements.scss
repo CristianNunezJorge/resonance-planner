@@ -16,6 +16,13 @@ $element-colors: (
   }
 }
 
+// The red of the outline danger buttons (Elimina, Rimuovi) has a contrast of 4.07:1 on the night blue background, under
+// AA (D70): the text and the border use the lighter red of the dark theme; on hover the button fills with the red as usual
+.btn-outline-danger {
+  --bs-btn-color: var(--bs-danger-text-emphasis);
+  --bs-btn-border-color: var(--bs-danger-text-emphasis);
+}
+
 // The close button of a notification is full strength: at the default half opacity its icon is too faint (WCAG 1.4.11)
 .toast .btn-close {
   opacity: 1;
