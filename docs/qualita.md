@@ -8,7 +8,7 @@ Controllo di T41 del 23/10/2026: copertura dei test, accessibilità, best practi
 |---|---|
 | Copertura del backend | **98,2%** delle righe, 92,5% dei rami (948 test) |
 | Copertura del frontend | **97,6%** delle righe, 92,5% dei rami (589 test) |
-| Lighthouse, 9 pagine su computer e telefono | **100** in accessibilità, best practice e SEO su tutte e 18 le misure (prima: accessibilità da 94 a 100, SEO da 82 a 83) |
+| Lighthouse, 9 pagine su computer e telefono | **100** in accessibilità, best practice e SEO su tutte e 18 le misure (prima: accessibilità da 94 a 100, SEO da 82 a 83); 100 anche sulle pagine pubbliche del sito online |
 | JavaScript scaricato dalla prima pagina | da 679 KB a **434 KB** (compresso: da 207 a 134 KB) |
 | Avvisi della build | nessuno (prima: l'agente di Mockito caricato da solo e il file JavaScript oltre i 500 KB) |
 
@@ -89,6 +89,17 @@ I tre numeri sono accessibilità · best practice · SEO. Con la pagina già ape
 | `robots.txt` non valido (il sito rispondeva con la pagina dell'app) | Tutte | Aggiunto `public/robots.txt` |
 
 Lighthouse controlla in automatico solo una parte di WCAG. Il focus nelle finestre, il tasto Esc e gli annunci con `role="status"` sono coperti dai test dei componenti; uso da tastiera e lettore di schermo vanno ricontrollati a mano nella checklist finale (T42).
+
+**Sul sito online** (23/10, dopo il deploy di T41), senza account, solo le pagine pubbliche:
+
+| Pagina | Computer | Telefono |
+|---|---|---|
+| Presentazione `https://resonance-planner.onrender.com/` | 100 · 100 · 100 | 100 · 100 · 100 |
+| Login | 100 · 100 · 100 | 100 · 100 · 100 |
+| Registrazione | 100 · 100 · 100 | 100 · 100 · 100 |
+| Pagina non trovata | 100 · 100 · 100 | 100 · 100 · 100 |
+
+Online valgono anche la CSP e `nosniff` impostati su Render, e `robots.txt` risponde come testo semplice.
 
 I report completi di Lighthouse (HTML e JSON, circa 1 MB l'uno) non sono nel repository: si rifanno con Lighthouse in Chrome DevTools sulle stesse pagine.
 

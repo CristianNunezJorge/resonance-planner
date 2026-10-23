@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (21/10/2026, giorno 12)
+## Stato attuale (23/10/2026, giorno 13)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D135.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D137.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -17,7 +17,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 10 (T37-T38) completato · v2 rilasciata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132); README e checklist di rilascio (`docs/rilascio-v2.md`, tutti i punti ✓ online il 21/10, il punto 8 saltato), tag `v2.0.0`. Tutto online; su Trello T01-T38 sono in "Fatto".
 - **Giorno 11 (X01-X02) completato · primi extra della v3:** export del piano in Excel con Apache POI (D133: fogli "Piano" ed "Eventi", `GET /api/me/calendar/export`, pulsante "Esporta in Excel"; online la prima esportazione dopo un avvio impiega circa 14 s, accettati) e accesso ospite "Prova la demo" (D134: `POST /api/auth/guest`, ospiti cancellati dopo 24 ore da un job `@Scheduled`, quota dell'agente per gli ospiti con la migrazione `V4`). Tutto online; su Trello X01-X02 sono in "Fatto".
 - **Giorno 12 (X03) completato:** notifiche in tempo reale (D135) con un **WebSocket semplice** su `/ws`, senza STOMP (scelta dell'utente). Il token viaggia nel primo messaggio `AUTH`, poi c'è un `PING` ogni 25 secondi. Il job di ogni minuto avvisa per le Waveplate quasi piene e gli eventi in scadenza, e dopo una modifica dell'admin dice a tutti che gli eventi sono cambiati. CSP con `wss://`, anche su Render. Online le notifiche arrivano; su Render però le chiusure decise dal server non arrivano al browser (limite accettato in D135). Tutto online; su Trello X01-X03 sono in "Fatto".
-- **Prossimo passo:** giorni 13-14, T39-T43 (README completo, Swagger, pulizia e Lighthouse, copione della demo e checklist finale, rilascio finale con tag). X04 e X05 si lasciano (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
+- **Giorno 13 (T39-T41) completato:** README completo con screenshot, verificato con un clone pulito (T39); Swagger con descrizione generale ed esempi su ogni campo, controllati da `OpenApiDocumentationTest`, che manda gli esempi come richieste vere (D136); Lighthouse a 100 in accessibilità, best practice e SEO su tutte le pagine (anche online), FullCalendar 7.1.3, calendario caricato solo quando serve (D137), riepilogo in `docs/qualita.md` (T41). `ANTHROPIC_MODEL` tolta da Render. Tutto online; su Trello T01-T41 sono in "Fatto".
+- **Prossimo passo:** giorno 14, T42 (copione della demo, checklist finale online, prova cronometrata) e T43 (rilascio finale con tag). X04 e X05 si lasciano (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -71,8 +72,8 @@ Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm ru
 
 | Parte | Scelta | Versioni fissate il 10/10/2026 | Decisioni |
 |---|---|---|---|
-| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105, FullCalendar 7.1.1 con il tema Bootstrap 5 e `temporal-polyfill` 1.0.5 (D119) | D7, D76, D119 |
-| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc, WebSocket | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel), `spring-boot-starter-websocket` (WebSocket semplice, senza STOMP) | D5, D45, D77, D133, D135 |
+| Frontend | React + TypeScript con Vite, Redux Toolkit, React Router, Bootstrap + SASS, FullCalendar | Node 24.21 (minimo 24.15), React 19.3, Vite 8.3, TypeScript 6.0, Redux Toolkit 2.13, React Router 8.4, Bootstrap 5.3.8, Sass 1.105, FullCalendar 7.1.3 (dal 23/10, prima 7.1.1) con il tema Bootstrap 5 e `temporal-polyfill` 1.0.5 (D119), caricato solo con il calendario (D137) | D7, D76, D119, D137 |
+| Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc, WebSocket | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel), `spring-boot-starter-websocket` (WebSocket semplice, senza STOMP); Swagger con esempi su ogni campo (D136) | D5, D45, D77, D133, D135, D136 |
 | Database | PostgreSQL, schema con Flyway (Hibernate in `validate`) | PostgreSQL 16 (Docker `postgres:16`) | D38, D98 |
 | IA | OpenRouter con un modello gratuito (`nvidia/nemotron-3-ultra-550b-a55b:free` dal 20/10, D132), chiamato con `RestClient`, ciclo tool-use scritto da noi | — | D54, D59, D126, D132 |
 | Test | JUnit 5 + Mockito, integrazione su PostgreSQL di Docker Compose, Vitest + React Testing Library, checklist manuale | JaCoCo 0.8.15, Vitest 5.0 | D79 |
@@ -101,7 +102,7 @@ backend/
   src/main/java/com/resonanceplanner/
     common/api/               ApiResponse, ApiError (D46)
     common/error/             ErrorCode, eccezioni, GlobalExceptionHandler
-    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig, ClockConfig, Today ("oggi" in ora italiana, D41), SchedulingConfig (@EnableScheduling, D134)
+    common/config/            AppProperties (variabili obbligatorie, D83), DatabaseConfig, ClockConfig, Today ("oggi" in ora italiana, D41), SchedulingConfig (@EnableScheduling, D134), OpenApiConfig (token di Swagger e descrizione generale, D53, D136)
     common/security/          SecurityConfig (accessi e CORS), ApiSecurityErrorHandler (401/403)
     common/data/              DataFileReader: lettura rigorosa dei JSON di data/
     catalog/                  entità, repository, GameRules, CatalogService e CatalogController, dto/
@@ -127,6 +128,7 @@ backend/
     db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125), V3__agent_model_calls.sql (D129), V4__agent_model_calls_guest.sql (quota degli ospiti, D134)
     data/                     6 JSON di gioco + README con fonti e stime
   src/test/resources/application-test.yml   database di test, valori finti
+  src/test/.../common/config/OpenApiDocumentationTest   ogni endpoint e ogni campo di Swagger con un esempio, ed esempi accettati dal server (D136)
 frontend/
   src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130); apiDownload per i file (D133); apiSocketUrl per l'indirizzo del WebSocket (D135)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
@@ -135,7 +137,7 @@ frontend/
   src/features/onboarding/    configurazione guidata P3 (T21): bozza in Redux, tre passi, livelli e ascensione (D111)
   src/features/progress/      LevelPicker e funzioni dei livelli (rankOf, draftOf), comuni a configurazione e roster
   src/features/roster/        pagina roster e inventario P5 (T24): rosterSlice, schede, modulo dei livelli (D115)
-  src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125), exportFile.ts ed "Esporta in Excel" (D133)
+  src/features/calendar/      pagina calendario P4 (T26, T31): CalendarView (unico componente con FullCalendar), calendarSlice, finestre, ProposalBar e avviso di cambiamento (D119, D120, D124, D125), exportFile.ts ed "Esporta in Excel" (D133); LazyCalendarPage la carica solo quando serve (D137)
   src/features/chat/          chat con l'agente (T36, D130): chatSlice (bozza, invio, pagine), ChatPanel, ChatMessages, ChatComposer, ChatDrawer, format.ts (plainText, limiti, suggerimenti)
   src/features/notifications/ notifiche in tempo reale (D135): notificationSocket.ts (WebSocket nativo, AUTH, PING, riconnessione), useNotifications (montato in RootLayout)
   src/features/waveplate/     riquadro Waveplate, useWaveplate, validateWaveplate comune con la configurazione
@@ -143,8 +145,8 @@ frontend/
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
   src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, usePageVisible, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
-  public/characters/          6 icone WebP 256×256
-docs/                         progettazione (fasi 01-09, decisioni, stato)
+  public/characters/          6 icone WebP 256×256; public/robots.txt
+docs/                         progettazione (fasi 01-09, decisioni, stato), qualita.md (copertura e Lighthouse, T41), screenshot/ (immagini del README)
 ```
 
 ## Convenzioni
@@ -158,6 +160,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 - Schema: una migrazione già unita a `main` non si modifica mai, se ne crea una nuova (`V2__...`). Le colonne intere sono `integer` (D98) e ogni `CHECK` controlla anche `IS NOT NULL`, perché un controllo che vale NULL viene considerato superato.
 - Backend: un errore su un campo si lancia con `ConflictException(messaggio, campo)` o `FieldValidationException(campo, messaggio)` (risposta con `fields`); un service che scrive dati dell'utente risponde 401 con `UnauthorizedException` se l'utente del token non esiste più (D102). Gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
 - Frontend: tutte le chiamate passano da `api/client.ts`; ogni pagina usa `LoadingState` ed `ErrorState` (D69).
+- Swagger (D136): ogni campo di un DTO ha `@Schema(example = ...)` (per un esempio `null`: `nullable = true`, e sui riferimenti anche `types = {"object", "null"}`), ogni parametro `@Parameter`; gli esempi delle richieste devono essere richieste valide. Un DTO di richiesta nuovo va aggiunto a `REQUEST_BODIES` di `OpenApiDocumentationTest`.
 - Definizione di "fatto" in 6 punti: `docs/08-regole-di-lavoro.md`.
 
 ## Link utili
@@ -170,11 +173,13 @@ docs/                         progettazione (fasi 01-09, decisioni, stato)
 
 ## Note operative
 
-- **Su questo computer:** il `JAVA_HOME` globale punta al JDK 25, quindi nei comandi va indicato il JDK 21. Il PostgreSQL 18 installato occupa la porta 5432, perciò Docker usa la 5433.
+- **Su questo computer:** il `JAVA_HOME` globale punta al JDK 25, quindi nei comandi va indicato il JDK 21. Il PostgreSQL 18 installato occupa la porta 5432, perciò Docker usa la 5433. In background il wrapper si lancia con `sh ./mvnw` (con `./mvnw` può non essere trovato).
+- **Variabili facoltative** (`APP_RATELIMIT_*`, `APP_AGENTLIMITS_*`): valgono solo come vere variabili d'ambiente; scritte nel `.env` vengono ignorate, perché il `.env` entra come file di proprietà e solo le obbligatorie sono richiamate con `${...}` in `application.yml`.
+- **Lighthouse e screenshot:** con Chrome DevTools (MCP `chrome-devtools`): `lighthouse_audit` con i report nello scratchpad, `take_screenshot` con `filePath` per salvare un'immagine senza guardarla. Dettagli in `HANDOFF.md`.
 - **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
-- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico. Dopo un merge controllare in Events che il deploy parta (il 21/10 per #53 non è partito). Dietro il proxy di Render le chiusure dei WebSocket decise dal server non arrivano al browser (D135).
+- **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico. Dopo un merge controllare in Events che il deploy parta (il 21/10 per #53 non è partito; il 23/10 sono partiti da soli). Le variabili d'ambiente del backend sono le 9 che il codice usa (`ANTHROPIC_MODEL` tolta il 23/10). Dietro il proxy di Render le chiusure dei WebSocket decise dal server non arrivano al browser (D135).
 - **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10). La chiamata di prova vera è `OpenRouterClientLiveTest`, spenta di default: il comando è in `HANDOFF.md`.
 - **Norton su questo computer** ispeziona HTTPS e rifirma i certificati: Java non se ne fida (`PKIX path building failed`). Per chiamare OpenRouter da Java in locale si usa l'archivio di Windows: `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`). Su Render non serve.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
