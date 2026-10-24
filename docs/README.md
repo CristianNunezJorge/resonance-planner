@@ -20,13 +20,15 @@ Le fasi vanno fatte in quest'ordine: ognuna usa le decisioni di quella prima.
 | 6. Agente IA | Quali strumenti usa, con quali istruzioni e limiti? Come lo testiamo? | [06-agente.md](06-agente.md) | Completata |
 | 7. Schermate | Quali pagine, cosa mostrano, come ci si muove tra loro? | [07-schermate.md](07-schermate.md) con bozze | Completata |
 | 8. Regole di lavoro | Struttura delle cartelle, convenzioni, Git, test, deploy | [08-regole-di-lavoro.md](08-regole-di-lavoro.md) | Completata |
-| 9. Task | Cosa si fa, in che ordine, in quale giorno? | [09-task.md](09-task.md) e board Trello | Completata |
+| 9. Task | Cosa si fa, in che ordine, in quale giorno? | [09-task.md](09-task.md) e board Trello | Completata (aggiornata il 24/10 con D138) |
 
 La raccolta dei dati reali è stata completata il 02/10/2026: i file sono in `backend/src/main/resources/data/`, con fonti e stime nel loro README. Ha portato alle decisioni D92-D97.
 
-**Rilasci:** le checklist da seguire sul sito online, con il loro esito, sono in [rilascio-v1.md](rilascio-v1.md) e [rilascio-v2.md](rilascio-v2.md).
+**Rilasci:** le checklist da seguire sul sito online, con il loro esito, sono in [rilascio-v1.md](rilascio-v1.md), [rilascio-v2.md](rilascio-v2.md) e [rilascio-v3.md](rilascio-v3.md), la checklist finale prima del Demo Day.
 
 **Qualità:** copertura dei test, punteggi di Lighthouse e pulizia del codice (T41) sono in [qualita.md](qualita.md).
+
+**Demo Day:** il copione della presentazione di 3 minuti, con preparazione, piano B e domande probabili (T42), è in [demo.md](demo.md).
 
 ## Registro delle decisioni
 
