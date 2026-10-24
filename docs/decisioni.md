@@ -1135,7 +1135,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   5. all'inizio i sette giorni sono tutti spuntati (tutti = tutti i giorni, D96); i campi dell'effetto compaiono solo per "Ricompense doppie" (D94);
   6. `GET /api/game/rules` restituisce anche `demoEventsAnchorDate`: il modulo dice da quale giorno si conta l'inizio di un evento che si ripete, senza scrivere la data nel codice del frontend;
   7. "Elimina" chiede conferma e avvisa che le attività collegate restano senza il collegamento; per un evento della demo aggiunge che ricompare al prossimo riavvio del server (D39).
-- **Perché:** lo stesso schema delle altre pagine rende la pagina prevedibile; tenere la bozza nella finestra evita uno slice in più per dati che vivono pochi minuti, mentre le funzioni pure testano la parte delicata, cioè la conversione dei numeri e dei campi.
+- **Perché:** lo stesso schema delle altre pagine rende la pagina prevedibile; tenere la bozza nella finestra evita uno slice in più per dati che vivono pochi minuti, mentre le funzioni pure tengono in un posto solo la parte delicata, cioè la conversione dei numeri e dei campi.
 - **Scartate:** una pagina separata per il modulo (`/admin/eventi/nuovo`: più rotte per lo stesso lavoro); la bozza in Redux (più codice, nessun vantaggio per una finestra); controllare nel browser tutte le regole di D114 (doppioni delle regole del server, che potrebbero divergere).
 - **Limiti noti:** chiudere la finestra (Annulla, Esc) perde la bozza senza chiedere conferma: per un admin solo, nella demo, è un compromesso accettato. Durante il salvataggio i campi sono bloccati; togliendo una riga spariscono gli errori di quel gruppo, perché gli indici delle righe cambiano.
 
