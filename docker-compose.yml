@@ -1,4 +1,4 @@
-# Local PostgreSQL for development and tests (D79, D84).
+# Local PostgreSQL for development (D84).
 # Credentials come from the .env file in this folder (see .env.example).
 services:
   postgres:
@@ -13,8 +13,6 @@ services:
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # Scripts run only on the first start, when the volume is still empty
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s

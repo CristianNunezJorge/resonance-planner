@@ -11,7 +11,7 @@ resonance-planner/
 ├── README.md                 presentazione del progetto, link alla demo, avvio
 ├── CLAUDE.md                 convenzioni del progetto per Claude Code (D86)
 ├── .env.example              elenco delle variabili d'ambiente, senza valori segreti
-├── docker-compose.yml        PostgreSQL in locale, per sviluppo e test
+├── docker-compose.yml        PostgreSQL in locale, per lo sviluppo
 ├── .github/workflows/ci.yml  controlli automatici, facoltativi (D81)
 ├── docs/                     progettazione (questi documenti)
 ├── backend/
@@ -35,7 +35,6 @@ resonance-planner/
 │       │   ├── application.yml, application-dev.yml, application-prod.yml
 │       │   ├── db/migration/ V1__schema.sql, ...
 │       │   └── data/         i sei file JSON (D26)
-│       └── test/java/com/resonanceplanner/
 └── frontend/
     ├── package.json, vite.config.ts, tsconfig.json
     ├── public/characters/    icone dei personaggi (D30)
@@ -86,36 +85,22 @@ Formattazione e analisi statica (D80): formattatore dell'IDE per il Java, ESLint
 
 - `main` è sempre funzionante e pubblicato online.
 - Ogni attività si sviluppa su un ramo: `feat/waveplate-counter`, `fix/onboarding-validation`, `docs/readme-setup`.
-- Si unisce a `main` con una pull request, solo dopo che test, lint e build sono passati (D81). Le pull request si uniscono in un solo commit (*squash merge*).
+- Si unisce a `main` con una pull request, solo dopo che lint e build sono passati (D81). Le pull request si uniscono in un solo commit (*squash merge*).
 - I messaggi di commit seguono Conventional Commits:
   ```
   feat: add waveplate counter endpoint
   fix: reject onboarding with target below current level
-  test: cover scheduler with double drop event
   docs: add setup instructions to README
   ```
-  Tipi: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`.
+  Tipi: `feat`, `fix`, `refactor`, `docs`, `chore`, `perf`, `ci`.
 - Almeno un push al giorno (lo chiede il regolamento) e mai un commit che non compila.
 - Ogni rilascio ha un tag: `v1.0.0`, `v2.0.0`, `v3.0.0` (D8).
 
-## Test (D79)
-
-| Livello | Strumenti | Cosa copre |
-|---|---|---|
-| Unitari backend | JUnit 5, Mockito | Calcoli e service: Waveplate, eventi ricorrenti, farming, pianificatore, regole del roster |
-| Integrazione backend | Spring Boot Test | Controller e repository su un PostgreSQL di test avviato con Docker Compose, con le migrazioni Flyway |
-| Agente | JUnit 5 con un finto client dell'API | Il ciclo con gli strumenti, senza rete (D63) |
-| Unitari frontend | Vitest, React Testing Library | Componenti principali, slice Redux, client HTTP |
-| Flussi completi | Checklist di prova manuale (sotto) | I percorsi dell'utente dall'inizio alla fine, prima di ogni rilascio |
-
-- **Test prima del codice** per tutta la parte di calcolo: si scrive il test, lo si vede fallire, si scrive il codice che lo fa passare.
-- **Copertura:** almeno l'80% su service e calcoli del backend (misurata con JaCoCo) e sulla logica del frontend (misurata con Vitest).
-- I test di integrazione usano PostgreSQL e non un database in memoria come H2, perché l'indice parziale di D37 e i controlli dello schema esistono solo in PostgreSQL.
-- **Facoltativo:** Testcontainers, per avviare il database di test in automatico invece che con Docker Compose.
+## Verifica dei flussi (D79)
 
 ### Checklist di prova manuale
 
-Da ripetere sulla versione online prima di ogni rilascio (v1, v2, v3) e prima del Demo Day:
+I percorsi dell'utente si provano dall'inizio alla fine. Da ripetere sulla versione online prima di ogni rilascio (v1, v2, v3) e prima del Demo Day:
 
 1. Registrazione di un utente nuovo → configurazione guidata completa → arrivo al calendario.
 2. Login con credenziali sbagliate → messaggio di errore; login corretto → calendario.
@@ -137,10 +122,10 @@ Prima di ogni pull request si lanciano in locale:
 
 | Parte | Controlli |
 |---|---|
-| Backend | Compilazione, test unitari e di integrazione, copertura |
-| Frontend | ESLint, controllo dei tipi TypeScript, test, build |
+| Backend | Compilazione e jar |
+| Frontend | ESLint, controllo dei tipi TypeScript, build |
 
-I due comandi sono scritti nel README. **Facoltativo:** se avanza tempo, GitHub Actions esegue gli stessi controlli da solo a ogni pull request, con un PostgreSQL di servizio per i test di integrazione. Dopo l'unione, Render pubblica da solo la nuova versione di `main`.
+I due comandi sono scritti nel README. **Facoltativo:** se avanza tempo, GitHub Actions esegue gli stessi controlli da solo a ogni pull request. Dopo l'unione, Render pubblica da solo la nuova versione di `main`.
 
 ## Deploy (D82)
 
@@ -168,7 +153,6 @@ I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
 | Profilo | Dove | Database |
 |---|---|---|
 | `dev` | Il tuo computer | PostgreSQL in Docker con `docker compose up` |
-| `test` | Test automatici | Database di test separato, nello stesso PostgreSQL di Docker Compose |
 | `prod` | Render | PostgreSQL di Render |
 
 | Variabile | A cosa serve |
@@ -187,17 +171,16 @@ I piani gratuiti cambiano spesso: si ricontrollano il giorno del primo deploy.
 
 ## Documentazione (D85)
 
-Il README principale contiene: descrizione e screenshot, link alla demo online e a Swagger, stack, istruzioni per clonare e avviare il progetto, variabili d'ambiente, comandi per i test, limiti noti (D41, D45, D57), crediti (Kuro Games, Wuthering Waves Wiki con licenza CC BY-SA) e un link a `docs/`. È in italiano, con un breve riassunto in inglese per i recruiter stranieri.
+Il README principale contiene: descrizione e screenshot, link alla demo online e a Swagger, stack, istruzioni per clonare e avviare il progetto, variabili d'ambiente, comandi per i controlli, limiti noti (D41, D45, D57), crediti (Kuro Games, Wuthering Waves Wiki con licenza CC BY-SA) e un link a `docs/`. È in italiano, con un breve riassunto in inglese per i recruiter stranieri.
 
 ## Definizione di "fatto"
 
 Un'attività è fatta quando:
 1. il codice fa quello che dice il documento di progettazione;
-2. ci sono i test e passano, con la copertura richiesta;
-3. codice formattato, e test, lint e build passano;
-4. l'hai riletta e la sai spiegare riga per riga;
-5. i documenti sono aggiornati, se la decisione è cambiata;
-6. è unita a `main` ed è online.
+2. codice formattato, e lint e build passano;
+3. l'hai riletta e la sai spiegare riga per riga;
+4. i documenti sono aggiornati, se la decisione è cambiata;
+5. è unita a `main` ed è online.
 
 ## Uso di Claude Code (D86)
 

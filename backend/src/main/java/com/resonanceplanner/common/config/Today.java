@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Today's date in the time zone of the app (D41): the moments are in UTC, but a day starts and ends at midnight in
- * Italy. It reads the instant of the clock and converts it, so a test clock in UTC works too.
+ * Italy. It reads the instant of the clock and converts it, so a clock in UTC works too.
  */
 @Component
 public class Today {

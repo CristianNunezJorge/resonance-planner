@@ -7,7 +7,7 @@ import java.util.Locale;
 /**
  * The instructions of the agent (D58, D128) and the line with the date. The instructions never change, so the
  * provider can keep them in cache (D54): the date goes in the message of the user. T37 refined the text with the
- * ten test scenarios (docs/scenari-agente.md): plain text, fewer calls to the model, dates and ids for the tools.
+ * ten real scenarios (docs/scenari-agente.md): plain text, fewer calls to the model, dates and ids for the tools.
  */
 final class AgentPrompt {
 

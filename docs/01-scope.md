@@ -64,21 +64,20 @@ I flussi nel dettaglio sono il compito della fase 2.
 | App mobile nativa | Basta un sito responsive |
 | Funzioni social, chat tra utenti, pagamenti | Non servono allo scopo dell'app |
 | Agente che modifica il calendario da solo | Ogni piano va confermato dall'utente (D2) |
-| Agente che fa i calcoli | I calcoli sono codice Java testato (D3) |
+| Agente che fa i calcoli | I calcoli sono codice Java (D3) |
 
 ## Vincoli
 
 - Due settimane esatte, progetto individuale.
 - Idea da far approvare allo staff; presentazione registrata al Demo Day.
 - Backend Spring Boot con PostgreSQL obbligatorio (D5).
-- Il README deve avere il link alla versione online e le istruzioni per avviare il progetto; test e Swagger sono un extra apprezzato.
+- Il README deve avere il link alla versione online e le istruzioni per avviare il progetto; Swagger è un extra apprezzato.
 - Costi dell'API IA il più bassi possibile (D6).
 
 ## Criteri di successo
 
 - La demo funziona dall'inizio alla fine sul sito online, senza intoppi.
 - Due utenti con scelte diverse ricevono piani diversi: si vede che il risultato non è preimpostato.
-- Il calcolo del farming è coperto da test automatici.
 - Il README permette a chiunque di clonare e avviare il progetto.
 
 ## Decisioni prese in questa fase

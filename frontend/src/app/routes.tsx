@@ -13,7 +13,7 @@ import ProfilePage from '../features/profile/ProfilePage'
 import RosterPage from '../features/roster/RosterPage'
 import RootLayout from './RootLayout'
 
-// Route list shared by the browser router and the tests (paths in Italian, D71).
+// Route list of the browser router (paths in Italian, D71).
 // The access rules are in docs/07-schermate.md (D73).
 export const routes: RouteObject[] = [
   {

@@ -6,10 +6,9 @@
 # Backend (Maven)
 target/
 
-# Frontend (Node, Vite, Vitest)
+# Frontend (Node, Vite)
 node_modules/
 dist/
-coverage/
 *.local
 
 # IDE

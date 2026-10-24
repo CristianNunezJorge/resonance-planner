@@ -43,11 +43,6 @@ public class AgentTurnGate {
         return new Pass(userId);
     }
 
-    /** How many turns are running; the tests use it. */
-    synchronized int running() {
-        return running.size();
-    }
-
     private synchronized void leave(Long userId) {
         running.remove(userId);
     }

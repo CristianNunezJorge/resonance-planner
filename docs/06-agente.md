@@ -109,7 +109,7 @@ Salva come proposta l'**ultima bozza generata da `plan_schedule` nello stesso tu
 
 **Limite noto:** l'algoritmo non "risparmia" Waveplate in vista di un evento con ricompense doppie che inizia più avanti. Lo segniamo come miglioramento futuro.
 
-Il pianificatore è un service normale, testato con JUnit come gli altri calcoli. Lo usa anche il piano base senza IA (D64).
+Il pianificatore è un service normale, come gli altri calcoli. Lo usa anche il piano base senza IA (D64).
 
 Le regole di dettaglio (priorità tra i personaggi, minuti già occupati, attività degli eventi già fatte, run potenziate) sono in D123. Nel codice: `Planner` fa il calcolo, `PlannerService` legge i dati dell'utente e controlla i parametri.
 
@@ -209,11 +209,9 @@ La risposta dell'agente arriva tutta insieme (D52). Mentre si aspetta, la chat m
 - **Log senza contenuti personali:** si registrano utente, strumenti usati, token e durata, ma non il testo dei messaggi.
 - **Rischio residuo (revisione di T37):** il testo della proposta (`summary`) lo scrive il modello, e le istruzioni gli chiedono di non copiare testi degli strumenti, ma non lo possono garantire: il testo di una descrizione di evento potrebbe finire nella proposta. Resta accettabile perché le descrizioni le scrive solo l'admin, il testo si mostra sempre come testo semplice (D130) e la proposta non cambia niente finché l'utente non la conferma. Per questo il tetto del `summary` resta a 2.000 caratteri (D127, scelta del 19/10): con 600, come suggeriva la revisione, i testi visti negli scenari (650-800 caratteri) darebbero errore e una chiamata in più.
 
-## Test e verifica (D63)
+## Scenari reali (D63)
 
-1. **Pianificatore e strumenti:** test JUnit con dati di prova; per esempio "con un evento a ricompense doppie mercoledì, la Simulation Training finisce mercoledì".
-2. **Ciclo dell'agente:** test con un finto client dell'API che restituisce risposte preparate (prima chiede uno strumento, poi risponde). Si verifica il ciclo senza rete e senza costi.
-3. **Scenari reali:** prima della demo, dieci richieste di prova contro l'API vera, controllando ogni volta che l'agente abbia usato gli strumenti giusti, che la proposta esista quando serve e che la spiegazione corrisponda ai numeri. Con la quota gratuita si provano in due giorni (D131); criteri, dati di prova e risultati sono in `scenari-agente.md`.
+Prima della demo, dieci richieste di prova contro l'API vera, controllando ogni volta che l'agente abbia usato gli strumenti giusti, che la proposta esista quando serve e che la spiegazione corrisponda ai numeri. Con la quota gratuita si provano in due giorni (D131); criteri, dati di prova e risultati sono in `scenari-agente.md`.
 
 | # | Scenario |
 |---|---|

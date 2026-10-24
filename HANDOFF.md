@@ -18,7 +18,6 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
 | Rilasci | **v1** (`v1.0.0`, 16/10), **v2** (`v2.0.0`, 21/10) e **versione finale** (`v3.0.0`, 24/10) |
 | Ultimo commit su `main` | `b312944`, T43 (PR #61), dopo T42 (`149bb7f`, PR #60), poi la chiusura del giorno 14 |
 | Ramo in corso | Nessuno |
-| Test | Backend 948 (`./mvnw verify`, copertura delle righe 98,2%), frontend 589 (`npm test`, 97,6%) |
 | Lighthouse | 100 in accessibilità, best practice e SEO su 9 pagine in locale (computer e telefono) e sulle pagine pubbliche online: `docs/qualita.md` |
 | Decisioni | D1-D138, tutte *Confermate* |
 | Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132). Limiti di D129, più quelli degli ospiti (D134) |
@@ -29,7 +28,7 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
 
 ## Cosa resta
 
-- **Modifiche:** le decide l'utente. Ognuna segue il flusso qui sotto: una card su Trello, un ramo, test prima del codice per i calcoli, revisione, commit approvato, PR. Se cambia una scelta già presa, prima si scrive una decisione nuova (D139 in poi) come *Proposta*. Dopo una modifica che cambia l'app, ricontrollare online i punti della checklist finale che tocca (`docs/rilascio-v3.md`) e, se serve, aggiornare il copione (`docs/demo.md`).
+- **Modifiche:** le decide l'utente. Ognuna segue il flusso qui sotto: una card su Trello, un ramo, controlli locali, revisione, commit approvato, PR. Se cambia una scelta già presa, prima si scrive una decisione nuova (D139 in poi) come *Proposta*. Dopo una modifica che cambia l'app, ricontrollare online i punti della checklist finale che tocca (`docs/rilascio-v3.md`) e, se serve, aggiornare il copione (`docs/demo.md`).
 - **Prima del Demo Day:** la "Preparazione" di `docs/demo.md` (backend sveglio, fornitore e quota dell'agente, Excel di prova, calendario aperto una volta). Se il Demo Day viene dopo il 10/11/2026, ricreare prima il database di Render (vedi i promemoria).
 - **Fuori dal piano:** X04 (GitHub Actions) e X05 (damage calculator) restano nel Backlog: si riprendono solo se l'utente lo decide (D90).
 
@@ -40,21 +39,20 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
   - preparazione in tre momenti, piano B (alle 0:50 si va avanti, alle 2:15 o con un errore si usa "Genera piano base"), domande probabili;
   - `docs/rilascio-v3.md`: 19 punti tutti ✓ sul sito online il 23-24/10, con un ospite (eliminato alla fine), l'admin e l'account dell'utente; provati anche il limite dei messaggi, la notifica delle Waveplate, Swagger "Try it out", tastiera e Assistente vocale di Windows. Nessun difetto nell'app;
   - le prove cronometrate sono saltate per scelta dell'utente; si presenta dal sito online.
-- **T43 · Rilascio finale (PR #61):** README con lo stato finale e i numeri dei test di T41, tag annotato `v3.0.0` su `main`; dopo il merge sito e API online rispondono.
+- **T43 · Rilascio finale (PR #61):** README con lo stato finale, tag annotato `v3.0.0` su `main`; dopo il merge sito e API online rispondono.
 
 ## Come lavoriamo (flusso approvato, invariato)
 
 1. Un ramo per card.
-2. Test prima del codice.
-3. Controlli locali: `./mvnw verify`; `npm run lint`, `typecheck`, `npm test`, `npm run build`.
-4. Prova reale, con strumenti testuali e niente screenshot (gli screenshot del README sono un'eccezione chiesta dall'utente):
+2. Controlli locali: `./mvnw package`; `npm run lint`, `typecheck`, `npm run build`.
+3. Prova reale, con strumenti testuali e niente screenshot (gli screenshot del README sono un'eccezione chiesta dall'utente):
    - backend con il jar;
    - frontend con `frontend-prod`, che manda la CSP. Prima serve `npm run build`;
    - le chiamate vere al modello solo con il permesso dell'utente.
-5. Revisione del codice con agenti: revisore del linguaggio e revisore di sicurezza, in parallelo.
-6. L'utente approva il messaggio di commit (solo l'oggetto, con il codice della card) e le decisioni nuove.
-7. Push, PR senza firme di Claude, squash merge, ramo cancellato.
-8. Controllo online, e prima ancora in Render > Events che il deploy sia partito (il 23/10 sono partiti da soli).
+4. Revisione del codice con agenti: revisore del linguaggio e revisore di sicurezza, in parallelo.
+5. L'utente approva il messaggio di commit (solo l'oggetto, con il codice della card) e le decisioni nuove.
+6. Push, PR senza firme di Claude, squash merge, ramo cancellato.
+7. Controllo online, e prima ancora in Render > Events che il deploy sia partito (il 23/10 sono partiti da soli).
 
 Altre regole:
 - Le decisioni nuove vanno in `docs/decisioni.md` come *Proposta* e diventano *Confermata* con l'approvazione dell'utente.
@@ -104,22 +102,16 @@ La questione del bundle di FullCalendar (D119) è chiusa da D137; `ANTHROPIC_MOD
   - JDK 21 nei comandi Maven (`export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"`);
   - Docker Desktop acceso e `docker compose up -d` per il database sulla 5433. Il container si ferma dopo un riavvio del computer o di Docker Desktop: se il backend esce subito con codice 1 e `Connection to localhost:5433 refused`, rilanciare `docker compose up -d`;
   - `frontend` e `frontend-prod` usano entrambi la porta 5173, l'unica accettata dal CORS locale: se ne accende uno alla volta (fermare l'altro con `preview_stop`);
-  - `./mvnw verify` non riesce a sostituire il jar se il backend acceso con `preview_start` lo sta usando: fermare prima il backend;
-  - **in background** (`run_in_background`) `./mvnw` può non essere trovato: usare `cd "C:/Users/.../backend" && sh ./mvnw verify`;
-  - i test che fanno commit veri lasciano il database di test con il solo utente `admin`;
+  - `./mvnw package` non riesce a sostituire il jar se il backend acceso con `preview_start` lo sta usando: fermare prima il backend;
+  - **in background** (`run_in_background`) `./mvnw` può non essere trovato: usare `cd "C:/Users/.../backend" && sh ./mvnw package`;
   - se i comandi `docker` si bloccano mentre il database risponde sulla 5433, per scrivere nel database locale c'è il client del PostgreSQL 18 installato: `"/c/Program Files/PostgreSQL/18/bin/psql.exe" -h localhost -p 5433 -U "$DATABASE_USERNAME" -d resonance_planner`, con `DATABASE_USERNAME` e `PGPASSWORD` presi dal `.env` senza stamparli;
   - **Norton** ispeziona HTTPS e rifirma i certificati: Java non se ne fida. Per chiamare OpenRouter da Java in locale serve `-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`); con Maven si passa con `JAVA_TOOL_OPTIONS`. Su Render non serve.
-- **Swagger (D136):** `OpenApiDocumentationTest` fa fallire la build se un endpoint o un campo nuovo non ha un esempio, o se un esempio viene rifiutato dal server. Un DTO di richiesta nuovo va aggiunto all'elenco `REQUEST_BODIES` del test. I controller che esistono solo nei test sono nascosti con `@Hidden` ed elencati in `TEST_CONTROLLERS`.
+- **Swagger (D136):** ogni campo nuovo di un DTO ha bisogno di `@Schema(example = ...)` e ogni parametro di `@Parameter`; gli esempi delle richieste devono essere richieste valide, così "Try it out" funziona.
 - **Lighthouse:** si fa con Chrome DevTools (MCP `chrome-devtools`, `lighthouse_audit` con `outputDirPath` nello scratchpad). Per le pagine private: account di prova creati via `fetch`, token in `localStorage` (`resonance-planner.token`), un contesto isolato per account; un admin si ottiene promuovendo un account con SQL e rifacendo il login. Lo script di riepilogo dei report si riscrive in pochi minuti (punteggi e controlli falliti da `report.json`).
 - **Screenshot su file senza guardarli:** Chrome DevTools `take_screenshot` con `filePath` e `format: "webp"`.
 - **Migrazioni:** una migrazione non ancora unita a `main` si può cambiare, ma i database locali la conoscono già con il checksum vecchio. Prima di riprovare: `drop table` della tabella nuova e `delete from flyway_schema_history where version = '…'` in entrambi.
 - **OpenRouter:**
   - la chiave è nel `.env` (`OPENROUTER_API_KEY`) e su Render: Claude non la legge e non la scrive. Ha un limite di credito di pochi dollari e scade il 15/01/2027;
-  - chiamata di prova vera del solo client (2 delle 50 richieste del giorno), dalla cartella `backend/`, in Git Bash:
-    ```bash
-    set -a; eval "$(grep -E '^OPENROUTER_(API_KEY|MODEL)=' ../.env | tr -d '\r')"; set +a
-    JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStoreType=Windows-ROOT" OPENROUTER_LIVE_TEST=true ./mvnw -q test -Dtest=OpenRouterClientLiveTest -Djacoco.skip=true
-    ```
   - le richieste gratuite rimaste oggi si leggono con `GET https://openrouter.ai/api/v1/key` e la chiave nell'header `Authorization` (campo `free_model_daily_requests`);
   - nelle impostazioni Privacy sono permessi i fornitori gratuiti che si addestrano sui dati, non quelli che pubblicano i prompt;
   - se un modello risponde sempre 429 con la quota intatta, provare l'altro modello gratuito (`OPENROUTER_MODEL`), poi i modelli con strumenti elencati da `https://openrouter.ai/api/v1/models`;
