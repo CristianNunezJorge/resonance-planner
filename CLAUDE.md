@@ -2,9 +2,9 @@
 
 Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di due settimane. È una **demo** di planner per Wuthering Waves: un calendario che unisce eventi a tempo, Waveplate e obiettivi di crescita dei personaggi, con un agente IA che propone un piano che l'utente conferma. "Resonance Planner" è un nome provvisorio.
 
-## Stato attuale (23/10/2026, giorno 13)
+## Stato attuale (24/10/2026, giorno 14 · piano completato)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D137.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D138.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -18,7 +18,8 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 11 (X01-X02) completato · primi extra della v3:** export del piano in Excel con Apache POI (D133: fogli "Piano" ed "Eventi", `GET /api/me/calendar/export`, pulsante "Esporta in Excel"; online la prima esportazione dopo un avvio impiega circa 14 s, accettati) e accesso ospite "Prova la demo" (D134: `POST /api/auth/guest`, ospiti cancellati dopo 24 ore da un job `@Scheduled`, quota dell'agente per gli ospiti con la migrazione `V4`). Tutto online; su Trello X01-X02 sono in "Fatto".
 - **Giorno 12 (X03) completato:** notifiche in tempo reale (D135) con un **WebSocket semplice** su `/ws`, senza STOMP (scelta dell'utente). Il token viaggia nel primo messaggio `AUTH`, poi c'è un `PING` ogni 25 secondi. Il job di ogni minuto avvisa per le Waveplate quasi piene e gli eventi in scadenza, e dopo una modifica dell'admin dice a tutti che gli eventi sono cambiati. CSP con `wss://`, anche su Render. Online le notifiche arrivano; su Render però le chiusure decise dal server non arrivano al browser (limite accettato in D135). Tutto online; su Trello X01-X03 sono in "Fatto".
 - **Giorno 13 (T39-T41) completato:** README completo con screenshot, verificato con un clone pulito (T39); Swagger con descrizione generale ed esempi su ogni campo, controllati da `OpenApiDocumentationTest`, che manda gli esempi come richieste vere (D136); Lighthouse a 100 in accessibilità, best practice e SEO su tutte le pagine (anche online), FullCalendar 7.1.3, calendario caricato solo quando serve (D137), riepilogo in `docs/qualita.md` (T41). `ANTHROPIC_MODEL` tolta da Render. Tutto online; su Trello T01-T41 sono in "Fatto".
-- **Prossimo passo:** giorno 14, T42 (copione della demo, checklist finale online, prova cronometrata) e T43 (rilascio finale con tag). X04 e X05 si lasciano (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
+- **Giorno 14 (T42-T43) completato · versione finale rilasciata:** copione della demo di 3 minuti sui cinque punti del Demo Day, con preparazione, piano B e domande probabili (`docs/demo.md`, D138: account già pronto, un solo messaggio all'agente, presentazione dal sito online); checklist finale sul sito online, 19 punti tutti ✓ il 23-24/10 (`docs/rilascio-v3.md`); le prove cronometrate sono saltate per scelta dell'utente (D138). README con lo stato finale e tag `v3.0.0`. Tutto online; su Trello T01-T43 e X01-X03 sono in "Fatto".
+- **Prossimo passo:** il piano dei 14 giorni è completo. Da qui si fanno le **modifiche che l'utente decide**, ognuna con lo stesso flusso (ramo, test, revisione, commit approvato, PR) e una decisione nuova quando cambia una scelta già presa. X04 e X05 restano fuori (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -146,7 +147,7 @@ frontend/
   src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, usePageVisible, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
   public/characters/          6 icone WebP 256×256; public/robots.txt
-docs/                         progettazione (fasi 01-09, decisioni, stato), qualita.md (copertura e Lighthouse, T41), screenshot/ (immagini del README)
+docs/                         progettazione (fasi 01-09, decisioni, stato), rilascio-v1/v2/v3.md (checklist online), qualita.md (copertura e Lighthouse, T41), demo.md (copione del Demo Day, T42), screenshot/ (immagini del README)
 ```
 
 ## Convenzioni
@@ -174,6 +175,7 @@ docs/                         progettazione (fasi 01-09, decisioni, stato), qual
 ## Note operative
 
 - **Su questo computer:** il `JAVA_HOME` globale punta al JDK 25, quindi nei comandi va indicato il JDK 21. Il PostgreSQL 18 installato occupa la porta 5432, perciò Docker usa la 5433. In background il wrapper si lancia con `sh ./mvnw` (con `./mvnw` può non essere trovato).
+- **Server locali (`.claude/launch.json`):** `frontend` (sviluppo) e `frontend-prod` (build con la CSP, prima serve `npm run build`) usano entrambi la porta 5173, l'unica accettata dal CORS locale: se ne accende uno alla volta. Se il backend esce subito con `Connection to localhost:5433 refused`, il container del database è fermo (succede dopo un riavvio di Docker Desktop): `docker compose up -d`.
 - **Variabili facoltative** (`APP_RATELIMIT_*`, `APP_AGENTLIMITS_*`): valgono solo come vere variabili d'ambiente; scritte nel `.env` vengono ignorate, perché il `.env` entra come file di proprietà e solo le obbligatorie sono richiamate con `${...}` in `application.yml`.
 - **Lighthouse e screenshot:** con Chrome DevTools (MCP `chrome-devtools`): `lighthouse_audit` con i report nello scratchpad, `take_screenshot` con `filePath` per salvare un'immagine senza guardarla. Dettagli in `HANDOFF.md`.
 - **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.

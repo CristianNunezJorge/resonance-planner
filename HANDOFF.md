@@ -1,12 +1,12 @@
-# Handoff · giorno 14 (demo e rilascio finale)
+# Handoff · dopo il giorno 14 (piano completato, si passa alle modifiche)
 
-Passaggio di consegne del 23/10/2026. Il giorno 13 è chiuso: T39 (README completo), T40 (Swagger) e T41 (pulizia, copertura e Lighthouse) sono su `main` e online. Restano T42 e T43.
+Passaggio di consegne del 24/10/2026. Il piano dei 14 giorni è completo: T42 (copione della demo e checklist finale) e T43 (rilascio finale, tag `v3.0.0`) sono su `main` e online. Da qui in poi si fanno le modifiche che l'utente decide.
 
 ## Messaggio da incollare nella nuova sessione
 
 ```text
 Leggi HANDOFF.md, CLAUDE.md e docs/stato-del-progetto.md.
-Iniziamo il giorno 14 con T42 (copione della demo e checklist finale online).
+Il piano dei 14 giorni è completo: oggi voglio fare questa modifica: …
 Prima di scrivere proponimi il piano e chiedimi conferma.
 ```
 
@@ -14,43 +14,33 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
 
 | Cosa | Stato |
 |---|---|
-| Giorni completati | **1-13** (T01-T41, X01, X02, X03), su `main` e online |
-| Rilasci | **v1** (`v1.0.0`, 16/10) e **v2** (`v2.0.0`, 21/10). Il tag finale arriva con T43 |
-| Ultimo commit su `main` | `4ebaafc`, T41 (PR #58), dopo T40 (`53b8428`, PR #57) e T39 (`bc162fe`, PR #56), poi la chiusura del giorno 13 |
+| Giorni completati | **1-14**: tutto il piano (T01-T43, X01, X02, X03), su `main` e online |
+| Rilasci | **v1** (`v1.0.0`, 16/10), **v2** (`v2.0.0`, 21/10) e **versione finale** (`v3.0.0`, 24/10) |
+| Ultimo commit su `main` | `b312944`, T43 (PR #61), dopo T42 (`149bb7f`, PR #60), poi la chiusura del giorno 14 |
 | Ramo in corso | Nessuno |
 | Test | Backend 948 (`./mvnw verify`, copertura delle righe 98,2%), frontend 589 (`npm test`, 97,6%) |
 | Lighthouse | 100 in accessibilità, best practice e SEO su 9 pagine in locale (computer e telefono) e sulle pagine pubbliche online: `docs/qualita.md` |
-| Decisioni | D1-D137, tutte *Confermate* |
+| Decisioni | D1-D138, tutte *Confermate* |
 | Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132). Limiti di D129, più quelli degli ospiti (D134) |
-| Render | Tutto online. `ANTHROPIC_MODEL` tolta il 23/10: le variabili del backend sono le 9 che il codice usa. Il database **scade il 10/11/2026** |
-| Trello | T01-T41 e X01-X03 in "Fatto"; T42-T43 e X04-X05 in Backlog; P01-P05 in "In verifica" |
-| Account di prova | Nessuno, né in locale né online |
+| Render | Tutto online. Le variabili del backend sono le 9 che il codice usa. Il database **scade il 10/11/2026** |
+| Trello | T01-T43 e X01-X03 in "Fatto"; X04-X05 in Backlog; P01-P05 in "In verifica" |
+| Account di prova | Nessuno online: l'ospite della checklist finale è stato eliminato (punto 13) |
+| Demo Day | 3 minuti, dal **sito online**, con il copione di `docs/demo.md` (D138). Le prove cronometrate sono saltate per scelta dell'utente |
 
-## Giorno 14 · Cosa fare (09-task)
+## Cosa resta
 
-| ID | Card | Note per la card |
-|---|---|---|
-| T42 | Copione della demo, checklist finale sul sito online, prova cronometrata | Riusare `docs/rilascio-v1.md` e `docs/rilascio-v2.md`, più gli extra (Excel, "Prova la demo", notifiche) e i controlli che Lighthouse non fa: uso da tastiera e lettore di schermo (`docs/qualita.md`). Vedi i promemoria qui sotto |
-| T43 | Rilascio finale con tag | I tag precedenti sono `v1.0.0` e `v2.0.0`. Aggiornare lo "Stato" del README, che oggi parla della v2 con tre extra |
+- **Modifiche:** le decide l'utente. Ognuna segue il flusso qui sotto: una card su Trello, un ramo, test prima del codice per i calcoli, revisione, commit approvato, PR. Se cambia una scelta già presa, prima si scrive una decisione nuova (D139 in poi) come *Proposta*. Dopo una modifica che cambia l'app, ricontrollare online i punti della checklist finale che tocca (`docs/rilascio-v3.md`) e, se serve, aggiornare il copione (`docs/demo.md`).
+- **Prima del Demo Day:** la "Preparazione" di `docs/demo.md` (backend sveglio, fornitore e quota dell'agente, Excel di prova, calendario aperto una volta). Se il Demo Day viene dopo il 10/11/2026, ricreare prima il database di Render (vedi i promemoria).
+- **Fuori dal piano:** X04 (GitHub Actions) e X05 (damage calculator) restano nel Backlog: si riprendono solo se l'utente lo decide (D90).
 
-X04 (GitHub Actions) e X05 (damage calculator) restano nel Backlog: si riprendono solo se l'utente lo decide.
+## Cosa ha fatto il giorno 14
 
-## Cosa ha fatto il giorno 13
-
-- **T39 · README completo (PR #56):**
-  - quattro screenshot in `docs/screenshot/`, fatti in locale con un account di prova e una risposta vera dell'agente;
-  - extra della v3, schema "Come funziona" in Mermaid, guida di avvio passo passo con PowerShell, tabella delle variabili, limiti nuovi, riassunto in inglese;
-  - verificato con un clone pulito da GitHub e un database nuovo: l'app parte e i test passano;
-  - dalla revisione: le variabili facoltative (`APP_RATELIMIT_*`, `APP_AGENTLIMITS_*`) funzionano solo come vere variabili d'ambiente, **nel `.env` vengono ignorate** (provato).
-- **T40 · Swagger (PR #57, D136):**
-  - descrizione generale in `OpenApiConfig` (token e "Authorize", formato `ApiResponse`, codici di errore, limiti, date, rimando a `05-api.md` per `/ws`);
-  - `@Schema(example)` su tutti i campi dei DTO, `@Parameter` sui parametri, nomi distinti per gli schemi annidati degli eventi, risposte in `application/json`;
-  - `OpenApiDocumentationTest`: tutti gli endpoint documentati, ogni campo con un esempio del tipo giusto, e gli esempi mandati come richieste vere che il server accetta.
-- **T41 · Qualità (PR #58, D137):**
-  - Lighthouse da 94-100 / 82-83 a 100 ovunque: contrasto dei pulsanti `btn-outline-danger`, eventi del calendario alti almeno 24 px, FullCalendar **7.1.3** (correzioni di accessibilità della 7.1.2), `meta description`, `robots.txt`, griglia dei ritratti;
-  - calendario caricato solo quando serve (`LazyCalendarPage`): la prima pagina scarica 434 KB di JavaScript invece di 679; la pagina d'errore torna alla presentazione con una ricarica completa;
-  - agente di Mockito caricato da Surefire: niente più avvisi;
-  - riepilogo in `docs/qualita.md`.
+- **T42 · Copione e checklist finale (PR #60, D138):**
+  - il Demo Day dura 3 minuti e deve raccontare problema, obiettivo raggiunto, strumenti, dati chiave e valore pratico: `docs/demo.md` ha una scena per punto; sul sito si mostra solo l'agente che propone e l'utente che conferma, con un solo messaggio mandato nei primi secondi e un account già pronto;
+  - preparazione in tre momenti, piano B (alle 0:50 si va avanti, alle 2:15 o con un errore si usa "Genera piano base"), domande probabili;
+  - `docs/rilascio-v3.md`: 19 punti tutti ✓ sul sito online il 23-24/10, con un ospite (eliminato alla fine), l'admin e l'account dell'utente; provati anche il limite dei messaggi, la notifica delle Waveplate, Swagger "Try it out", tastiera e Assistente vocale di Windows. Nessun difetto nell'app;
+  - le prove cronometrate sono saltate per scelta dell'utente; si presenta dal sito online.
+- **T43 · Rilascio finale (PR #61):** README con lo stato finale e i numeri dei test di T41, tag annotato `v3.0.0` su `main`; dopo il merge sito e API online rispondono.
 
 ## Come lavoriamo (flusso approvato, invariato)
 
@@ -77,12 +67,7 @@ Altre regole:
 
 - **Database di Render: scade il 10/11/2026.** Ricrearlo prima e **cambiare anche `JWT_SECRET`** (D100).
 - Se il modello dell'agente smette di rispondere: guardare nei log di Render la riga `OpenRouter answered …` e lo stato del fornitore con `GET https://openrouter.ai/api/v1/models/<id>/endpoints` (gratuito, senza chiave), poi cambiare `OPENROUTER_MODEL` (D132).
-- **Copione della demo (T42), prima di presentare:**
-  1. svegliare il backend (circa 3 minuti);
-  2. fare una **esportazione Excel di prova**: la prima dopo un avvio impiega circa 14 secondi (D133);
-  3. aprire una volta il calendario: il suo file si scarica solo allora (D137);
-  4. se si mostra "Prova la demo", farlo dopo il risveglio: l'ospite si elimina dal profilo o sparisce da solo dopo 24 ore (D134);
-  5. Swagger online ha ora esempi pronti per "Try it out" (D136): gli esempi della registrazione (`rover`, `rover@example.com`) sono uguali per tutti, quindi un secondo tentativo dà 409.
+- **Demo Day:** tutto quello che serve prima di presentare è nella "Preparazione" di `docs/demo.md` (D138). In breve: backend sveglio (3-4 minuti), fornitore e quota dell'agente controllati, almeno 2 messaggi liberi, **esportazione Excel di prova** (la prima dopo un avvio impiega circa 14 secondi, D133), calendario aperto una volta (D137), messaggio della demo negli appunti (di sabato o domenica escludere un altro giorno). In Swagger gli esempi della registrazione (`rover`, `rover@example.com`) sono uguali per tutti: un secondo tentativo dà 409 (D136).
 - **Notifiche nella demo (D135):**
   - si vedono solo con la pagina visibile;
   - le Waveplate si mostrano salvando dal riquadro una lettura tra 230 e 239: la notifica arriva entro un minuto, una sola volta per lettura;
@@ -117,7 +102,8 @@ La questione del bundle di FullCalendar (D119) è chiusa da D137; `ANTHROPIC_MOD
 
 - **Su questo computer:**
   - JDK 21 nei comandi Maven (`export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"`);
-  - Docker Desktop acceso e `docker compose up -d` per il database sulla 5433. Il container si ferma dopo un riavvio del computer: se il backend esce subito con codice 1, rilanciare `docker compose up -d`;
+  - Docker Desktop acceso e `docker compose up -d` per il database sulla 5433. Il container si ferma dopo un riavvio del computer o di Docker Desktop: se il backend esce subito con codice 1 e `Connection to localhost:5433 refused`, rilanciare `docker compose up -d`;
+  - `frontend` e `frontend-prod` usano entrambi la porta 5173, l'unica accettata dal CORS locale: se ne accende uno alla volta (fermare l'altro con `preview_stop`);
   - `./mvnw verify` non riesce a sostituire il jar se il backend acceso con `preview_start` lo sta usando: fermare prima il backend;
   - **in background** (`run_in_background`) `./mvnw` può non essere trovato: usare `cd "C:/Users/.../backend" && sh ./mvnw verify`;
   - i test che fanno commit veri lasciano il database di test con il solo utente `admin`;
