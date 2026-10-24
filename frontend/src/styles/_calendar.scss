@@ -1,17 +1,53 @@
-// Colours of the calendar (D65, D120). FullCalendar reads them through the color fields of the items
-// (calendarItems.ts); every background is light and the text on it is night blue, so the contrast stays AA:
-// about 11:1 on gold, 8.6:1 on red, 10:1 on green and blue, 6:1 for a done task.
+// Colours of the calendar (D120, D139). FullCalendar reads them through the color fields of the items
+// (calendarItems.ts); every background is bright and the text on it is the black of the page, so the contrast stays
+// AA: about 15:1 on cyan, 10:1 on orange and green, 16:1 on a confirmed task, 5:1 for a done task.
 :root {
-  --rp-on-event: #{$night-blue};
-  --rp-event-double-drop: #{$gold-light};
-  --rp-event-combat-stages: #f19a9a;
-  --rp-event-points-shop: #8fd19e;
-  --rp-task: #9cc3ff;
-  --rp-task-done: #3a4566;
-  --rp-on-task-done: #c9cfe0;
-  // A proposed task: the dark background of the page, with a light dashed border and light text (D68)
-  --rp-task-proposed: #1b2238;
-  --rp-on-task-proposed: #e6ecff;
+  --rp-on-event: #{$terminal-black};
+  --rp-event-double-drop: #{$neon-cyan};
+  --rp-event-combat-stages: #{$neon-orange};
+  --rp-event-points-shop: #{$status-green};
+  --rp-task: #dfe6ef;
+  --rp-task-done: #{$border-tech};
+  --rp-on-task-done: #{$text-muted};
+  // A proposed task: the dark background of a module, with light text and a dashed cyan border (D68)
+  --rp-task-proposed: #{$module};
+  --rp-on-task-proposed: #{$text-neon};
+}
+
+// The classes come from the options of CalendarView (FullCalendar 7 has no fixed class names).
+// The names of the days in capitals, like the timeline of Vaelithar
+.calendar-day-header,
+.calendar-list-day {
+  font-family: $font-terminal;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+// Today: the light of the cyan accent on its cell, and the label "OGGI" of Vaelithar next to its name. The Bootstrap
+// theme of FullCalendar paints today with the utility .bg-warning, which is !important: two classes and !important win
+.calendar-day.calendar-day--today,
+.calendar-day-header.calendar-day-header--today {
+  background-color: rgba($neon-cyan, 0.07) !important;
+  box-shadow: inset 0 0 0 1px rgba($neon-cyan, 0.4);
+}
+
+.calendar-day-header--today,
+.calendar-list-day--today {
+  color: $neon-cyan;
+}
+
+// Only for the eyes: FullCalendar already marks today with aria-current="date", read by screen readers
+.calendar-day-header--today::after,
+.calendar-list-day--today::after {
+  content: 'OGGI' / '';
+  align-self: center;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: $terminal-black;
+  background-color: $neon-cyan;
 }
 
 // Every event and task can be clicked: at least 24 px high, the smallest target of WCAG 2.2 AA (2.5.8, D70).
@@ -19,6 +55,33 @@
 .calendar-event,
 .calendar-task {
   min-height: 24px;
+  font-family: $font-terminal;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateX(3px);
+    box-shadow: 0 0 12px rgba($neon-cyan, 0.45);
+  }
+
+  // A clear ring for the keyboard, also on a cyan event and with reduced motion (WCAG 2.4.7)
+  &:focus-visible {
+    outline: 2px solid $text-neon;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calendar-event,
+  .calendar-task {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
 }
 
 // A done task is marked with ✓ in its title (D70) and crossed out
@@ -28,7 +91,7 @@
 
 // A task of the pending proposal is written "Proposta:" in its title (D70) and dashed (D68)
 .calendar-task--proposed {
-  border: 2px dashed var(--rp-on-task-proposed) !important;
+  border: 2px dashed $neon-cyan !important;
 }
 
 // The type of an event in its window, with the colour it has in the calendar

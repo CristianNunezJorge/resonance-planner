@@ -17,7 +17,7 @@ const STEPS = [
 function HowItWorks() {
   return (
     <section aria-labelledby="how-it-works-title" className="mt-5">
-      <h2 id="how-it-works-title" className="h4 mb-3">
+      <h2 id="how-it-works-title" className="h4 mb-3 terminal-section-title">
         Come funziona
       </h2>
       {/* list-style none removes the list semantics in Safari: role="list" puts them back */}
@@ -26,12 +26,11 @@ function HowItWorks() {
           <li className="col" key={step.title}>
             <div className="card h-100">
               <div className="card-body">
-                <h3 className="h5 card-title">
-                  <span className="badge text-bg-primary me-2" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  {step.title}
-                </h3>
+                {/* The number of the step as a label of the terminal (D139); the list already says the order */}
+                <p className="terminal-label mb-2" aria-hidden="true">
+                  [ Passo_{String(index + 1).padStart(2, '0')} ]
+                </p>
+                <h3 className="h5 card-title">{step.title}</h3>
                 <p className="card-text mb-0">{step.text}</p>
               </div>
             </div>

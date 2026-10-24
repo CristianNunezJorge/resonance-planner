@@ -19,7 +19,7 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
 | Ultimo commit su `main` | `b312944`, T43 (PR #61), dopo T42 (`149bb7f`, PR #60), poi la chiusura del giorno 14 |
 | Ramo in corso | Nessuno |
 | Lighthouse | 100 in accessibilità, best practice e SEO su 9 pagine in locale (computer e telefono) e sulle pagine pubbliche online: `docs/qualita.md` |
-| Decisioni | D1-D138, tutte *Confermate* |
+| Decisioni | D1-D139, tutte *Confermate* (D139: grafica nello stile di Vaelithar) |
 | Agente | Modello **gratuito** `nvidia/nemotron-3-ultra-550b-a55b:free` (D132). Limiti di D129, più quelli degli ospiti (D134) |
 | Render | Tutto online. Le variabili del backend sono le 9 che il codice usa. Il database **scade il 10/11/2026** |
 | Trello | T01-T43 e X01-X03 in "Fatto"; X04-X05 in Backlog; P01-P05 in "In verifica" |

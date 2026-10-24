@@ -9,8 +9,8 @@ import { useNotifications } from '../features/notifications/useNotifications'
 // The footer stays at the bottom of the window even on short pages.
 function RootLayout() {
   const { pathname } = useLocation()
-  // The real-time notifications of the server arrive on every page (D135)
-  useNotifications()
+  // The real-time notifications of the server arrive on every page (D135); the footer shows their state (D139)
+  const notificationStatus = useNotifications()
   const mainRef = useRef<HTMLElement>(null)
   const previousPathname = useRef(pathname)
 
@@ -33,7 +33,7 @@ function RootLayout() {
       <main id="contenuto" ref={mainRef} className="container py-4 flex-grow-1" tabIndex={-1}>
         <Outlet />
       </main>
-      <Footer />
+      <Footer notificationStatus={notificationStatus} />
       <ToastContainer />
     </div>
   )

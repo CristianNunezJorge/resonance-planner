@@ -1,9 +1,30 @@
 import { useState, type MouseEvent } from 'react'
 import { Link, NavLink, useLocation } from 'react-router'
 import { useAppSelector } from '../app/hooks'
+import type { User } from '../features/auth/types'
 import { useLogout } from '../features/auth/useLogout'
 
 const MENU_ID = 'main-menu'
+
+interface MenuLink {
+  to: string
+  label: string
+}
+
+// The pages of the menu, in order (D73): the guided setup until it is done, the admin area only for an admin
+function menuLinks(user: User | null): MenuLink[] {
+  if (!user) {
+    return []
+  }
+  const home = user.onboardingCompleted
+    ? [
+        { to: '/calendario', label: 'Calendario' },
+        { to: '/roster', label: 'Roster' },
+      ]
+    : [{ to: '/configurazione', label: 'Configurazione' }]
+  const admin = user.role === 'ADMIN' ? [{ to: '/admin/eventi', label: 'Eventi' }] : []
+  return [...home, ...admin, { to: '/profilo', label: 'Profilo' }]
+}
 
 // Navigation bar of every page (docs/07-schermate.md). It collapses into a menu on small screens.
 function NavBar() {
@@ -32,10 +53,19 @@ function NavBar() {
 
   return (
     <header>
-      <nav className="navbar navbar-expand-md border-bottom" data-bs-theme="dark" aria-label="Navigazione principale">
+      <nav className="navbar navbar-expand-md terminal-navbar" data-bs-theme="dark" aria-label="Navigazione principale">
         <div className="container">
-          <Link className="navbar-brand" to="/">
-            Resonance Planner
+          {/* The logo of the terminal (D139): the name is the only text a screen reader reads */}
+          <Link className="navbar-brand terminal-brand" to="/">
+            <span className="terminal-brand-accent" aria-hidden="true">
+              {'//'}
+            </span>
+            <span>
+              <span className="terminal-brand-name">Resonance Planner</span>
+              <span className="terminal-brand-sub" aria-hidden="true">
+                Wuthering Waves · planner
+              </span>
+            </span>
           </Link>
           <button
             type="button"
@@ -53,41 +83,16 @@ function NavBar() {
             onClick={closeMenuOnLinkClick}
           >
             <ul className="navbar-nav me-auto">
-              {user &&
-                (user.onboardingCompleted ? (
-                  <>
-                    <li className="nav-item">
-                      <NavLink to="/calendario" className={navLinkClass}>
-                        Calendario
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink to="/roster" className={navLinkClass}>
-                        Roster
-                      </NavLink>
-                    </li>
-                  </>
-                ) : (
-                  <li className="nav-item">
-                    <NavLink to="/configurazione" className={navLinkClass}>
-                      Configurazione
-                    </NavLink>
-                  </li>
-                ))}
-              {user?.role === 'ADMIN' && (
-                <li className="nav-item">
-                  <NavLink to="/admin/eventi" className={navLinkClass}>
-                    Eventi
+              {menuLinks(user).map((link, index) => (
+                <li className="nav-item" key={link.to}>
+                  <NavLink to={link.to} className={navLinkClass}>
+                    <span className="nav-number" aria-hidden="true">
+                      {String(index + 1).padStart(2, '0')}.
+                    </span>
+                    {link.label}
                   </NavLink>
                 </li>
-              )}
-              {user && (
-                <li className="nav-item">
-                  <NavLink to="/profilo" className={navLinkClass}>
-                    Profilo
-                  </NavLink>
-                </li>
-              )}
+              ))}
             </ul>
             {user && (
               <div className="d-flex align-items-center gap-3">

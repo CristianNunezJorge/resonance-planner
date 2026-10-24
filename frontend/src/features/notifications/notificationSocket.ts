@@ -13,10 +13,14 @@ export interface NotificationConnection {
   close: () => void
 }
 
+// What the footer shows (D139): the connection is open, is being opened again, or the server refused the token
+export type ConnectionStatus = 'connecting' | 'connected' | 'stopped'
+
 interface ConnectOptions {
   url: string
   token: string
   onNotification: (notification: ServerNotification) => void
+  onStatus?: (status: ConnectionStatus) => void
 }
 
 const TYPES: ReadonlySet<string> = new Set<NotificationType>([
@@ -33,6 +37,8 @@ const LONGEST_RETRY_MS = 60_000
 // A connection that stayed open this long worked: after it the waits start again from one second. Not at the opening,
 // or a connection that the server closes right after AUTH would come back every second
 const STABLE_AFTER_MS = 10_000
+// The server refuses a token right after AUTH: a connection still open after two seconds has been accepted (D139)
+const ACCEPTED_AFTER_MS = 2_000
 // The server refused the token, or the account is gone: the same token would be refused again
 const TOKEN_REJECTED = 4401
 const NORMAL_CLOSURE = 1000
@@ -71,19 +77,28 @@ export function parseNotification(data: unknown): ServerNotification | null {
  * messages (the notifications are an extra). It stops for good when the server refuses the token or the page calls
  * close().
  */
-export function connectNotifications({ url, token, onNotification }: ConnectOptions): NotificationConnection {
+export function connectNotifications({ url, token, onNotification, onStatus }: ConnectOptions): NotificationConnection {
   let socket: WebSocket | null = null
   let pingTimer: ReturnType<typeof setInterval> | undefined
   let stableTimer: ReturnType<typeof setTimeout> | undefined
+  let acceptedTimer: ReturnType<typeof setTimeout> | undefined
   let retryTimer: ReturnType<typeof setTimeout> | undefined
   let attempt = 0
   let stopped = false
+
+  // After close() the page no longer listens: nothing is reported
+  const report = (status: ConnectionStatus) => {
+    if (!stopped) {
+      onStatus?.(status)
+    }
+  }
 
   const open = () => {
     const current = new WebSocket(url)
     socket = current
     current.onopen = () => {
       current.send(JSON.stringify({ type: 'AUTH', token }))
+      acceptedTimer = setTimeout(() => report('connected'), ACCEPTED_AFTER_MS)
       pingTimer = setInterval(() => current.send(JSON.stringify({ type: 'PING' })), PING_EVERY_MS)
       stableTimer = setTimeout(() => {
         attempt = 0
@@ -102,9 +117,15 @@ export function connectNotifications({ url, token, onNotification }: ConnectOpti
     current.onclose = (event: CloseEvent) => {
       clearInterval(pingTimer)
       clearTimeout(stableTimer)
-      if (stopped || event.code === TOKEN_REJECTED) {
+      clearTimeout(acceptedTimer)
+      if (stopped) {
         return
       }
+      if (event.code === TOKEN_REJECTED) {
+        report('stopped')
+        return
+      }
+      report('connecting')
       retryTimer = setTimeout(open, retryDelayMs(attempt))
       attempt += 1
     }
@@ -117,6 +138,7 @@ export function connectNotifications({ url, token, onNotification }: ConnectOpti
       stopped = true
       clearInterval(pingTimer)
       clearTimeout(stableTimer)
+      clearTimeout(acceptedTimer)
       clearTimeout(retryTimer)
       socket?.close(NORMAL_CLOSURE)
     },

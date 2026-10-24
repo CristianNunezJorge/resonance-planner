@@ -523,7 +523,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Scartate:** nessuna alternativa all'agente (la demo dipenderebbe del tutto da un servizio esterno).
 
 ## D65 · Tema scuro ispirato al gioco
-**Stato:** Confermata · 01/10/2026
+**Stato:** Confermata · 01/10/2026 · colori sostituiti da D139 (24/10/2026)
 
 - **Cosa:** solo tema scuro in v1: sfondo blu notte, accento dorato, un colore per ogni elemento.
 - **Come:** Bootstrap personalizzato con variabili SASS. Gli stati non dipendono solo dal colore (D70).
@@ -1096,7 +1096,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Limiti noti:** FullCalendar 7 è uscito a giugno 2026, quindi è giovane. I pacchetti di FullCalendar e `temporal-polyfill` li pubblica l'autore di FullCalendar dai repository ufficiali, `bootstrap-icons` il team di Bootstrap; nessuno ha script di installazione e `npm audit` non trova vulnerabilità (15/10/2026). Il rischio che resta è quello di ogni dipendenza: un aggiornamento compromesso girerebbe nella stessa pagina del token (D45), per questo le versioni sono fissate. Il bundle JavaScript passa a circa 630 KB (195 KB compressi) e Vite avvisa che supera i 500 KB: si può caricare la pagina del calendario solo quando serve (`lazy` di React Router) se la pagina di presentazione diventa lenta. `bootstrap-icons` aggiunge un font di circa 130 KB, scaricato solo quando serve.
 
 ## D120 · Come la pagina del calendario usa i dati
-**Stato:** Confermata · 15/10/2026 · nata da T26
+**Stato:** Confermata · 15/10/2026 · nata da T26 · colori del calendario sostituiti da D139 (24/10/2026)
 
 - **Cosa:** la pagina P4 (T26) mostra eventi e attività dell'intervallo sullo schermo, le finestre di dettaglio, il modulo delle attività manuali e il riquadro Waveplate. Restano per la v2: barra della proposta, avviso di cambiamento, chat, "Genera piano base" e "Spiegamelo".
 - **Come:**
@@ -1472,3 +1472,21 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - una demo con il solo piano base: si perderebbe la parte originale del progetto;
   - contare solo sul montaggio di un video per tagliare l'attesa: il copione deve funzionare anche dal vivo;
   - due prove cronometrate dall'inizio alla fine, come chiedeva il criterio di T42: l'autore ha scelto di saltarle (24/10/2026). Le singole parti sono provate nella checklist finale e prima della presentazione si apre e si prepara tutto.
+
+## D139 · Grafica nello stile di Vaelithar
+**Stato:** Confermata · 24/10/2026 · sostituisce i colori di D65 e di D120 · stesse tecnologie di D7 e D65
+
+- **Cosa:** il frontend prende l'identità visiva di Vaelithar, un prototipo in HTML e CSS fatto dall'autore sullo stesso gioco: un terminale tattico scuro, con accento ciano e caratteri monospazio per titoli, menu ed etichette. Pagine, funzioni e testi restano quelli di oggi.
+- **Come:**
+  1. **stesse tecnologie:** variabili SASS di Bootstrap in `_theme.scss` e regole in `_terminal.scss`, `_elements.scss`, `_calendar.scss` e `_chat.scss`; FullCalendar resta, cambiano solo i suoi colori. Nessuna libreria nuova e nessun font esterno: Courier New e il monospazio del sistema, quindi la CSP di Render non cambia;
+  2. **colori:** nero profondo `#04060a` per lo sfondo, blocchi `#10141d`, bordi `#222e3f`, testo `#e1e7ef`, accento ciano `#00f2fe` (pulsanti principali con testo scuro), arancione `#ff9f43` solo per i dettagli (il `//` del logo e il bordo dei titoli di sezione). Il grigio secondario di Vaelithar (`#627288`, 3,7:1 sui blocchi) diventa `#8f9db3` (6,7:1), e i bordi dei campi dei moduli sono più chiari (almeno 3:1), per restare AA (D70);
+  3. **sfondo:** una griglia di linee sottili e un flusso di colore lento tra ciano e arancione, molto più tenue che in Vaelithar perché i testi restino leggibili; con "riduci movimento" è fermo;
+  4. **elementi:** logo `// RESONANCE PLANNER` con un sottotitolo, menu numerato, card con l'angolo segnato e angoli quasi dritti, titoli delle pagine in maiuscolo, l'artwork di Wuthering Waves dietro la presentazione (i crediti a Kuro Games sono nel footer), passi di "Come funziona" numerati come etichette;
+  5. **calendario:** eventi per tipo in ciano (ricompense doppie), arancione (sfide di combattimento) e verde (negozio a punti), sempre con testo scuro; attività confermate chiare, fatte scure, proposte tratteggiate in ciano (D68); il giorno di oggi in evidenza con l'etichetta "OGGI";
+  6. **footer:** il pallino di stato dice una cosa vera: se le notifiche in tempo reale sono collegate (D135), con il testo accanto, non solo il colore.
+- **Perché:** l'autore vuole che il progetto abbia l'identità visiva che aveva già pensato per un planner di Wuthering Waves; restare sulle tecnologie del progetto (scelta dell'autore) evita librerie nuove e cambi alla CSP prima del Demo Day.
+- **Scartate:**
+  - usare Vaelithar così com'è: pagine HTML statiche a parte, con parti di Arknights: Endfield fuori dallo scope (D9);
+  - il grigio secondario originale (sotto AA) e lo sfondo animato con i colori pieni di Vaelithar (i testi sopra diventano difficili da leggere);
+  - il footer fisso in basso: su telefono copre i contenuti;
+  - un font da Google Fonts: cambierebbe la CSP del sito su Render.
