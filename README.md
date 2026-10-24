@@ -6,7 +6,7 @@ Progetto capstone del Master Full-Stack AI Developer di Epicode. "Resonance Plan
 
 > **Stato:** è online la **versione finale** (tag `v3.0.0`, 24/10/2026): calendario, roster e inventario, piano base, proposte da confermare e agente IA con la chat, più tre extra: export del piano in Excel, accesso ospite "Prova la demo" e notifiche in tempo reale. La checklist finale sul sito online è superata in tutti i 19 punti ([`docs/rilascio-v3.md`](docs/rilascio-v3.md)).
 
-![Il calendario su computer: eventi della settimana, una proposta dell'agente con le attività tratteggiate e la chat a destra](docs/screenshot/calendario.webp)
+![Il calendario su computer: eventi della settimana, una proposta con le attività tratteggiate e la chat dell'agente a destra](docs/screenshot/calendario.webp)
 
 ## Demo online
 
