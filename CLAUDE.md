@@ -4,7 +4,7 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 
 ## Stato attuale (24/10/2026, giorno 14 · piano completato)
 
-- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D138.
+- **Progetto approvato dallo staff.** Progettazione completa: 9 fasi; decisioni D1-D139.
 - **Giorno 1 (T01-T06):** repository, Docker Compose, backend Spring Boot, schema Flyway, frontend Vite.
 - **Giorno 2 (T07-T11):** `ApiResponse` ed errori, catalogo caricato dai JSON, API pubbliche `/api/game/**` con sicurezza di base e CORS, **primo deploy su Render**, client HTTP e tema scuro. L'app è online (link sotto).
 - **Giorno 3 (T12-T16) completato:** JWT e ruoli (D99, D100), limiti di richieste con Cloudflare (D101), API del profilo (D102), login, registrazione, sessione e regole di accesso nel frontend (D103), pagina di presentazione (T16). Su Render il sito statico manda CSP e `X-Content-Type-Options: nosniff` (sezione Headers, non nel repository). Tutto online; su Trello T01-T16 sono in "Fatto".
@@ -19,6 +19,7 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 12 (X03) completato:** notifiche in tempo reale (D135) con un **WebSocket semplice** su `/ws`, senza STOMP (scelta dell'utente). Il token viaggia nel primo messaggio `AUTH`, poi c'è un `PING` ogni 25 secondi. Il job di ogni minuto avvisa per le Waveplate quasi piene e gli eventi in scadenza, e dopo una modifica dell'admin dice a tutti che gli eventi sono cambiati. CSP con `wss://`, anche su Render. Online le notifiche arrivano; su Render però le chiusure decise dal server non arrivano al browser (limite accettato in D135). Tutto online; su Trello X01-X03 sono in "Fatto".
 - **Giorno 13 (T39-T41) completato:** README completo con screenshot, verificato con un clone pulito (T39); Swagger con descrizione generale ed esempi su ogni campo (D136); Lighthouse a 100 in accessibilità, best practice e SEO su tutte le pagine (anche online), FullCalendar 7.1.3, calendario caricato solo quando serve (D137), riepilogo in `docs/qualita.md` (T41). `ANTHROPIC_MODEL` tolta da Render. Tutto online; su Trello T01-T41 sono in "Fatto".
 - **Giorno 14 (T42-T43) completato · versione finale rilasciata:** copione della demo di 3 minuti sui cinque punti del Demo Day, con preparazione, piano B e domande probabili (`docs/demo.md`, D138: account già pronto, un solo messaggio all'agente, presentazione dal sito online); checklist finale sul sito online, 19 punti tutti ✓ il 23-24/10 (`docs/rilascio-v3.md`); le prove cronometrate sono saltate per scelta dell'utente (D138). README con lo stato finale e tag `v3.0.0`. Tutto online; su Trello T01-T43 e X01-X03 sono in "Fatto".
+- **Dopo il giorno 14 · grafica nuova:** il frontend ha lo stile di Vaelithar, il prototipo dell'autore sullo stesso gioco (D139): terminale scuro, accento ciano, caratteri monospazio, stesse tecnologie. Il pallino del footer dice se le notifiche in tempo reale sono collegate.
 - **Prossimo passo:** il piano dei 14 giorni è completo. Da qui si fanno le **modifiche che l'utente decide**, ognuna con lo stesso flusso (ramo, controlli, revisione, commit approvato, PR) e una decisione nuova quando cambia una scelta già presa. X04 e X05 restano fuori (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
@@ -139,7 +140,7 @@ frontend/
   src/features/profile/       pagina profilo P6 (T27): modifica, eliminazione dell'account con l'email (D121), o con il nome per l'ospite (D134)
   src/features/adminEvents/   gestione eventi P7 (T27): tabella, EventFormModal, eventForm.ts, adminEventsSlice (D122)
   src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, usePageVisible, pagine 404 ed errore
-  src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
+  src/styles/                 _theme.scss (tema scuro D65, colori di D139), _terminal.scss (sfondo, header, footer e card nello stile di Vaelithar, D139), _elements.scss, _calendar.scss, _chat.scss, main.scss
   public/characters/          6 icone WebP 256×256; public/robots.txt
 docs/                         progettazione (fasi 01-09, decisioni, stato), rilascio-v1/v2/v3.md (checklist online), qualita.md (Lighthouse, T41), demo.md (copione del Demo Day, T42), screenshot/ (immagini del README)
 ```

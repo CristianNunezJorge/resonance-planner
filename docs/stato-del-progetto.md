@@ -56,7 +56,7 @@ Il progetto è approvato e **il piano dei 14 giorni è completo** (T01-T43 e gli
 | Repository | https://github.com/CristianNunezJorge/resonance-planner |
 | Comandi, versioni, convenzioni | `CLAUDE.md` nella cartella principale |
 | Indice della progettazione | `docs/README.md` |
-| Registro delle decisioni | `docs/decisioni.md` (D1-D138) |
+| Registro delle decisioni | `docs/decisioni.md` (D1-D139) |
 | Lighthouse, pulizia | `docs/qualita.md` (T41) |
 | Documenti di fase | `docs/01-scope.md` ... `docs/09-task.md` |
 | Dati di gioco | `backend/src/main/resources/data/*.json` |

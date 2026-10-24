@@ -1,6 +1,14 @@
 import bootstrapTheme from '@fullcalendar/bootstrap5'
 import '@fullcalendar/bootstrap5/theme.css'
-import FullCalendar, { type CalendarController, type DatesSetInfo, type EventClickInfo, type EventInput } from '@fullcalendar/react'
+import FullCalendar, {
+  type CalendarController,
+  type DatesSetInfo,
+  type DayCellInfo,
+  type DayHeaderInfo,
+  type EventClickInfo,
+  type EventInput,
+  type ListDayHeaderInfo,
+} from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/react/daygrid'
 import listPlugin from '@fullcalendar/react/list'
 import italian from '@fullcalendar/react/locales/it'
@@ -14,6 +22,14 @@ export type CalendarViewName = 'dayGridWeek' | 'dayGridMonth' | 'listWeek'
 const PLUGINS = [bootstrapTheme, dayGridPlugin, listPlugin]
 // The events above the tasks of the same day, then by day and title
 const ORDER = ['rank', 'start', 'title']
+
+// FullCalendar 7 has no fixed class names: the classes of the terminal look (D139) come from these options, and
+// _calendar.scss styles them. Today has its own class in the week, the month and the list of the phone
+const dayHeaderClass = ({ isToday }: DayHeaderInfo) =>
+  isToday ? 'calendar-day-header calendar-day-header--today' : 'calendar-day-header'
+const dayCellClass = ({ isToday }: DayCellInfo) => (isToday ? 'calendar-day calendar-day--today' : 'calendar-day')
+const listDayHeaderClass = ({ isToday }: ListDayHeaderInfo) =>
+  isToday ? 'calendar-list-day calendar-list-day--today' : 'calendar-list-day'
 
 interface CalendarViewProps {
   controller: CalendarController
@@ -52,6 +68,9 @@ function CalendarView({ controller, view, items, onRangeChange, onItemClick }: C
       // Everything lasts whole days: no time, not even "Tutto il giorno" in the list of the phone
       displayEventTime={false}
       eventOrder={ORDER}
+      dayHeaderClass={dayHeaderClass}
+      dayCellClass={dayCellClass}
+      listDayHeaderClass={listDayHeaderClass}
       events={items}
       datesSet={handleDatesSet}
       eventClick={handleClick}

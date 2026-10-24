@@ -94,8 +94,12 @@ function LandingPage() {
 
   return (
     <>
-      <div className="py-4">
-        <h1>Resonance Planner</h1>
+      {/* The panel with the artwork of the game, like the cards of Vaelithar (D139) */}
+      <section className="landing-hero" aria-labelledby="landing-title">
+        <p className="terminal-label mb-2" aria-hidden="true">
+          [ Wuthering Waves // planner ]
+        </p>
+        <h1 id="landing-title">Resonance Planner</h1>
         <p className="lead">
           Il planner per Wuthering Waves che unisce eventi a tempo, Waveplate e obiettivi di crescita in un solo
           calendario.
@@ -106,12 +110,12 @@ function LandingPage() {
           </Link>
         )}
         {callToAction?.kind === 'visitor' && <VisitorButtons />}
-      </div>
+      </section>
 
       <HowItWorks />
 
       <section className="mt-5" aria-labelledby="demo-characters-title">
-        <h2 id="demo-characters-title" ref={headingRef} tabIndex={-1} className="h4 mb-3">
+        <h2 id="demo-characters-title" ref={headingRef} tabIndex={-1} className="h4 mb-3 terminal-section-title">
           Personaggi della demo
         </h2>
         {(charactersStatus === 'idle' || charactersStatus === 'loading') && <LoadingState />}

@@ -1,23 +1,55 @@
-// Dark theme inspired by Wuthering Waves (D65): night blue background, gold accent.
+// Dark "tactical terminal" theme of Vaelithar, the author's prototype on the same game (D139, replaces the gold of D65).
 // These variables are read by Bootstrap, so they must come before it in main.scss.
 
-$night-blue: #0d1326;
-$night-blue-raised: #151d38;
-$night-blue-border: #2a3558;
-$gold: #e0b04f;
-$gold-light: #f0c96f;
-$text-light: #e7eaf3;
-$text-muted: #a9b1c9;
+$terminal-black: #04060a;
+$module: #10141d;
+$module-raised: #172030;
+$border-tech: #222e3f;
+// The border of a form field: at least 3:1 on the background, so the field is visible without its label (WCAG 1.4.11)
+$border-field: #52637e;
+$text-neon: #e1e7ef;
+// The grey of Vaelithar (#627288) is 3.7:1 on the modules, under AA (D70): this one is 6.7:1
+$text-muted: #8f9db3;
+$neon-cyan: #00f2fe;
+$neon-cyan-light: #8ff9ff;
+$neon-orange: #ff9f43;
+$status-green: #2ed573;
 
-$primary: $gold;
+// Courier New is on almost every computer: no web font, so the Content-Security-Policy stays the same (D103)
+$font-terminal: 'Courier New', Courier, monospace;
+
+$primary: $neon-cyan;
+
+// Almost square corners, like the panels of Vaelithar
+$border-radius: 2px;
+$border-radius-sm: 1px;
+$border-radius-lg: 3px;
+$border-radius-xl: 4px;
+$border-radius-xxl: 6px;
+$border-radius-pill: 2px;
+
+$headings-font-family: $font-terminal;
+$headings-font-weight: 700;
+$btn-font-family: $font-terminal;
+$btn-font-weight: 700;
+
+$input-border-color: $border-field;
+$form-select-border-color: $border-field;
+$form-check-input-border: 1px solid $border-field;
+
+// Cards, windows and the side chat are modules on the black background
+$card-bg: $module;
+$card-cap-bg: $module-raised;
+$modal-content-bg: $module;
+$offcanvas-bg-color: $module;
 
 // Only the dark colour mode is used (index.html sets data-bs-theme="dark")
-$body-bg-dark: $night-blue;
-$body-color-dark: $text-light;
+$body-bg-dark: $terminal-black;
+$body-color-dark: $text-neon;
 $body-secondary-color-dark: $text-muted;
-$body-secondary-bg-dark: $night-blue-raised;
-$body-tertiary-bg-dark: $night-blue-raised;
-$border-color-dark: $night-blue-border;
-$link-color-dark: $gold-light;
-$link-hover-color-dark: $gold;
-$headings-color-dark: $text-light;
+$body-secondary-bg-dark: $module;
+$body-tertiary-bg-dark: $module-raised;
+$border-color-dark: $border-tech;
+$link-color-dark: $neon-cyan;
+$link-hover-color-dark: $neon-cyan-light;
+$headings-color-dark: $text-neon;

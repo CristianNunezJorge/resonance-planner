@@ -6,16 +6,16 @@
 
 .chat-message {
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: $border-radius;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-// The messages of the user lean to the right, with a touch of the gold accent; the light text stays AA on both
+// The messages of the user lean to the right, with a touch of the cyan accent (D139); the light text stays AA on both
 .chat-message--user {
   margin-left: 2rem;
-  background-color: rgba($gold, 0.14);
-  border: 1px solid rgba($gold, 0.45);
+  background-color: rgba($neon-cyan, 0.08);
+  border: 1px solid rgba($neon-cyan, 0.45);
 }
 
 .chat-message--assistant {

@@ -256,12 +256,12 @@ Messaggio breve e pulsante per tornare al calendario o alla presentazione.
 | `LoadingState`, `EmptyState`, `ErrorState` | Tutte le pagine |
 | `ProtectedRoute` | Applica le regole di accesso di D73 |
 
-## Stile visivo (D65)
+## Stile visivo (D65, D139)
 
-- **Tema scuro**, come l'interfaccia del gioco: sfondo blu notte, testo chiaro, un accento dorato per le azioni principali.
+- **Tema scuro da terminale tattico**, come Vaelithar, il prototipo dell'autore sullo stesso gioco (D139): sfondo quasi nero con una griglia sottile, blocchi blu scuro con l'angolo segnato, testo chiaro, accento ciano per le azioni principali, caratteri monospazio per titoli, menu ed etichette.
 - **Colori degli elementi**, usati negli avatar e nei badge: Aero verde, Electro viola, Fusion rosso aranciato, Glacio azzurro, Havoc magenta scuro, Spectro oro.
 - **Stati delle attività** riconoscibili anche senza colore: proposta = bordo tratteggiato e scritta "Proposta"; fatta = spunta e testo attenuato.
-- Bootstrap personalizzato con variabili SASS; i colori esatti si definiscono nella prima giornata di sviluppo, controllando i contrasti.
+- Bootstrap personalizzato con variabili SASS; i colori esatti sono in `_theme.scss`, con i contrasti controllati (D70).
 
 ## Accessibilità (D70)
 
