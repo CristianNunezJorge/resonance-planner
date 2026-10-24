@@ -1452,26 +1452,25 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - alla prima apertura del calendario "Caricamento…" compare due volte di seguito (download del file, poi dati del calendario), e l'avviso del server che si sveglia riparte da zero.
 
 ## D138 · Demo di 3 minuti: account già pronto e un solo messaggio all'agente
-**Stato:** Confermata · 24/10/2026 · nata da T42 · cambia il criterio "fatta quando" di T42 (prove cronometrate saltate)
+**Stato:** Confermata · 24/10/2026 · nata da T42
 
 - **Cosa:** la presentazione al Demo Day dura al massimo 3 minuti e deve raccontare cinque cose: il problema individuato, l'obiettivo raggiunto, gli strumenti e le tecnologie, i dati chiave emersi e il valore pratico. Il copione (`docs/demo.md`) ha una scena per ognuna. Sul sito si mostra solo l'obiettivo raggiunto: una richiesta all'agente e la conferma della proposta. Admin, notifiche, Excel e telefono restano per le domande; sono comunque provati nella checklist finale (`docs/rilascio-v3.md`).
 - **Come:**
   - l'account dell'autore si prepara prima, con due o tre personaggi, le Waveplate e nessuna proposta in attesa;
   - un solo messaggio unisce la richiesta e un vincolo: "Organizzami la settimana: non gioco sabato e domenica" (di sabato o di domenica un altro giorno, per esempio "non gioco mercoledì", perché il piano parte da oggi);
-  - il messaggio parte nei primi secondi, e l'attesa del modello (20-50 secondi nelle prove online del 23/10) passa mentre si racconta il problema;
+  - il messaggio parte nei primi secondi, e l'attesa del modello (20-50 secondi nella checklist online del 23/10) passa mentre si racconta il problema;
   - strumenti e dati chiave si raccontano sullo schema "Come funziona" del README su GitHub;
   - piano B: se alle 0:50 il modello non ha risposto si va avanti lasciando la chat visibile; se dà errore, o non ha ancora risposto alle 2:15, si usa "Genera piano base" (D64);
   - 30 minuti prima si sveglia il backend e si controllano fornitore e quota, poi si fanno un'esportazione Excel di prova (D133) e una prima apertura del calendario (D137).
 - **Perché:**
   - in 3 minuti la configurazione guidata (circa un minuto) e due attese dell'agente (circa un minuto) non ci stanno;
   - il valore del progetto è il calendario con l'agente che propone e l'utente che conferma (D1, D2);
-  - un account già pronto ha 5 messaggi al giorno invece dei 2 dell'ospite (D129, D134), e ogni prova della demo ne usa uno solo: si può provare più volte nello stesso giorno.
+  - un account già pronto ha 5 messaggi al giorno invece dei 2 dell'ospite (D129, D134), e la demo ne usa uno solo: ne restano altri di riserva se la richiesta va ripetuta.
 - **Scartate:**
   - entrare con "Prova la demo" da zero: la configurazione è troppo lunga per 3 minuti. "Prova la demo" si cita alla fine, per chi vuole provare l'app;
   - due messaggi all'agente come nella checklist della v2: l'attesa sarebbe doppia;
   - una demo con il solo piano base: si perderebbe la parte originale del progetto;
-  - contare solo sul montaggio di un video per tagliare l'attesa: il copione deve funzionare anche dal vivo;
-  - due prove cronometrate dall'inizio alla fine, come chiedeva il criterio di T42: l'autore ha scelto di saltarle (24/10/2026). Le singole parti sono provate nella checklist finale e prima della presentazione si apre e si prepara tutto.
+  - contare solo sul montaggio di un video per tagliare l'attesa: il copione deve funzionare anche dal vivo.
 
 ## D139 · Grafica nello stile di Vaelithar
 **Stato:** Confermata · 24/10/2026 · sostituisce i colori di D65 e di D120 · stesse tecnologie di D7 e D65
