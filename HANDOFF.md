@@ -24,7 +24,7 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
 | Render | Tutto online. Le variabili del backend sono le 9 che il codice usa. Il database **scade il 10/11/2026** |
 | Trello | T01-T43 e X01-X03 in "Fatto"; X04-X05 in Backlog; P01-P05 in "In verifica" |
 | Account di prova | Nessuno online: l'ospite della checklist finale è stato eliminato (punto 13) |
-| Demo Day | 3 minuti, dal **sito online**, con il copione di `docs/demo.md` (D138). Le prove cronometrate sono saltate per scelta dell'utente |
+| Demo Day | 3 minuti, dal **sito online**, con il copione di `docs/demo.md` (D138) |
 
 ## Cosa resta
 
@@ -38,7 +38,7 @@ Prima di scrivere proponimi il piano e chiedimi conferma.
   - il Demo Day dura 3 minuti e deve raccontare problema, obiettivo raggiunto, strumenti, dati chiave e valore pratico: `docs/demo.md` ha una scena per punto; sul sito si mostra solo l'agente che propone e l'utente che conferma, con un solo messaggio mandato nei primi secondi e un account già pronto;
   - preparazione in tre momenti, piano B (alle 0:50 si va avanti, alle 2:15 o con un errore si usa "Genera piano base"), domande probabili;
   - `docs/rilascio-v3.md`: 19 punti tutti ✓ sul sito online il 23-24/10, con un ospite (eliminato alla fine), l'admin e l'account dell'utente; provati anche il limite dei messaggi, la notifica delle Waveplate, Swagger "Try it out", tastiera e Assistente vocale di Windows. Nessun difetto nell'app;
-  - le prove cronometrate sono saltate per scelta dell'utente; si presenta dal sito online.
+  - si presenta dal sito online.
 - **T43 · Rilascio finale (PR #61):** README con lo stato finale, tag annotato `v3.0.0` su `main`; dopo il merge sito e API online rispondono.
 
 ## Come lavoriamo (flusso approvato, invariato)

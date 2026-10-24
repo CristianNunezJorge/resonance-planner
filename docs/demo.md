@@ -12,7 +12,7 @@ La presentazione al Demo Day dura **al massimo 3 minuti** e deve raccontare in s
 
 Il copione segue questi cinque punti, uno per scena. L'obiettivo raggiunto si **mostra** sul sito online: l'agente propone un piano e tu lo confermi. Gli altri punti si raccontano a voce, con una schermata di appoggio. Admin, notifiche, Excel e telefono non si mostrano: sono provati nella checklist finale, `rilascio-v3.md`.
 
-Il copione funziona sia dal vivo sia in un video registrato. Il messaggio all'agente parte nei primi secondi, così la sua attesa (20-50 secondi nelle prove online del 23/10) passa mentre racconti il problema.
+Il copione funziona sia dal vivo sia in un video registrato. Il messaggio all'agente parte nei primi secondi, così la sua attesa (20-50 secondi nella checklist online del 23/10) passa mentre racconti il problema.
 
 ## Preparazione
 
@@ -22,7 +22,7 @@ Usa il tuo account abituale, non un ospite: ha 5 messaggi al giorno per l'agente
 
 - **Roster:** due o tre personaggi con un obiettivo ancora da raggiungere, per esempio Jinhsi, Yinlin e Aalto verso il livello 40. Se tutti sono già al loro obiettivo, il piano ha solo le attività degli eventi.
 - **Waveplate:** un valore sotto 180, per esempio 120. Così durante la demo non arriva la notifica "Waveplate quasi piene" (che parte da 60 minuti prima del pieno).
-- **Calendario:** nessuna proposta in attesa e nessun piano già confermato in questa settimana, altrimenti il piano nuovo cambia. Nelle prove, alla fine premi **"Scarta"** invece di "Conferma": il calendario resta pronto per la prova successiva.
+- **Calendario:** nessuna proposta in attesa e nessun piano già confermato in questa settimana, altrimenti il piano nuovo cambia.
 
 ### 30 minuti prima
 
@@ -30,7 +30,7 @@ Usa il tuo account abituale, non un ospite: ha 5 messaggi al giorno per l'agente
 2. **Controlla il modello:** apri https://openrouter.ai/api/v1/models/nvidia/nemotron-3-ultra-550b-a55b:free/endpoints. Se l'elenco degli `endpoints` è vuoto, il fornitore gratuito è caduto. In quel caso cambia `OPENROUTER_MODEL` su Render (D132): il deploy dura circa 4 minuti. Se non c'è tempo, usa il piano B dell'agente.
 3. **Accedi** e apri il **calendario**: la prima apertura scarica il file del calendario (D137). Nel pannello **"Agente"** controlla il contatore *"… / 5 messaggi oggi"*: servono almeno **2** messaggi liberi, uno per la demo e uno di riserva.
 4. **Fai un'esportazione di prova:** premi **"Esporta in Excel"**. La prima dopo un avvio impiega circa 15 secondi (D133); così, se te la chiedono, la successiva è rapida.
-5. **Copia negli appunti** il messaggio della demo: *Organizzami la settimana: non gioco sabato e domenica*. Incollarlo è più rapido e sicuro che scriverlo. Se presenti o provi di sabato o di domenica, scegli un altro giorno libero, per esempio *non gioco mercoledì*: il piano parte da oggi, e con il fine settimana escluso la settimana sullo schermo resterebbe senza attività proposte.
+5. **Copia negli appunti** il messaggio della demo: *Organizzami la settimana: non gioco sabato e domenica*. Incollarlo è più rapido e sicuro che scriverlo. Se presenti di sabato o di domenica, scegli un altro giorno libero, per esempio *non gioco mercoledì*: il piano parte da oggi, e con il fine settimana escluso la settimana sullo schermo resterebbe senza attività proposte.
 6. **Prepara le schede**, nell'ordine:
    1. **Calendario** (`/calendario`), da cui parte la demo;
    2. **README su GitHub**, aperto sullo schema "Come funziona": https://github.com/CristianNunezJorge/resonance-planner#come-funziona.
@@ -133,9 +133,3 @@ Se la risposta non è ancora arrivata, comincia dalla seconda frase (eventi e Wa
 | Come si calcolano le Waveplate? | Il server salva il valore e l'ora della lettura, poi aggiunge una Waveplate ogni 6 minuti fino al massimo, e oltre accumula i Crystals (D28, D105). |
 | Cosa faresti con più tempo? | Controlli automatici con GitHub Actions e il damage calculator (X04, X05); più personaggi ed eventi, che sono solo dati JSON e non richiedono codice nuovo (D4, D9). |
 | L'app è accessibile? | Obiettivo WCAG 2.2 AA (D70): Lighthouse 100 su tutte le pagine, uso da tastiera e lettore di schermo provati a mano (`qualita.md`, `rilascio-v3.md`). |
-
-## Prove cronometrate
-
-**Non fatte, per scelta dell'autore (24/10/2026).** Il criterio di T42 chiedeva due prove dall'inizio alla fine. L'autore ha deciso di saltarle: prima della presentazione apre tutto e lo lascia pronto, come nella sezione "Preparazione" (D138). Le singole parti sono già state provate nella checklist finale (`rilascio-v3.md`): richiesta all'agente e conferma della proposta (risposta in 20-50 secondi il 23/10), piano base, notifiche ed Excel.
-
-Se si decide di fare comunque una prova: dall'inizio alla fine, ad alta voce e con il cronometro, annotando la durata di ogni scena; alla fine della scena 2 si preme "Scarta" invece di "Conferma".

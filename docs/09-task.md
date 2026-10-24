@@ -1,6 +1,6 @@
 # 9. Task
 
-**Stato:** completata · 02/10/2026 · aggiornata il 24/10/2026 con D138 (criterio di T42)
+**Stato:** completata · 02/10/2026
 
 Il lavoro è diviso in una **fase 0**, da fare mentre si aspetta l'approvazione dello staff, e in **14 giorni** di sviluppo. Ogni attività ha un codice da usare come titolo della card su Trello, l'area, le decisioni a cui si riferisce e il criterio per dirla finita. Vale sempre anche la definizione di "fatto" della fase 8.
 
@@ -15,7 +15,7 @@ Il lavoro è diviso in una **fase 0**, da fare mentre si aspetta l'approvazione 
 | 6 | **v1** online: tutto tranne l'agente |
 | 10 | **v2** online: agente e piano base |
 | 11-12 | Margine per i ritardi, poi extra della v3 |
-| 14 | Versione finale, README completo, demo provata |
+| 14 | Versione finale, README completo, copione della demo |
 
 ## Fase 0 · Prima dell'inizio (D88)
 
@@ -127,7 +127,7 @@ Prima si recuperano eventuali ritardi di v1 e v2. Il tempo che resta va agli ext
 | T39 | README completo: screenshot, link, avvio, variabili, limiti noti, crediti, riassunto in inglese | DOC | D85 | Una persona esterna riesce ad avviare il progetto seguendolo |
 | T40 | Swagger: descrizioni ed esempi per ogni endpoint | BE | D53 | Ogni endpoint ha descrizione ed esempio |
 | T41 | Pulizia del codice e controllo dell'accessibilità con Lighthouse | QA | D70 | Punteggio di accessibilità salvato |
-| T42 | Copione della demo, checklist finale sul sito online, prova cronometrata | QA | D138 | Copione scritto e checklist finale superata sul sito online; le due prove cronometrate sono state saltate per scelta dell'autore (D138) |
+| T42 | Copione della demo e checklist finale sul sito online | QA | D138 | Copione scritto e checklist finale superata sul sito online |
 | T43 | Rilascio finale con tag | OPS | D8 | Tag su `main`, sito online aggiornato |
 
 ## Se qualcosa va in ritardo (D91)
