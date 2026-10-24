@@ -4,7 +4,7 @@ Planner per **Wuthering Waves**: un calendario che unisce eventi a tempo, Wavepl
 
 Progetto capstone del Master Full-Stack AI Developer di Epicode. "Resonance Planner" è un nome provvisorio.
 
-> **Stato:** è online la **v2**: calendario, roster e inventario, piano base, proposte da confermare e agente IA con la chat. In più ci sono tre extra: export del piano in Excel, accesso ospite "Prova la demo" e notifiche in tempo reale.
+> **Stato:** è online la **versione finale** (tag `v3.0.0`, 24/10/2026): calendario, roster e inventario, piano base, proposte da confermare e agente IA con la chat, più tre extra: export del piano in Excel, accesso ospite "Prova la demo" e notifiche in tempo reale. La checklist finale sul sito online è superata in tutti i 19 punti ([`docs/rilascio-v3.md`](docs/rilascio-v3.md)).
 
 ![Il calendario su computer: eventi della settimana, una proposta dell'agente con le attività tratteggiate e la chat a destra](docs/screenshot/calendario.webp)
 
@@ -251,9 +251,9 @@ npm test
 npm run build
 ```
 
-Con `npm run coverage` il frontend scrive anche il report della copertura. Oggi i test sono 941 nel backend e 586 nel frontend; la copertura delle righe è del 98,2% nel backend e del 97,5% nel frontend.
+Con `npm run coverage` il frontend scrive anche il report della copertura. Oggi i test sono 948 nel backend e 589 nel frontend; la copertura delle righe è del 98,2% nel backend e del 97,6% nel frontend ([`docs/qualita.md`](docs/qualita.md)).
 
-Le chiamate vere al modello non fanno parte dei test automatici: il ciclo dell'agente si prova con un finto client (D63). Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md) e [`docs/rilascio-v2.md`](docs/rilascio-v2.md), e negli scenari dell'agente, [`docs/scenari-agente.md`](docs/scenari-agente.md).
+Le chiamate vere al modello non fanno parte dei test automatici: il ciclo dell'agente si prova con un finto client (D63). Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md), e negli scenari dell'agente, [`docs/scenari-agente.md`](docs/scenari-agente.md).
 
 ## Limiti noti
 
