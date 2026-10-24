@@ -1,63 +1,14 @@
 # Qualità del codice e accessibilità
 
-Controllo di T41 del 23/10/2026: copertura dei test, accessibilità, best practice e SEO con Lighthouse, peso del frontend e pulizia del codice. Gli obiettivi sono quelli di D70 (accessibilità WCAG 2.2 AA) e D79 (copertura almeno all'80% su service, calcoli e logica del frontend).
+Controllo di T41 del 23/10/2026: accessibilità, best practice e SEO con Lighthouse, peso del frontend e pulizia del codice. L'obiettivo di accessibilità è quello di D70 (WCAG 2.2 AA).
 
 ## In sintesi
 
 | Cosa | Risultato |
 |---|---|
-| Copertura del backend | **98,2%** delle righe, 92,5% dei rami (948 test) |
-| Copertura del frontend | **97,6%** delle righe, 92,5% dei rami (589 test) |
 | Lighthouse, 9 pagine su computer e telefono | **100** in accessibilità, best practice e SEO su tutte e 18 le misure (prima: accessibilità da 94 a 100, SEO da 82 a 83); 100 anche sulle pagine pubbliche del sito online |
 | JavaScript scaricato dalla prima pagina | da 679 KB a **434 KB** (compresso: da 207 a 134 KB) |
-| Avvisi della build | nessuno (prima: l'agente di Mockito caricato da solo e il file JavaScript oltre i 500 KB) |
-
-## Copertura dei test
-
-**Backend:** JaCoCo, con `./mvnw verify` (report in `backend/target/site/jacoco/index.html`).
-
-| Pacchetto | Righe | Rami |
-|---|---|---|
-| `agent` (client del modello, strumenti, ciclo, chat) | 98,0% | 88,4% |
-| `auth` | 98,2% | 88,2% |
-| `catalog` | 96,0% | 58,3% |
-| `common` (errori, sicurezza, configurazione) | 97,6% | 88,5% |
-| `event` | 99,4% | 96,3% |
-| `farming` | 99,3% | 94,7% |
-| `inventory` | 93,5% | 100% |
-| `notification` | 99,0% | 95,6% |
-| `onboarding` | 100% | 100% |
-| `planner` | 99,0% | 94,8% |
-| `planning` | 96,7% | 92,9% |
-| `roster` | 98,1% | 100% |
-| `seed` | 99,4% | 89,3% |
-| `user` | 100% | 96,7% |
-| `waveplate` | 100% | 100% |
-| **Totale** | **98,2%** | **92,5%** |
-
-Restano fuori il metodo `main` dell'applicazione, che i test non eseguono, e la chiamata vera a OpenRouter (`OpenRouterClientLiveTest`, spenta di default). I rami di `catalog` sono più bassi perché sono pochi (12) e quelli mancanti riguardano dati che il catalogo della demo non ha: un grado oltre i livelli di ascensione (`CharacterDetailResponse`) e alcuni controlli delle regole di gioco (`GameRules`, `GameRulesConfig`).
-
-**Frontend:** Vitest con v8, con `npm run coverage` (report nel terminale).
-
-| Cartella | Righe | Rami |
-|---|---|---|
-| `src/api` | 95,4% | 93,8% |
-| `src/app` | 95,7% | 100% |
-| `src/components` | 97,3% | 95,6% |
-| `features/adminEvents` | 96,3% | 87,9% |
-| `features/auth` | 98,0% | 95,5% |
-| `features/calendar` | 98,5% | 92,7% |
-| `features/catalog` | 98,0% | 79,2% |
-| `features/chat` | 92,8% | 86,6% |
-| `features/landing` | 100% | 94,6% |
-| `features/onboarding` | 100% | 95,7% |
-| `features/profile` | 98,0% | 95,9% |
-| `features/progress` | 100% | 94,7% |
-| `features/roster` | 98,1% | 91,8% |
-| `features/waveplate` | 96,7% | 93,5% |
-| **Totale** | **97,6%** | **92,5%** |
-
-Le cartelle che mancano (per esempio `features/notifications`) sono al 100% in tutto: il report non le elenca.
+| Avvisi della build | nessuno (prima: il file JavaScript oltre i 500 KB) |
 
 ## Lighthouse
 
@@ -88,7 +39,7 @@ I tre numeri sono accessibilità · best practice · SEO. Con la pagina già ape
 | Manca la `meta description` | Tutte | Aggiunta in `index.html` |
 | `robots.txt` non valido (il sito rispondeva con la pagina dell'app) | Tutte | Aggiunto `public/robots.txt` |
 
-Lighthouse controlla in automatico solo una parte di WCAG. Il focus nelle finestre, il tasto Esc e gli annunci con `role="status"` sono coperti dai test dei componenti; uso da tastiera e lettore di schermo vanno ricontrollati a mano nella checklist finale (T42).
+Lighthouse controlla in automatico solo una parte di WCAG. Il focus nelle finestre, il tasto Esc, gli annunci con `role="status"`, l'uso da tastiera e il lettore di schermo si controllano a mano nella checklist finale (T42).
 
 **Sul sito online** (23/10, dopo il deploy di T41), senza account, solo le pagine pubbliche:
 
@@ -118,7 +69,7 @@ La build non avvisa più di un file oltre i 500 KB.
 
 ## Pulizia del codice
 
-- **Residui:** nessun `TODO`, `FIXME`, `console.log`, `System.out` o `printStackTrace` nel codice; ESLint e il controllo dei tipi non segnalano nulla; i 589 test del frontend non scrivono avvisi.
+- **Residui:** nessun `TODO`, `FIXME`, `console.log`, `System.out` o `printStackTrace` nel codice; ESLint e il controllo dei tipi non segnalano nulla.
 - **Codice non usato:** cercato con piccoli script (export del frontend non importati da nessun altro file, classi del backend non nominate da nessun altro file). Nel backend non ce ne sono; nel frontend tutte le funzioni e i tipi esportati sono usati almeno nel loro file, e alcuni tipi sono esportati solo per descrivere la forma dei dati del modulo.
 - **File grandi:** il file di codice più lungo è `EventFormModal.tsx` con 485 righe, sotto il limite di 800.
-- **Avvisi della build:** l'agente di Mockito ora si carica all'avvio dei test (`maven-dependency-plugin` e `-javaagent` in Surefire, accanto a quello di JaCoCo): spariscono gli avvisi "A Java agent has been loaded dynamically", e i test non si romperanno quando Java vieterà il caricamento dinamico. Restano due avvisi di Maven su repository esterni che rispondono 401 al download di un elenco: sono innocui e non dipendono dal progetto.
+- **Avvisi della build:** restano due avvisi di Maven su repository esterni che rispondono 401 al download di un elenco: sono innocui e non dipendono dal progetto.

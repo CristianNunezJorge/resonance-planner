@@ -2,7 +2,7 @@
 
 **Card:** T38 · **Decisione:** D8 (ogni rilascio funziona online prima del successivo) · **Riferimento:** checklist di prova manuale in `08-regole-di-lavoro.md`, punti 6-10 e 12, e flusso F6 in `02-flussi.md`.
 
-La v2 aggiunge il piano base, le proposte, l'avviso di cambiamento e l'agente con la chat. I punti 1-5, 11 e 13 sono quelli della v1: sono stati superati il 16/10 (`rilascio-v1.md`), e il codice che provano è coperto dai test automatici di ogni pull request (D81).
+La v2 aggiunge il piano base, le proposte, l'avviso di cambiamento e l'agente con la chat. I punti 1-5, 11 e 13 sono quelli della v1: sono stati superati il 16/10 (`rilascio-v1.md`).
 
 ## Prima di iniziare
 
@@ -30,4 +30,4 @@ La v2 aggiunge il piano base, le proposte, l'avviso di cambiamento e l'agente co
 
 ## Esito
 
-**21/10/2026 · tutti i punti ✓, il punto 8 saltato.** Prova fatta dall'autore del progetto sul sito online, con il suo account abituale e con l'account admin di Render per il punto 6; l'evento di prova è stato poi eliminato. Il punto 8 non si poteva provare, perché la checklist non porta il contatore a 5 / 5: il limite di messaggi è coperto dai test automatici (`AgentQuotaTest` nel backend, `ChatPanel.test.tsx` nel frontend). Nessun problema trovato. Con questo esito si crea il tag `v2.0.0` su `main` (D8).
+**21/10/2026 · tutti i punti ✓, il punto 8 saltato.** Prova fatta dall'autore del progetto sul sito online, con il suo account abituale e con l'account admin di Render per il punto 6; l'evento di prova è stato poi eliminato. Il punto 8 non si poteva provare, perché la checklist non porta il contatore a 5 / 5: il limite dei messaggi è stato provato poi nella checklist finale (`rilascio-v3.md`, punto 9). Nessun problema trovato. Con questo esito si crea il tag `v2.0.0` su `main` (D8).

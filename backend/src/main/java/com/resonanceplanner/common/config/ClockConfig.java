@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** One clock for the whole application, so the code that depends on time can be tested with a fixed one. */
+/** One clock for the whole application: all the code that depends on time reads it from the same place. */
 @Configuration(proxyBeanMethods = false)
 public class ClockConfig {
 

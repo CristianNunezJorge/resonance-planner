@@ -134,11 +134,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
         refuse(response, secondsUntil(window.end(), now));
     }
 
-    /** How many counters are in memory; the tests use it to check that the old ones are forgotten. */
-    int trackedCounters() {
-        return windows.size();
-    }
-
     private static Bucket bucketOf(HttpServletRequest request) {
         String path = UrlPathHelper.defaultInstance.getPathWithinApplication(request);
         if ("POST".equals(request.getMethod())) {

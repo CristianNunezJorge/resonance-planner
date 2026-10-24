@@ -24,8 +24,8 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 **Stato:** Confermata · 30/09/2026
 
 - **Cosa:** Waveplate, materiali mancanti e giorni di farming sono calcolati dal backend.
-- **Come:** service Java con metodi puri, coperti da test JUnit. L'agente li chiama come strumenti (tool use) e usa i risultati per costruire e spiegare il piano.
-- **Perché:** i modelli di linguaggio sbagliano spesso l'aritmetica. Un calcolo in Java dà sempre lo stesso risultato ed è facile da testare.
+- **Come:** service Java con metodi puri. L'agente li chiama come strumenti (tool use) e usa i risultati per costruire e spiegare il piano.
+- **Perché:** i modelli di linguaggio sbagliano spesso l'aritmetica. Un calcolo in Java dà sempre lo stesso risultato ed è facile da controllare.
 - **Scartate:** far calcolare tutto al modello dentro il prompt.
 
 ## D4 · Nessuna API esterna: dataset in JSON caricato nel database
@@ -56,7 +56,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 **Stato:** Confermata · 01/10/2026 (insieme alla fase 8)
 
 - **Cosa:** progetto React + TypeScript creato con Vite.
-- **Come:** stessa struttura React del corso; i test usano Vitest con React Testing Library.
+- **Come:** stessa struttura React del corso.
 - **Perché:** Create React App, usato nel corso, non è più mantenuto.
 - **Scartate:** Create React App.
 
@@ -462,7 +462,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 
 - **Cosa:** `plan_schedule` distribuisce attività di eventi e run di farming nei giorni, rispettando Waveplate e tempo di gioco.
 - **Come:** algoritmo "greedy" (prende la scelta migliore giorno per giorno): prima le attività degli eventi, poi le fonti con ricompense doppie, poi le altre secondo la priorità dei personaggi. Dettagli in `06-agente.md`.
-- **Perché:** semplice da implementare, testare e spiegare, e dà risultati sensati per la demo. Lo stesso servizio fa funzionare anche il piano base senza IA (D64).
+- **Perché:** semplice da implementare e da spiegare, e dà risultati sensati per la demo. Lo stesso servizio fa funzionare anche il piano base senza IA (D64).
 - **Scartate:** ottimizzazione matematica completa (troppo complessa per due settimane).
 - **Limite noto:** non risparmia Waveplate in vista di eventi futuri.
 
@@ -506,13 +506,13 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Perché:** con la risposta sincrona non si possono mostrare i passaggi in tempo reale, ma mostrarli dopo rende comunque chiaro cosa ha fatto l'agente. I passaggi vengono dal backend, quindi sono sempre veri.
 - **Scartate per ora:** passaggi in tempo reale con lo streaming (miglioramento futuro).
 
-## D63 · Come testiamo l'agente
+## D63 · Come proviamo l'agente
 **Stato:** Confermata · 01/10/2026 · come provare gli scenari reali con la quota gratuita in D131
 
-- **Cosa:** test JUnit di pianificatore e strumenti; test del ciclo con un finto client dell'API; dieci scenari reali verificati prima della demo.
-- **Come:** il client dell'API sta dietro un'interfaccia Java, così nei test si sostituisce con una versione che restituisce risposte preparate. Gli scenari reali sono elencati in `06-agente.md`.
-- **Perché:** la parte deterministica si testa in modo completo e gratuito; il comportamento del modello si controlla con pochi scenari mirati, a costo quasi zero.
-- **Scartate:** test automatici contro l'API vera a ogni build (costosi e con risultati che variano).
+- **Cosa:** dieci scenari reali provati prima della demo.
+- **Come:** gli scenari sono elencati in `06-agente.md`. Il client dell'API sta dietro un'interfaccia Java, così il ciclo dell'agente non dipende dal fornitore.
+- **Perché:** il comportamento del modello si controlla con pochi scenari mirati, a costo quasi zero.
+- **Scartate:** chiamate automatiche all'API vera a ogni build (costose e con risultati che variano).
 
 ## D64 · Piano base senza IA
 **Stato:** Confermata · 01/10/2026 · aggiunta allo scope v2
@@ -634,14 +634,13 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Perché:** il regolamento chiede di non pubblicare codice rotto e di fare push ogni giorno. Uno storico ordinato è anche un biglietto da visita nel portfolio.
 - **Scartate:** lavorare sempre direttamente su `main`.
 
-## D79 · Strategia di test
+## D79 · Verifica dei flussi sul sito online
 **Stato:** Confermata · 01/10/2026
 
-- **Cosa:** test unitari e di integrazione nel backend (settimana 16), test unitari nel frontend (settimana 10), checklist di prova manuale dei flussi principali prima di ogni rilascio. Test scritti prima del codice per i calcoli. Copertura minima dell'80% su service, calcoli e logica del frontend.
-- **Come:** JUnit 5 e Mockito nel backend, con i test di integrazione su un database PostgreSQL di test avviato con Docker Compose; Vitest e React Testing Library nel frontend; JaCoCo e Vitest per la copertura. La checklist è in `08-regole-di-lavoro.md`.
-- **Perché:** i calcoli sono il cuore del progetto e devono essere sicuramente giusti. I test di integrazione richiedono un vero PostgreSQL per l'indice parziale (D37) e le migrazioni Flyway (D38). Tutti gli strumenti, tranne JaCoCo per misurare la copertura, sono quelli del corso.
-- **Facoltativo:** Testcontainers, che avvia da solo il PostgreSQL di test; da aggiungere solo se avanza tempo.
-- **Scartate:** H2 in memoria (non supporta tutto quello che usiamo di PostgreSQL); test end-to-end con Playwright (fuori dal programma e costosi da imparare in due settimane).
+- **Cosa:** checklist di prova manuale dei flussi principali sul sito online prima di ogni rilascio.
+- **Come:** la checklist è in `08-regole-di-lavoro.md`; l'esito di ogni rilascio è in `rilascio-v1.md`, `rilascio-v2.md` e `rilascio-v3.md`.
+- **Perché:** il regolamento chiede di non pubblicare codice rotto: ogni rilascio si prova dall'inizio alla fine sul sito vero, come lo userà chi valuta il progetto.
+- **Scartate:** Playwright per automatizzare le prove nel browser (fuori dal programma e costoso da imparare in due settimane).
 
 ## D80 · Formattazione e analisi statica
 **Stato:** Confermata · 01/10/2026
@@ -654,8 +653,8 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 ## D81 · Controlli prima di unire, GitHub Actions facoltativo
 **Stato:** Confermata · 01/10/2026 · GitHub Actions è nuovo rispetto al corso
 
-- **Cosa:** prima di unire una pull request si lanciano test, lint e build in locale. Se avanza tempo, gli stessi controlli girano da soli con GitHub Actions.
-- **Come:** due comandi documentati nel README (uno per il backend, uno per il frontend). GitHub Actions è un file `.github/workflows/ci.yml` con un database PostgreSQL di servizio per i test di integrazione.
+- **Cosa:** prima di unire una pull request si lanciano lint e build in locale. Se avanza tempo, gli stessi controlli girano da soli con GitHub Actions.
+- **Come:** due comandi documentati nel README (uno per il backend, uno per il frontend). GitHub Actions è un file `.github/workflows/ci.yml`.
 - **Perché:** il regolamento chiede di non pubblicare codice rotto. I controlli in locale bastano; quelli automatici li rendono impossibili da dimenticare e fanno bella figura nel portfolio, ma sono uno strumento in più da imparare.
 - **Scartate:** unire senza controlli.
 
@@ -674,7 +673,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 ## D83 · Configurazione con variabili d'ambiente
 **Stato:** Confermata · 01/10/2026
 
-- **Cosa:** tre profili Spring (`dev`, `test`, `prod`); tutti i segreti e gli indirizzi in variabili d'ambiente.
+- **Cosa:** due profili Spring (`dev`, `prod`); tutti i segreti e gli indirizzi in variabili d'ambiente.
 - **Come:** `.env.example` nel repository senza valori, `.env` escluso da Git. All'avvio il backend controlla le variabili obbligatorie e si ferma con un messaggio chiaro se ne manca una.
 - **Perché:** nessun segreto finisce su GitHub, e un errore di configurazione si scopre subito invece che alla prima richiesta.
 - **Scartate:** valori scritti in `application.yml`.
@@ -691,7 +690,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 **Stato:** Confermata · 01/10/2026
 
 - **Cosa:** README completo in italiano, con una breve sezione in inglese.
-- **Come:** contenuto elencato in `08-regole-di-lavoro.md`: demo, Swagger, stack, avvio, variabili, test, limiti noti, crediti.
+- **Come:** contenuto elencato in `08-regole-di-lavoro.md`: demo, Swagger, stack, avvio, variabili, limiti noti, crediti.
 - **Perché:** staff e mercato principale sono italiani; il riassunto in inglese rende il progetto leggibile anche per recruiter stranieri.
 - **Scartate:** solo italiano o solo inglese.
 
@@ -809,8 +808,8 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 
 - **Cosa:** i token JWT si creano e si leggono con JJWT (`io.jsonwebtoken`), versione 0.13.0.
 - **Come:** dipendenze `jjwt-api`, `jjwt-impl` e `jjwt-jackson`; la versione sta in una proprietà del `pom.xml`, perché Spring Boot non la gestisce. Tutto il codice che usa la libreria sta in `JwtService`. La chiave è fatta dai byte UTF-8 di `JWT_SECRET` (testo semplice, non base64) e la firma è sempre HS256. Il token contiene l'identificativo dell'utente (`sub`), il ruolo e le date di emissione e scadenza (24 ore, D45). Il filtro `JwtAuthenticationFilter` viene creato dentro `SecurityConfig` e non è un bean, altrimenti Spring Boot lo registrerebbe due volte. Con un token mancante, scaduto o non valido il filtro non identifica nessuno e la richiesta prosegue: i percorsi pubblici funzionano, quelli protetti rispondono 401.
-- **Perché:** è la libreria vista nel corso (D45 sceglie già il metodo del corso) e lascia a noi il controllo del filtro, che serve per tenere usabile il catalogo anche con un token scaduto. Con Spring Boot 4 il test che crea e rilegge un token passa.
-- **Limiti noti:** l'ultima versione (0.13.0, agosto 2025) non supporta Jackson 3. `jjwt-jackson` porta quindi anche Jackson 2, accanto al Jackson 3 di Spring Boot 4: i pacchetti sono diversi e nei test non c'è nessun conflitto. Se la libreria non venisse più aggiornata, si cambia solo `JwtService`.
+- **Perché:** è la libreria vista nel corso (D45 sceglie già il metodo del corso) e lascia a noi il controllo del filtro, che serve per tenere usabile il catalogo anche con un token scaduto.
+- **Limiti noti:** l'ultima versione (0.13.0, agosto 2025) non supporta Jackson 3. `jjwt-jackson` porta quindi anche Jackson 2, accanto al Jackson 3 di Spring Boot 4: i pacchetti sono diversi e non c'è nessun conflitto. Se la libreria non venisse più aggiornata, si cambia solo `JwtService`.
 - **Scartate:** il resource server di Spring con Nimbus (ufficiale, ma fuori dal programma; per quanto ne so risponde 401 a un token scaduto anche sui percorsi pubblici, quindi andrebbe aggirato); `jjwt-gson` (sostituirebbe Jackson 2 con Gson, senza vantaggi).
 
 ## D100 · Regole di username, password e account admin
@@ -849,17 +848,17 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - **Filtro:** `RateLimitFilter`, con contatori in memoria e senza librerie esterne (D48). Lo crea `SecurityConfig` e sta dopo il filtro CORS e prima di quello JWT: il 429 mantiene gli header CORS e una richiesta rifiutata non costa quasi nulla. `Retry-After` è tra gli header che il CORS lascia leggere al frontend.
   - **Finestra fissa:** la prima richiesta apre la finestra e il contatore riparte quando finisce. Un tentativo conta anche se riesce.
   - **Indirizzo del client:** quello che Tomcat ricava dagli header del proxy (`getRemoteAddr()`). Per IPv6 si usano i primi 64 bit.
-  - **Dietro Render e Cloudflare:** la richiesta passa da Cloudflare e da un proxy di Render, e `X-Forwarded-For` finisce con "client vero, nodo Cloudflare". Il primo deploy ha mostrato (12/10/2026) che Tomcat si fermava al nodo Cloudflare, diverso quasi a ogni richiesta: 50 tentativi di login su 56 passavano. Per questo `application-prod.yml` aggiunge gli intervalli di Cloudflare ai proxy fidati di Tomcat (`server.tomcat.remoteip.internal-proxies`): Tomcat salta il nodo e si ferma al client vero, che Cloudflare ha aggiunto e che nessun client può falsificare. Un test con un Tomcat vero e il profilo `prod` (`ClientAddressBehindProxyTest`) lo verifica. Quello che non è un indirizzo (con una porta attaccata, un nome, un testo lungo) va in un unico contatore "unknown": un valore sbagliato limita troppo e si vede subito, invece di non limitare per niente.
+  - **Dietro Render e Cloudflare:** la richiesta passa da Cloudflare e da un proxy di Render, e `X-Forwarded-For` finisce con "client vero, nodo Cloudflare". Il primo deploy ha mostrato (12/10/2026) che Tomcat si fermava al nodo Cloudflare, diverso quasi a ogni richiesta: 50 tentativi di login su 56 passavano. Per questo `application-prod.yml` aggiunge gli intervalli di Cloudflare ai proxy fidati di Tomcat (`server.tomcat.remoteip.internal-proxies`): Tomcat salta il nodo e si ferma al client vero, che Cloudflare ha aggiunto e che nessun client può falsificare. Quello che non è un indirizzo (con una porta attaccata, un nome, un testo lungo) va in un unico contatore "unknown": un valore sbagliato limita troppo e si vede subito, invece di non limitare per niente.
   - **Controllo di salute:** `/actuator/health` ha un contatore suo perché Render lo chiama di continuo e un 429 potrebbe farlo riavviare, ma non è illimitato perché interroga il database. Le richieste di verifica del CORS (preflight) non arrivano al filtro.
   - **Memoria:** i contatori scaduti si eliminano ogni minuto e ce ne sono al massimo 200.000 (circa 36 MB). Se sono tutti occupati, login e registrazione di un client nuovo ricevono 429, mentre il resto dell'API passa senza contatore.
   - **Valori modificabili:** proprietà `app.rate-limit.*`, cioè le variabili d'ambiente `APP_RATELIMIT_AUTHATTEMPTS`, `APP_RATELIMIT_AUTHWINDOW`, `APP_RATELIMIT_GENERALREQUESTS` e `APP_RATELIMIT_GENERALWINDOW`. I valori predefiniti sono quelli di D48. Le finestre ammesse vanno da 1 secondo a 24 ore, i limiti da 1 a 1.000.000; un numero semplice è in minuti per il login e in secondi per il resto.
   - **Log:** all'avvio si registrano i valori in uso. Al primo rifiuto di ogni finestra si registrano il contatore, l'indirizzo e gli header `X-Forwarded-For` e `CF-Connecting-IP` (ripuliti dai caratteri strani).
   - **`/logout`:** il percorso predefinito di Spring Security è disattivato: il logout è il frontend che dimentica il token (D45).
 - **Perché:**
-  - **Contatori separati:** la registrazione costa un calcolo BCrypt e fa da test per scoprire le email già usate; il login frena chi indovina le password. Con un contatore unico, chi si registra consumerebbe i tentativi del login e viceversa.
-  - **Finestra fissa:** è la più semplice da spiegare e da testare. Il suo difetto (fino al doppio dei tentativi a cavallo di due finestre) non conta con questi numeri.
+  - **Contatori separati:** la registrazione costa un calcolo BCrypt e serve anche a scoprire le email già usate; il login frena chi indovina le password. Con un contatore unico, chi si registra consumerebbe i tentativi del login e viceversa.
+  - **Finestra fissa:** è la più semplice da spiegare. Il suo difetto (fino al doppio dei tentativi a cavallo di due finestre) non conta con questi numeri.
   - **Primi 64 bit di IPv6:** chi usa IPv6 possiede miliardi di indirizzi della sua rete e cambierebbe indirizzo a ogni tentativo.
-  - **Valori modificabili:** servono ai test (altrimenti tutte le classi di test condividerebbero un contatore) e al Demo Day: se i valutatori usano la stessa rete si alza il limite con una variabile d'ambiente, senza cambiare il codice. I limiti sui valori evitano che un errore di scrittura (per esempio una finestra di 15 millisecondi) spenga la protezione senza avvisare.
+  - **Valori modificabili:** servono al Demo Day: se i valutatori usano la stessa rete si alza il limite con una variabile d'ambiente, senza cambiare il codice. I limiti sui valori evitano che un errore di scrittura (per esempio una finestra di 15 millisecondi) spenga la protezione senza avvisare.
   - **Memoria piena e catalogo aperto:** le chiavi le sceglie chi manda le richieste, e il server gratuito ha 512 MB; ma il catalogo pubblico non deve diventare irraggiungibile perché qualcuno riempie i contatori.
 - **Limiti noti:**
   - I contatori si azzerano al riavvio (D48) e più istanze del server non li condividerebbero (su Render ce n'è una sola).
@@ -877,7 +876,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - **Errori su un campo:** `FieldValidationException` per le regole che conosce solo il service (D47) risponde 400 con il campo, come la validazione del corpo.
   - **Tutto o niente:** se un valore non è valido non si salva niente. Se due richieste prendono lo stesso username insieme, l'indice unico decide e la perdente riceve lo stesso 409; ogni altro errore del database non si traveste da "username già usato".
   - **Aggiornamenti contemporanei:** `@DynamicUpdate` su `User`: un `UPDATE` scrive solo le colonne cambiate, così due richieste che modificano campi diversi dello stesso utente (profilo, configurazione guidata, Waveplate) non si annullano a vicenda.
-  - **Eliminazione:** una sola istruzione `delete from users`; il database cancella a cascata roster, inventario, proposte, attività e messaggi (D42). Un test lo prova con righe in tutte le cinque tabelle, compresi i collegamenti verso le proposte.
+  - **Eliminazione:** una sola istruzione `delete from users`; il database cancella a cascata roster, inventario, proposte, attività e messaggi (D42).
   - **Swagger:** il pulsante "Authorize" per inserire il token (D53); solo gli endpoint del profilo mostrano il lucchetto.
 - **Perché:**
   - **Email non modificabile:** è la credenziale di accesso, e cambiarla vorrebbe dire verificare il nuovo indirizzo, ma la demo non invia email.
@@ -961,7 +960,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 
 - **Cosa:** `PUT /api/me/inventory/{materialId}` imposta la quantità di un materiale (un numero intero da 0 a 999.999.999) al posto di quella di prima, e la prima volta crea la voce. Un materiale che non è nel catalogo dà 404; una quantità negativa, troppo grande, mancante o non intera dà 400 con il campo `quantity`. `GET /api/me/inventory` elenca solo i materiali già salvati (D106) in ordine di identificativo, con `materialId` e `quantity`.
 - **Come:** la quantità si scrive con un solo `insert ... on conflict (user_id, material_id) do update`, senza prima controllare se la riga c'è. L'entità `InventoryItem` è in sola lettura (`@Immutable`). Il repository estende `Repository` e non `JpaRepository`, così `findAll`, `findById` e `deleteById` (che non hanno l'utente) non esistono; lo stesso vale ora per il roster.
-- **Perché:** con "controlla e poi inserisci" due richieste uguali, mandate insieme, farebbero fallire la seconda sull'indice univoco; con un'unica istruzione vince l'ultima, senza errori (c'è un test con 8 richieste in parallelo). Il tetto lascia spazio alle somme delle card successive: due valori al massimo stanno in un `int`, tre no, quindi chi somma quantità (T30, T22) deve usare `long` o `Math.addExact`.
+- **Perché:** con "controlla e poi inserisci" due richieste uguali, mandate insieme, farebbero fallire la seconda sull'indice univoco; con un'unica istruzione vince l'ultima, senza errori. Il tetto lascia spazio alle somme delle card successive: due valori al massimo stanno in un `int`, tre no, quindi chi somma quantità (T30, T22) deve usare `long` o `Math.addExact`.
 - **Scartate:** una voce per ogni materiale del catalogo, anche a zero (22 righe da creare a ogni registrazione e un catalogo che cambia lascerebbe buchi); correggere la quantità con `POST` e `PATCH` separati (due modi per fare la stessa cosa); nessun tetto (una somma potrebbe superare il limite dell'`int` in silenzio).
 
 ## D109 · La configurazione guidata sostituisce quello che c'era
@@ -1001,7 +1000,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   6. i giorni stimati sono il più grande tra Waveplate ÷ ricarica di un giorno (240) e minuti ÷ tempo di gioco, entrambi per eccesso; se il tempo di gioco non è ancora stato scelto valgono `null`. Waveplate attuali, Crystals ed eventi non contano: li usa il pianificatore (D57);
   7. il piano complessivo somma il fabbisogno di tutto il roster e conta l'inventario una volta sola; la vista di un personaggio considera tutto l'inventario a sua disposizione e aggiunge la percentuale di completamento: per ogni materiale la parte già posseduta (al massimo 100, per difetto), poi la media, per difetto; 100 se non manca niente;
   8. `containsEstimates` è vero se almeno una fonte usata ha un drop stimato (D25, D97).
-  9. il catalogo si legge dal database a ogni richiesta (quattro query piccole); un dato mancante (ascensione, livello, fonte di un materiale) è un errore dei dati e dà 500 senza dettagli. Un test calcola tutti i personaggi del catalogo reale da 1 a 40, così l'errore si scopre prima.
+  9. il catalogo si legge dal database a ogni richiesta (quattro query piccole); un dato mancante (ascensione, livello, fonte di un materiale) è un errore dei dati e dà 500 senza dettagli.
 - **Perché:** le quattro Resonance Potion si possono scambiare tra loro: contando i punti non serve decidere quali usare. Ricavare la fonte dai dati evita una tabella scritta nel codice. Contare i drop secondari dà un numero vicino a quello che farà il pianificatore (fase 6, passo 5), che a ogni run toglie tutto quello che la run dà; l'ordine fisso mette prima le fonti i cui drop secondari (pozioni e crediti) riducono le run successive. I conti interi evitano gli errori di arrotondamento della virgola mobile.
 - **Scartate:** EXP espressa in pozioni di un solo tipo (bisogna scegliere quali usare e quelle già possedute di altri tipi non conterebbero); ignorare i drop secondari (con Jinhsi da 1 a 40 servirebbero 4 run di pozioni invece di 3, 2 di crediti invece di 1 e 3 di Howler invece di 2); una fonte scritta nel codice per ogni materiale; giorni calcolati con le Waveplate attuali e i Crystals (è il lavoro del pianificatore: qui basta una stima); per ora, il catalogo tenuto in memoria (una copia costruita prima del caricamento all'avvio resterebbe vecchia, e quattro query piccole non pesano per la demo).
 
@@ -1053,7 +1052,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 - **Cosa:** le azioni irreversibili (per prima "Rimuovi" nel roster) chiedono conferma in una finestra `ConfirmModal` con gli stili delle modali di Bootstrap (D69), gestita da React.
 - **Come:** il componente usa le classi `.modal` e `.modal-backdrop`, senza stili inline (CSP, D103). Quando si apre il focus va su "Annulla", Tab resta dentro la finestra, Esc la chiude e alla chiusura il focus torna al pulsante che l'ha aperta (WCAG 2.1.2, 2.4.3).
 - **Perché:** il progetto importa solo gli stili di Bootstrap. Il suo JavaScript cambia il DOM per conto suo, mentre in React è React a decidere cosa c'è nella pagina: due padroni dello stesso elemento creano errori difficili da trovare.
-- **Scartate:** `window.confirm` (esclusa da D69, non personalizzabile); `react-bootstrap` (una libreria in più, fuori dal programma del corso); l'elemento nativo `<dialog>` (l'ambiente dei test, jsdom, non lo gestisce del tutto).
+- **Scartate:** `window.confirm` (esclusa da D69, non personalizzabile); `react-bootstrap` (una libreria in più, fuori dal programma del corso).
 
 ## D117 · Attività manuali e calendario
 **Stato:** Confermata · 15/10/2026 · nata da T25
@@ -1080,7 +1079,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   6. ogni scrittura delle attività (creazione, modifica, cancellazione, completamento) blocca la riga dell'utente (`SELECT ... FOR NO KEY UPDATE`) fino alla fine della transazione: due completamenti della stessa attività nello stesso momento ne fanno uno (l'altro riceve 409), due attività dello stesso giorno si dividono il limite e una modifica non può riportare indietro un'attività appena completata. Il blocco non ferma le altre scritture dell'utente (inventario, roster);
   7. la risposta contiene l'attività aggiornata e `addedToInventory`, con la quantità che le run hanno dato per ogni materiale, così il frontend può mostrarla. Vicino al massimo l'inventario cresce di meno, perché si ferma a 999.999.999.
 - **Perché:** il giorno dell'attività è quello per cui il piano è stato calcolato, e dà un risultato che non dipende da quando l'utente preme il pulsante. L'arrotondamento per difetto non promette materiali che il gioco potrebbe non aver dato, ed è lo stesso criterio delle percentuali (D112). Il blocco sulla riga dell'utente è la soluzione più semplice per due richieste in gara, e una prova con 6 richieste insieme lo verifica.
-- **Scartate:** il moltiplicatore del giorno in cui si preme "Segna come fatta" (un'attività segnata in ritardo perderebbe l'evento, e i test dipenderebbero dall'orologio); arrotondare ogni run (con medie sotto 1 un'attività non darebbe mai niente); sommare gli effetti di più eventi (nei dati della demo non succede, e scegliere il più forte non promette materiali in più); impedire di completare un'attività di un giorno futuro (una regola in più, poco utile in una demo).
+- **Scartate:** il moltiplicatore del giorno in cui si preme "Segna come fatta" (un'attività segnata in ritardo perderebbe l'evento); arrotondare ogni run (con medie sotto 1 un'attività non darebbe mai niente); sommare gli effetti di più eventi (nei dati della demo non succede, e scegliere il più forte non promette materiali in più); impedire di completare un'attività di un giorno futuro (una regola in più, poco utile in una demo).
 
 ## D119 · FullCalendar 7 con il tema Bootstrap 5
 **Stato:** Confermata · 15/10/2026 · nata da T26
@@ -1090,7 +1089,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - pacchetti con la versione fissata in `package.json`: `@fullcalendar/react` 7.1.3 (7.1.1 fino al 23/10, aggiornato in T41 per le correzioni di accessibilità della 7.1.2; calendario, viste `dayGridWeek`, `dayGridMonth`, `listWeek`, lingua italiana), `@fullcalendar/bootstrap5` 7.1.3, `temporal-polyfill` 1.0.5 (richiesto da FullCalendar 7), `bootstrap-icons` 1.13.1 (richiesto dal tema). Si è scelta la 7.1.1, uscita da più di una settimana, e non la 7.1.2, uscita da tre giorni;
   - gli stili sono file CSS normali (`skeleton.css`, `theme.css`) che Vite mette nella build: la CSP di D103 (`style-src 'self'`) resta com'è. Verificato con la build di produzione e `npm run preview`: nessuna violazione, nessun `<style>` inserito da JavaScript. Gli unici stili in linea sono quelli che React imposta con il DOM (CSSOM), che la CSP permette;
   - il tema prende i colori da Bootstrap e segue `data-bs-theme="dark"`; i colori di eventi e attività sono variabili CSS nostre (`styles/_calendar.scss`), passate agli elementi con `color` e `contrastColor`, con il testo blu notte su sfondi chiari (contrasto da 6:1 a 11:1);
-  - la barra dei comandi è nostra, in italiano (periodo precedente, oggi, successivo, Settimana/Mese, "+ Attività"), e guida il calendario con il controller di FullCalendar (`useCalendarController`). Solo `CalendarView` conosce FullCalendar: nei test della pagina è sostituito da un elenco di pulsanti;
+  - la barra dei comandi è nostra, in italiano (periodo precedente, oggi, successivo, Settimana/Mese, "+ Attività"), e guida il calendario con il controller di FullCalendar (`useCalendarController`). Solo `CalendarView` conosce FullCalendar;
   - gli elementi sono raggiungibili da tastiera (pulsanti con Invio) e su telefono, sotto i 768 px, la vista è l'elenco per giorno.
 - **Perché:** FullCalendar 6 inserisce i suoi stili con JavaScript, e la CSP li bloccherebbe: si dovrebbe aggiungere `'unsafe-inline'` a `style-src`, come temeva D103. La versione 7 non lo fa. Il tema Bootstrap 5 evita di riscrivere a mano i colori del tema scuro (D65).
 - **Scartate:** FullCalendar 6 con `style-src 'unsafe-inline'` (CSP più debole); un calendario scritto da noi (più codice e più accessibilità da curare, per una griglia che FullCalendar fa già); il tema predefinito di FullCalendar (andrebbe ricolorato tutto per il tema scuro).
@@ -1132,7 +1131,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   1. l'elenco sta in un `adminEventsSlice`, come roster e calendario: si ricarica dopo ogni modifica, si azzera al logout e a ogni login, e ignora le risposte superate (D103, D115);
   2. la tabella mostra nome (con l'etichetta "Demo" per gli eventi del file, D39), tipo, date ("dal 12/10/2026 al 18/10/2026" oppure "ogni 14 giorni, per 7 giorni") e giorni attivi; su telefono scorre in orizzontale;
   3. il modulo è in una finestra larga. La sua bozza sta nello stato della finestra e non in Redux: esiste solo finché la finestra è aperta, e chiuderla o uscire la cancella. È un'eccezione voluta alla regola di `CLAUDE.md` sulle bozze dei moduli lunghi, nata per la configurazione a tre passi, dove la bozza deve sopravvivere tra un passo e l'altro;
-  4. bozza e corpo della richiesta si convertono con funzioni pure (`eventForm.ts`, test scritti prima). I numeri restano testo finché non si salva; la pagina controlla solo quello che serve per mandare un corpo valido (interi, moltiplicatore con la virgola o il punto e al massimo due decimali, almeno un giorno della settimana). Tutte le altre regole sono del server, e i suoi messaggi tornano sotto il campo con lo stesso nome, anche nelle righe delle ricompense e delle attività (`activities[0].unlockDay`); un messaggio per un campo che il modulo non mostra va in cima;
+  4. bozza e corpo della richiesta si convertono con funzioni pure (`eventForm.ts`). I numeri restano testo finché non si salva; la pagina controlla solo quello che serve per mandare un corpo valido (interi, moltiplicatore con la virgola o il punto e al massimo due decimali, almeno un giorno della settimana). Tutte le altre regole sono del server, e i suoi messaggi tornano sotto il campo con lo stesso nome, anche nelle righe delle ricompense e delle attività (`activities[0].unlockDay`); un messaggio per un campo che il modulo non mostra va in cima;
   5. all'inizio i sette giorni sono tutti spuntati (tutti = tutti i giorni, D96); i campi dell'effetto compaiono solo per "Ricompense doppie" (D94);
   6. `GET /api/game/rules` restituisce anche `demoEventsAnchorDate`: il modulo dice da quale giorno si conta l'inizio di un evento che si ripete, senza scrivere la data nel codice del frontend;
   7. "Elimina" chiede conferma e avvisa che le attività collegate restano senza il collegamento; per un evento della demo aggiunge che ricompare al prossimo riavvio del server (D39).
@@ -1201,7 +1200,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
 
 - **Cosa:** l'agente usa un modello **gratuito** tramite OpenRouter, al posto dell'API Claude a pagamento. OpenRouter è un servizio che dà accesso a molti modelli di fornitori diversi con un'unica API e un'unica chiave; alcuni modelli sono gratuiti. È **fuori dal programma del corso**, che ha studiato l'API Claude (settimana 19, D6).
 - **Come:**
-  1. **formato:** l'API di OpenRouter compatibile con OpenAI (Chat Completions, `POST https://openrouter.ai/api/v1/chat/completions`), chiamata con `RestClient` di Spring, che è già nel progetto: nessuna libreria nuova. Il client sta dietro l'interfaccia `ModelClient`, con tipi nostri per messaggi, strumenti e chiamate agli strumenti: il ciclo (T34) e il finto client dei test (D63) non dipendono dal fornitore;
+  1. **formato:** l'API di OpenRouter compatibile con OpenAI (Chat Completions, `POST https://openrouter.ai/api/v1/chat/completions`), chiamata con `RestClient` di Spring, che è già nel progetto: nessuna libreria nuova. Il client sta dietro l'interfaccia `ModelClient`, con tipi nostri per messaggi, strumenti e chiamate agli strumenti: il ciclo (T34) non dipende dal fornitore;
   2. **modello:** `nvidia/nemotron-3-super-120b-a12b:free`, letto da `OPENROUTER_MODEL`; si cambia con una riga, come diceva D59. Nella chiamata di prova del 17/10 ha chiesto lo strumento giusto e ha risposto in italiano. `google/gemma-4-31b-it:free`, la prima scelta, riceveva sempre 429 dal suo fornitore gratuito (Google AI Studio), anche con la quota giornaliera intatta: resta l'alternativa;
   3. **solo gratuito:** il backend non parte se il nome del modello non finisce con `:free`. In più la chiave ha un limite di credito di pochi dollari, e l'account non ha credito né un metodo di pagamento;
   4. **variabili:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` al posto di `ANTHROPIC_API_KEY` e `ANTHROPIC_MODEL`, obbligatorie in `AppProperties`;
@@ -1209,7 +1208,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   6. **ogni risposta del modello** ha al massimo 2.048 token: una risposta della chat è breve, e così il testo resta sotto i limiti di lettura di Jackson (D110). Il client legge al massimo 1 MB di risposta, così una risposta enorme non può riempire i 512 MB del server gratuito;
   7. **cache dei prompt:** le parti fisse restano in testa (D58), ma con i modelli gratuiti la cache non è garantita: i token letti dalla cache si registrano solo se il fornitore li riporta;
   8. **dati:** nelle impostazioni di OpenRouter sono permessi i fornitori gratuiti che possono addestrarsi sui dati, non quelli che pubblicano i prompt. Al modello vanno solo dati di gioco e i messaggi della chat, mai email o password (D60); la chat (T36) dirà all'utente che i messaggi vanno a un modello gratuito di terzi;
-  9. **tempo:** ogni chiamata gira in un thread virtuale e ha 60 secondi in tutto, risposta compresa (D61); allo scadere viene interrotta. Il timeout del client HTTP da solo non basta: smette di aspettare gli header, ma non un server che manda gli header e poi tace (lo mostra un test);
+  9. **tempo:** ogni chiamata gira in un thread virtuale e ha 60 secondi in tutto, risposta compresa (D61); allo scadere viene interrotta. Il timeout del client HTTP da solo non basta: smette di aspettare gli header, ma non un server che manda gli header e poi tace;
   10. **errori:** chiave rifiutata, modello non trovato, tempo scaduto, risposta non valida, troppo grande o errore del fornitore diventano 502 `AGENT_UNAVAILABLE`. Nei log restano lo stato HTTP e il codice d'errore di OpenRouter; il messaggio d'errore solo a livello DEBUG, spento di norma, perché alcuni fornitori vi ripetono parte del prompt (D60). Una chiave con spazi o a capo ferma l'avvio, perché farebbe fallire ogni chiamata.
 - **Perché:** l'agente deve costare zero. Il ciclo, gli strumenti e il pianificatore restano nostri e non cambiano: cambia solo chi risponde. Siccome i calcoli li fa Java (D3), al modello resta il compito di capire la richiesta, scegliere i parametri e spiegare, che un modello gratuito di media grandezza sa fare; lo si verifica con gli scenari di `06-agente.md`.
 - **Scartate:** API Claude con Haiku 4.5 (D6, D59: a pagamento, circa 9 $ per lo sviluppo); SDK di Anthropic puntato su OpenRouter (OpenRouter garantisce quel formato solo con i modelli Claude); SDK di OpenAI (una libreria in più, fuori programma); Spring AI (fuori programma, e nasconde il ciclo che D54 vuole scritto da noi); `openrouter/free`, che sceglie ogni volta un modello gratuito diverso (prove non ripetibili); modello locale con Ollama (non funziona online, D6).
@@ -1324,7 +1323,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   4. **permesso:** prima di ogni blocco di prove l'utente dà il permesso, con le chiamate stimate. Con un 429 di OpenRouter ci si ferma, senza riprovare (D126);
   5. **effetto sul piano:** T38 finisce il 20/10, nei giorni di margine (D91: "fine del giorno 10 senza v2 completa").
 - **Perché:** dieci scenari costano circa 40-60 chiamate, più delle 50 al giorno di OpenRouter per tutto l'account, che servono anche al sito online. Con 25-35 chiamate al giorno resta spazio per chi usa il sito. Gli scenari che creano un piano vanno per primi perché sono i più costosi e quelli che dicono di più sulle istruzioni: se falliscono, si correggono e si ripetono il giorno dopo.
-- **Scartate:** tutti gli scenari in un giorno (si supera la quota e si blocca il sito online); alzare i limiti in locale con `APP_AGENTLIMITS_*` (con più account non serve, e le 50 di OpenRouter restano); comprare 10 $ di credito per avere 1.000 richieste al giorno (costa denaro, contro D126); test automatici contro l'API vera (già scartati da D63).
+- **Scartate:** tutti gli scenari in un giorno (si supera la quota e si blocca il sito online); alzare i limiti in locale con `APP_AGENTLIMITS_*` (con più account non serve, e le 50 di OpenRouter restano); comprare 10 $ di credito per avere 1.000 richieste al giorno (costa denaro, contro D126); chiamate automatiche all'API vera (già scartate da D63).
 
 ## D132 · Nemotron Ultra come modello predefinito
 **Stato:** Confermata · 20/10/2026 · nata da T37, scelta dell'utente · modifica la scelta del modello di D126 (punto 2)
@@ -1346,7 +1345,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   4. **forma:** intestazioni in grassetto, prima riga bloccata, filtro automatico, colonne larghe quanto serve;
   5. **solo il piano confermato:** la proposta in attesa (attività `PROPOSED`) non entra, perché finché l'utente non conferma non è il suo piano (D2, D22);
   6. **sicurezza:** i testi scritti da utenti e admin (titoli, note, nomi degli eventi) vanno sempre in celle di testo, mai come formule: in un `.xlsx` una cella di testo che inizia con `=` resta testo, al contrario di un CSV. Le uniche formule sono quelle del totale, scritte da noi. Il nome del file contiene solo le date;
-  7. **backend:** una classe pura `PlanSpreadsheet` in `planning/` trasforma i dati del calendario nel file (byte) ed è testata rileggendo il file con POI; il controller aggiunge solo gli header. Il file si costruisce in memoria (`XSSFWorkbook`): con al massimo 62 giorni sono poche centinaia di righe;
+  7. **backend:** una classe pura `PlanSpreadsheet` in `planning/` trasforma i dati del calendario nel file (byte); il controller aggiunge solo gli header. Il file si costruisce in memoria (`XSSFWorkbook`): con al massimo 62 giorni sono poche centinaia di righe;
   8. **frontend:** pulsante "Esporta in Excel" nella barra del calendario, che esporta il periodo sullo schermo. Il client unico (D76) ha una funzione nuova, `apiDownload`, con lo stesso token e la stessa gestione degli errori di `apiRequest`, che restituisce il file; la pagina lo salva con un link temporaneo (`URL.createObjectURL` e l'attributo `download`) e poi lo libera. Il nome del file lo decide il frontend (per esempio `resonance-planner_2026-10-19_2026-10-25.xlsx`), così non serve rendere leggibile `Content-Disposition` nel CORS. Durante il download il pulsante dice "Esportazione…" e non ne chiede un secondo; resta raggiungibile con la tastiera (`aria-disabled` e non `disabled`, come nelle finestre di conferma, così il fuoco non si perde). Alla fine la notifica "Piano esportato." oppure il messaggio d'errore; il file di una sessione finita nel frattempo non si salva (D103);
   9. **dipendenza:** `org.apache.poi:poi-ooxml` 5.5.1, l'ultima versione stabile (novembre 2025), senza le dipendenze facoltative (firma, PDF, SVG). POI scrive i log con `log4j-api`, che Spring Boot manda già a Logback.
 - **Perché:** è l'argomento della settimana 15 e costa poco, perché i dati li prepara già `CalendarService`. Un foglio Excel serve a chi vuole stampare il piano o tenerlo fuori dall'app. "Esporti quello che vedi" è la regola più semplice da usare e da spiegare. Date vere e formule per i totali fanno del file un vero foglio di calcolo, che si può ordinare, filtrare e modificare.
@@ -1392,7 +1391,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
      - dal server: `{"type":"WAVEPLATE_ALMOST_FULL" | "WAVEPLATE_FULL" | "EVENT_ENDING" | "EVENTS_CHANGED","message":"…"}`;
   2. **accesso con il JWT:** il browser non può mettere l'header `Authorization` nella richiesta che apre il WebSocket, e il token non va nell'indirizzo (finirebbe nei log dei proxy) né in un cookie (D45). Quindi l'apertura di `/ws` è pubblica e il token arriva nel primo messaggio, `AUTH`. Il server lo controlla con `JwtService` e verifica che l'utente esista ancora (D102); solo allora la connessione entra nel registro. Un token rifiutato, un primo messaggio diverso da `AUTH` o un messaggio che non si legge chiudono la connessione; con un token rifiutato il codice di chiusura è `4401` e il browser non riprova. Messaggi in arrivo al massimo di 8 KB. Origini ammesse: le stesse del CORS (`CORS_ALLOWED_ORIGINS`), nessuna variabile nuova;
   3. **registro delle connessioni:** `NotificationSessions` tiene in memoria le connessioni aperte, ognuna con il suo utente e la scadenza del token; un utente con più schede ha più connessioni e la notifica va a tutte. Per mandare si usa `ConcurrentWebSocketSessionDecorator`, perché una connessione non accetta due invii insieme (il job e la risposta all'`AUTH` possono incrociarsi). Una connessione che tace per più di 90 secondi (nessun `PING`) la chiude il server al giro successivo del job di ogni minuto (punto 4), con il codice `4408`;
-  4. **chi decide:** il server (D3). Un job `@Scheduled` ogni minuto guarda solo gli utenti collegati, legge le loro Waveplate con una query e gli eventi di oggi e domani una volta per tutti, e decide con una classe pura, `NotificationRules`, scritta con i test prima:
+  4. **chi decide:** il server (D3). Un job `@Scheduled` ogni minuto guarda solo gli utenti collegati, legge le loro Waveplate con una query e gli eventi di oggi e domani una volta per tutti, e decide con una classe pura, `NotificationRules`:
      - **Waveplate quasi piene:** quando al pieno mancano al massimo 60 minuti (10 Waveplate), una sola notifica per lettura: "Waveplate quasi piene: 232/240, piene alle 18:42.". Se quando l'utente si collega sono già piene: "Le Waveplate sono piene dalle 14:02: ora si accumulano i Crystals (37/480).". Nessuna notifica se la lettura salvata era già piena, perché l'utente lo sa. Le ore sono italiane (D41);
      - **evento in scadenza:** un'edizione che finisce oggi ("Ultimo giorno di «nome».") o domani ("«nome» finisce domani."), una volta al giorno per utente e per edizione. Gli eventi sono gli stessi per tutti (D49);
      - subito dopo l'`AUTH` il server fa il controllo per quell'utente, così chi torna sulla pagina non aspetta il minuto;
@@ -1424,7 +1423,7 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   - con l'avviso degli eventi tutti i collegati ricaricano il calendario insieme, anche fuori dalla pagina del calendario;
   - ogni `AUTH` valido costa due o tre query; in produzione i log di `org.springframework.web.socket` restano a INFO, perché a DEBUG o TRACE mostrerebbero il token del primo messaggio.
 
-## D136 · Esempi di Swagger sui campi dei DTO, controllati da un test
+## D136 · Esempi di Swagger sui campi dei DTO
 **Stato:** Confermata · 23/10/2026 · nata da T40 · precisa D53
 
 - **Cosa:** Swagger mostra per ogni endpoint, oltre alla descrizione, un esempio realistico di richiesta e di risposta, e in cima una descrizione generale dell'API.
@@ -1433,9 +1432,8 @@ Ogni voce riporta cosa abbiamo scelto, come lo implementiamo, perché, e quali a
   2. **esempi validi:** gli esempi delle richieste sono scelti in modo che passino la validazione, così "Try it out" con l'esempio già compilato funziona;
   3. **descrizione generale** (`OpenApiConfig`): titolo "Resonance Planner API", versione 1.0 (la versione del contratto delle API, non quella dell'app), come avere il token e usare "Authorize", il formato `ApiResponse` con un esempio di successo e uno di errore, i codici di errore, i limiti di richieste con `Retry-After`, il formato delle date e il rimando a `05-api.md` per il WebSocket `/ws`, che Swagger non mostra;
   4. **errori:** documentati una volta nella descrizione generale; i codici di ogni endpoint restano nella sua descrizione;
-  5. **tipo delle risposte:** `springdoc.default-produces-media-type: application/json`, così Swagger mostra JSON invece di `*/*`; il comportamento delle API non cambia;
-  6. **test:** un test di integrazione legge `/v3/api-docs` e controlla che ci siano tutti gli endpoint dei controller (uno nascosto per errore fa fallire il test), ognuno con titolo e descrizione; che ogni campo e ogni parametro abbia un esempio del tipo giusto (per un enum, uno dei suoi valori); che l'esempio di ogni corpo di richiesta, ricomposto dallo schema, superi la validazione del suo DTO. Poi manda gli esempi come richieste vere, uno dopo l'altro (registrazione, roster, configurazione guidata, profilo, Waveplate, inventario, attività, login, evento dell'admin), così valgono anche le regole dei servizi; resta fuori solo l'agente, che chiamerebbe il modello. Un campo nuovo senza esempio, o un esempio che il server rifiuta, fa fallire il test.
-- **Perché:** D53 chiede descrizione ed esempi per ogni endpoint, e chi valuta il progetto prova le API da Swagger senza leggere il codice. Gli esempi sui campi sono il modo standard di springdoc e valgono per tutti gli endpoint che usano lo stesso DTO; il test impedisce che la documentazione resti indietro rispetto al codice.
+  5. **tipo delle risposte:** `springdoc.default-produces-media-type: application/json`, così Swagger mostra JSON invece di `*/*`; il comportamento delle API non cambia.
+- **Perché:** D53 chiede descrizione ed esempi per ogni endpoint, e chi valuta il progetto prova le API da Swagger senza leggere il codice. Gli esempi sui campi sono il modo standard di springdoc e valgono per tutti gli endpoint che usano lo stesso DTO.
 - **Scartate:**
   - un esempio JSON completo per ogni endpoint in file separati, collegati da un `OpenApiCustomizer`: DTO più corti ed esempi più coerenti tra loro, ma un meccanismo in più da spiegare e da tenere allineato (scelta dell'autore del 23/10);
   - le risposte di errore con un esempio per ogni endpoint: circa 100 annotazioni che ripetono quello che dicono già le descrizioni (scelta dell'autore del 23/10).

@@ -113,5 +113,3 @@ Tutti e dieci gli scenari passano, due con riserva (4 bis e la prima prova del 6
 
 **Dopo il secondo blocco (20/10):**
 - "Non fare somme o altri calcoli: se serve un totale, usa quello degli strumenti, altrimenti elenca i valori senza sommarli": nello scenario 6 il modello ha sbagliato due somme fatte da solo (D3).
-
-Un test (`AgentPromptTest`) controlla che le istruzioni nominino i cinque strumenti e solo quelli, che non usino il markdown e che restino sotto i 4.000 caratteri.

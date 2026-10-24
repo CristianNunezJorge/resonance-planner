@@ -8,8 +8,7 @@ COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN ./mvnw -B -q dependency:go-offline
 COPY src/ src/
-# The tests need PostgreSQL: they run on the computer before every pull request (D81)
-RUN ./mvnw -B -q package -DskipTests
+RUN ./mvnw -B -q package
 
 # Stage 2: only the Java runtime and the jar, run by a user without privileges
 FROM eclipse-temurin:21-jre

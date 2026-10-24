@@ -2,7 +2,7 @@ package com.resonanceplanner.agent.client;
 
 /**
  * Sends one request to the language model and returns its reply (D54, D126). The agent loop talks only to this
- * interface: OpenRouterClient calls the real API, and the tests of the loop use a fake one without network (D63).
+ * interface, and OpenRouterClient calls the real API: the loop does not depend on the provider.
  */
 public interface ModelClient {
 

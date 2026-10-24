@@ -99,7 +99,7 @@ flowchart LR
 ```
 
 - **Frontend:** un'applicazione React su un sito statico. Tutte le chiamate passano da un unico client HTTP, che manda il token JWT nell'header `Authorization`.
-- **Backend:** API REST con Spring Boot. I dati personali stanno solo sotto `/api/me` e l'utente si ricava sempre dal token. Waveplate, materiali mancanti, run e piano giorno per giorno sono calcolati in Java e coperti dai test.
+- **Backend:** API REST con Spring Boot. I dati personali stanno solo sotto `/api/me` e l'utente si ricava sempre dal token. Waveplate, materiali mancanti, run e piano giorno per giorno sono calcolati in Java.
 - **Un messaggio all'agente:** il backend manda al modello la domanda con cinque strumenti (`get_player_status`, `get_events`, `get_calendar`, `plan_schedule`, `create_plan_proposal`). Il modello chiede i dati e sceglie i parametri del piano; Java esegue ogni strumento e gli restituisce il risultato, per al massimo 6 giri. La proposta salvata è sempre l'ultimo piano calcolato dal pianificatore, mai un testo scritto dal modello.
 - **Notifiche:** il browser apre il WebSocket solo a pagina visibile e manda il token nel primo messaggio, mai nell'indirizzo. Il backend controlla ogni minuto gli utenti collegati e decide cosa avvisare. Il protocollo è in [`docs/05-api.md`](docs/05-api.md), perché il WebSocket non compare in Swagger.
 
@@ -123,7 +123,6 @@ flowchart LR
 | Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc, Apache POI per l'export Excel, WebSocket di Spring (senza STOMP) | Java 21, Spring Boot 4.1.1, Maven 3.10 (wrapper incluso), springdoc 3.1.1, Apache POI 5.5.1 |
 | Database | PostgreSQL, schema gestito con Flyway | PostgreSQL 16 |
 | IA | OpenRouter con un modello gratuito (`nvidia/nemotron-3-ultra-550b-a55b:free`), chiamato con `RestClient` di Spring; ciclo con gli strumenti scritto da noi (D126, D132) | — |
-| Test | JUnit 5, Mockito, JaCoCo, Vitest, React Testing Library | — |
 | Deploy | Render (sito statico, backend Docker, database) | — |
 
 ## Struttura del repository
@@ -138,7 +137,7 @@ frontend/                  applicazione React
   src/features/            una cartella per funzionalità: calendar, chat, roster, onboarding, notifications...
   src/api/client.ts        l'unico client HTTP
 docs/                      progettazione: scope, flussi, modello dati, API, agente, schermate, regole, task, decisioni
-docker-compose.yml         PostgreSQL per sviluppo e test
+docker-compose.yml         PostgreSQL per lo sviluppo
 .env.example               variabili d'ambiente, senza valori
 ```
 
@@ -205,7 +204,7 @@ In PowerShell: `Copy-Item .env.example .env`. Poi si completano i valori come ne
 docker compose up -d
 ```
 
-PostgreSQL 16 parte sulla porta **5433**, per non scontrarsi con un PostgreSQL già installato, con due database: `resonance_planner` per lo sviluppo e `resonance_planner_test` per i test.
+PostgreSQL 16 parte sulla porta **5433**, per non scontrarsi con un PostgreSQL già installato, con il database `resonance_planner`.
 
 **4. Avviare il backend** (dalla cartella `backend/`)
 
@@ -236,24 +235,21 @@ Si apre http://localhost:5173: "Prova la demo" entra come ospite e "Registrati" 
 - Le porte 5433, 8080 e 5173 devono essere libere.
 - `npm install` può avvisare che `@parcel/watcher` ha uno script di installazione non approvato: è solo un avviso, e l'app funziona senza.
 
-## Test e controlli
+## Controlli
 
-Da lanciare prima di ogni pull request, con il database di Docker Compose avviato:
+Da lanciare prima di ogni pull request:
 
 ```bash
-# Backend, dalla cartella backend/: test unitari e di integrazione, copertura in target/site/jacoco/index.html
-./mvnw verify
+# Backend, dalla cartella backend/: compilazione e jar in target/
+./mvnw package
 
-# Frontend, dalla cartella frontend/: lint, controllo dei tipi, test e build
+# Frontend, dalla cartella frontend/: lint, controllo dei tipi e build
 npm run lint
 npm run typecheck
-npm test
 npm run build
 ```
 
-Con `npm run coverage` il frontend scrive anche il report della copertura. Oggi i test sono 948 nel backend e 589 nel frontend; la copertura delle righe è del 98,2% nel backend e del 97,6% nel frontend ([`docs/qualita.md`](docs/qualita.md)).
-
-Le chiamate vere al modello non fanno parte dei test automatici: il ciclo dell'agente si prova con un finto client (D63). Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md), e negli scenari dell'agente, [`docs/scenari-agente.md`](docs/scenari-agente.md).
+Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md), e negli scenari dell'agente, [`docs/scenari-agente.md`](docs/scenari-agente.md).
 
 ## Limiti noti
 

@@ -93,9 +93,9 @@ Se la risposta non è ancora arrivata, comincia dalla seconda frase (eventi e Wa
 **Fai:** resta sullo schema.
 
 **Dici:**
-> Qualche numero. In 14 giorni ho fatto tre rilasci online e documentato 138 decisioni. Ci sono 948 test nel backend e 589 nel frontend, con una copertura del 98%, e Lighthouse dà 100 in accessibilità. Sull'agente ho provato dieci scenari reali: un piano costa da 3 a 6 chiamate al modello, e il piano gratuito ne dà 50 al giorno per tutta l'app. Per questo ci sono limiti giornalieri e un piano base senza IA, [che è servito davvero quando il fornitore gratuito è rimasto fermo per ore].
+> Qualche numero. In 14 giorni ho fatto tre rilasci online e documentato 138 decisioni. Lighthouse dà 100 in accessibilità, best practice e SEO su tutte le pagine, e la checklist finale sul sito online è passata in tutti i 19 punti. Sull'agente ho provato dieci scenari reali: un piano costa da 3 a 6 chiamate al modello, e il piano gratuito ne dà 50 al giorno per tutta l'app. Per questo ci sono limiti giornalieri e un piano base senza IA, [che è servito davvero quando il fornitore gratuito è rimasto fermo per ore].
 
-**Decisioni:** D64 (piano base), D79 (test), D129 (limiti), D131 (scenari), D132 (cambio di modello), `qualita.md`.
+**Decisioni:** D64 (piano base), D79 (verifica sul sito), D129 (limiti), D131 (scenari), D132 (cambio di modello), `qualita.md`.
 
 ### 5 · Valore pratico (2:35-3:00)
 
@@ -127,7 +127,7 @@ Se la risposta non è ancora arrivata, comincia dalla seconda frase (eventi e Wa
 | E se il modello non risponde? | La chat lo dice e offre il piano base, che usa lo stesso pianificatore senza IA (D64). Le chiamate al modello sono contate nel database, anche quelle fallite (D129). |
 | Come funziona il login? | Token JWT nell'header `Authorization`, valido 24 ore, con i ruoli USER e ADMIN. I dati personali stanno solo sotto `/api/me` e l'utente si ricava sempre dal token (D19, D44, D45). |
 | Come proteggi l'app dagli abusi? | Limiti di richieste su login, registrazione e accesso ospite (D101), limiti giornalieri dell'agente (D129), password con le regole di D100. |
-| Come l'hai testata? | 948 test nel backend su un PostgreSQL vero in Docker e 589 nel frontend con Vitest e React Testing Library, copertura del 98%. Il ciclo dell'agente si prova con un finto modello, senza rete (D63). Sul sito online: checklist di rilascio e dieci scenari reali dell'agente (D79, `scenari-agente.md`). |
+| Come l'hai verificata? | Sul sito online: una checklist a ogni rilascio, l'ultima con 19 punti, e dieci scenari reali dell'agente (D63, D79, `rilascio-v3.md`, `scenari-agente.md`). Lighthouse dà 100 su tutte le pagine (`qualita.md`). |
 | Perché Flyway? | Lo schema è versionato insieme al codice e Hibernate lo controlla soltanto (D38). Una migrazione già pubblicata non si modifica mai: se ne aggiunge una nuova. |
 | Perché un WebSocket semplice e non STOMP? | Il server manda solo notifiche brevi, e il browser manda solo l'accesso e un `PING` ogni 25 secondi: STOMP aggiungerebbe un protocollo che non serve. Il token arriva nel primo messaggio, `AUTH`, e mai nell'indirizzo (D135). |
 | Come si calcolano le Waveplate? | Il server salva il valore e l'ora della lettura, poi aggiunge una Waveplate ogni 6 minuti fino al massimo, e oltre accumula i Crystals (D28, D105). |

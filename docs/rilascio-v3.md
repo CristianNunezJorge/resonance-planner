@@ -11,7 +11,7 @@ La v3 aggiunge i tre extra (export in Excel, "Prova la demo", notifiche in tempo
   - un **ospite** di "Prova la demo" per i punti 1, 4-11, 13 e 14: è un utente nuovo che non resta, perché il punto 13 lo elimina;
   - il **tuo account abituale** per i punti 2, 3, 12, 15, 18 e 19. È anche l'account della demo, quindi alla fine va rimesso come lo chiede `demo.md`;
   - l'**admin** per il punto 10, in un altro browser, così l'ospite resta collegato: `ADMIN_EMAIL` e `ADMIN_PASSWORD` del servizio `resonance-planner-api` su Render (sezione Environment).
-- **Registrazione:** online non si creano account di prova. Il modulo di registrazione è stato provato online il 16/10 (`rilascio-v1.md`) e lo coprono i test automatici; da allora non è cambiato. L'utente nuovo del punto 1 è l'ospite.
+- **Registrazione:** online non si creano account di prova. Il modulo di registrazione è stato provato online il 16/10 (`rilascio-v1.md`) e da allora non è cambiato. L'utente nuovo del punto 1 è l'ospite.
 - **Quota dell'agente (D129, D134):** i punti 8 e 9 usano i **2 messaggi dell'ospite**, e il punto 9 prova anche il limite. Il tuo account non usa messaggi e li tiene per le prove della demo.
 - **Excel:** il file si controlla nel browser (nome, tipo, fogli) senza salvarlo sul computer.
 - **Esito:** ✓ se tutto va come previsto, altrimenti ✗ e cosa è successo.

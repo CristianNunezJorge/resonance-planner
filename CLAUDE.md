@@ -17,9 +17,9 @@ Capstone del Master Full-Stack AI Developer (Epicode), progetto individuale di d
 - **Giorno 10 (T37-T38) completato · v2 rilasciata:** istruzioni di sistema rifinite e dieci scenari reali superati, divisi su due giorni per la quota gratuita (D131, `docs/scenari-agente.md`); dal 20/10 il modello predefinito è `nvidia/nemotron-3-ultra-550b-a55b:free`, anche su Render, perché il fornitore di Super è caduto (D132); README e checklist di rilascio (`docs/rilascio-v2.md`, tutti i punti ✓ online il 21/10, il punto 8 saltato), tag `v2.0.0`. Tutto online; su Trello T01-T38 sono in "Fatto".
 - **Giorno 11 (X01-X02) completato · primi extra della v3:** export del piano in Excel con Apache POI (D133: fogli "Piano" ed "Eventi", `GET /api/me/calendar/export`, pulsante "Esporta in Excel"; online la prima esportazione dopo un avvio impiega circa 14 s, accettati) e accesso ospite "Prova la demo" (D134: `POST /api/auth/guest`, ospiti cancellati dopo 24 ore da un job `@Scheduled`, quota dell'agente per gli ospiti con la migrazione `V4`). Tutto online; su Trello X01-X02 sono in "Fatto".
 - **Giorno 12 (X03) completato:** notifiche in tempo reale (D135) con un **WebSocket semplice** su `/ws`, senza STOMP (scelta dell'utente). Il token viaggia nel primo messaggio `AUTH`, poi c'è un `PING` ogni 25 secondi. Il job di ogni minuto avvisa per le Waveplate quasi piene e gli eventi in scadenza, e dopo una modifica dell'admin dice a tutti che gli eventi sono cambiati. CSP con `wss://`, anche su Render. Online le notifiche arrivano; su Render però le chiusure decise dal server non arrivano al browser (limite accettato in D135). Tutto online; su Trello X01-X03 sono in "Fatto".
-- **Giorno 13 (T39-T41) completato:** README completo con screenshot, verificato con un clone pulito (T39); Swagger con descrizione generale ed esempi su ogni campo, controllati da `OpenApiDocumentationTest`, che manda gli esempi come richieste vere (D136); Lighthouse a 100 in accessibilità, best practice e SEO su tutte le pagine (anche online), FullCalendar 7.1.3, calendario caricato solo quando serve (D137), riepilogo in `docs/qualita.md` (T41). `ANTHROPIC_MODEL` tolta da Render. Tutto online; su Trello T01-T41 sono in "Fatto".
+- **Giorno 13 (T39-T41) completato:** README completo con screenshot, verificato con un clone pulito (T39); Swagger con descrizione generale ed esempi su ogni campo (D136); Lighthouse a 100 in accessibilità, best practice e SEO su tutte le pagine (anche online), FullCalendar 7.1.3, calendario caricato solo quando serve (D137), riepilogo in `docs/qualita.md` (T41). `ANTHROPIC_MODEL` tolta da Render. Tutto online; su Trello T01-T41 sono in "Fatto".
 - **Giorno 14 (T42-T43) completato · versione finale rilasciata:** copione della demo di 3 minuti sui cinque punti del Demo Day, con preparazione, piano B e domande probabili (`docs/demo.md`, D138: account già pronto, un solo messaggio all'agente, presentazione dal sito online); checklist finale sul sito online, 19 punti tutti ✓ il 23-24/10 (`docs/rilascio-v3.md`); le prove cronometrate sono saltate per scelta dell'utente (D138). README con lo stato finale e tag `v3.0.0`. Tutto online; su Trello T01-T43 e X01-X03 sono in "Fatto".
-- **Prossimo passo:** il piano dei 14 giorni è completo. Da qui si fanno le **modifiche che l'utente decide**, ognuna con lo stesso flusso (ramo, test, revisione, commit approvato, PR) e una decisione nuova quando cambia una scelta già presa. X04 e X05 restano fuori (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
+- **Prossimo passo:** il piano dei 14 giorni è completo. Da qui si fanno le **modifiche che l'utente decide**, ognuna con lo stesso flusso (ramo, controlli, revisione, commit approvato, PR) e una decisione nuova quando cambia una scelta già presa. X04 e X05 restano fuori (D90), salvo decisione diversa dell'utente. Leggere `HANDOFF.md`.
 
 ## Da leggere per riprendere
 
@@ -38,14 +38,14 @@ I documenti di fase da 01 a 09 sono la fonte di verità. Se il codice deve disco
 - **Restare sugli strumenti del programma del corso.** Se si propone uno strumento fuori programma, segnalarlo esplicitamente.
 - Nel browser, quando l'utente guarda lo schermo condiviso: **niente screenshot**, verificare con strumenti testuali.
 - Chiedere il permesso prima di scaricare file.
-- **Flusso di ogni card:** un ramo, test prima del codice per i calcoli, controlli locali, revisione del codice, poi l'utente approva il messaggio di commit (solo l'oggetto, con il codice della card: `feat: ... (T07)`). Poi push, pull request, *squash merge* e cancellazione del ramo. Nessuna firma o co-autore di Claude nei commit e nelle pull request.
+- **Flusso di ogni card:** un ramo, controlli locali, revisione del codice, poi l'utente approva il messaggio di commit (solo l'oggetto, con il codice della card: `feat: ... (T07)`). Poi push, pull request, *squash merge* e cancellazione del ramo. Nessuna firma o co-autore di Claude nei commit e nelle pull request.
 
 ## Comandi
 
-Prerequisiti: Docker Desktop avviato, JDK 21, Node 24. Il `.env` nella cartella principale (copiato da `.env.example`) serve a Docker Compose, al backend in `dev` e ai test.
+Prerequisiti: Docker Desktop avviato, JDK 21, Node 24. Il `.env` nella cartella principale (copiato da `.env.example`) serve a Docker Compose e al backend in `dev`.
 
 ```bash
-# Database: PostgreSQL 16 sulla porta 5433, con i database resonance_planner e resonance_planner_test
+# Database: PostgreSQL 16 sulla porta 5433, con il database resonance_planner
 docker compose up -d
 docker compose down        # ferma il container, i dati restano
 docker compose down -v     # cancella i database locali: al riavvio Flyway ricrea lo schema
@@ -53,8 +53,6 @@ docker compose down -v     # cancella i database locali: al riavvio Flyway ricre
 # Backend (dalla cartella backend/)
 export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"   # in Git Bash
 ./mvnw spring-boot:run     # profilo dev, http://localhost:8080
-./mvnw test                # test unitari e di integrazione (serve il database)
-./mvnw verify              # test + copertura in target/site/jacoco/index.html
 ./mvnw package             # jar in target/
 
 # Frontend (dalla cartella frontend/)
@@ -62,12 +60,10 @@ npm install
 npm run dev                # http://localhost:5173
 npm run lint
 npm run typecheck
-npm test
-npm run coverage
 npm run build
 ```
 
-Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` nel frontend (D81).
+Prima di ogni pull request: `./mvnw package` nel backend; `npm run lint`, `npm run typecheck` e `npm run build` nel frontend (D81).
 
 ## Stack e versioni (D77)
 
@@ -77,7 +73,7 @@ Prima di ogni pull request: `./mvnw verify` nel backend; `npm run lint`, `npm ru
 | Backend | Java, Spring Boot, Maven, Spring Data JPA, Spring Security + JWT, springdoc, WebSocket | Java 21 (Temurin 21.0.12.1), Spring Boot 4.1.1, Maven 3.10 (wrapper), springdoc 3.1.1, Apache POI 5.5.1 (`poi-ooxml`, export Excel), `spring-boot-starter-websocket` (WebSocket semplice, senza STOMP); Swagger con esempi su ogni campo (D136) | D5, D45, D77, D133, D135, D136 |
 | Database | PostgreSQL, schema con Flyway (Hibernate in `validate`) | PostgreSQL 16 (Docker `postgres:16`) | D38, D98 |
 | IA | OpenRouter con un modello gratuito (`nvidia/nemotron-3-ultra-550b-a55b:free` dal 20/10, D132), chiamato con `RestClient`, ciclo tool-use scritto da noi | — | D54, D59, D126, D132 |
-| Test | JUnit 5 + Mockito, integrazione su PostgreSQL di Docker Compose, Vitest + React Testing Library, checklist manuale | JaCoCo 0.8.15, Vitest 5.0 | D79 |
+| Verifica | Checklist manuale sul sito online a ogni rilascio | — | D79 |
 | Deploy | Tutto su Render: frontend, backend e database PostgreSQL (il database gratuito scade dopo 30 giorni e va ricreato) | — | D82 |
 
 Principi da non perdere:
@@ -97,7 +93,7 @@ La struttura completa prevista è in `docs/08-regole-di-lavoro.md`. Oggi esiste:
 
 ```
 .env.example                  variabili d'ambiente, senza valori
-docker-compose.yml            PostgreSQL locale; docker/postgres/init/ crea il database di test
+docker-compose.yml            PostgreSQL locale
 backend/
   pom.xml, mvnw, Dockerfile   Spring Boot 4.1.1, Maven wrapper, immagine in due fasi per Render
   src/main/java/com/resonanceplanner/
@@ -128,8 +124,6 @@ backend/
     application.yml           comune; application-dev.yml legge ../.env; application-prod.yml per Render
     db/migration/V1__schema.sql, V2__plan_inputs.sql (impronta del piano, D125), V3__agent_model_calls.sql (D129), V4__agent_model_calls_guest.sql (quota degli ospiti, D134)
     data/                     6 JSON di gioco + README con fonti e stime
-  src/test/resources/application-test.yml   database di test, valori finti
-  src/test/.../common/config/OpenApiDocumentationTest   ogni endpoint e ogni campo di Swagger con un esempio, ed esempi accettati dal server (D136)
 frontend/
   src/api/client.ts           unico client HTTP: ApiResponse → dati o ApiError (D76); apiPage per le pagine con meta (D130); apiDownload per i file (D133); apiSocketUrl per l'indirizzo del WebSocket (D135)
   src/app/                    store, hook tipizzati, rotte, layout, toastSlice
@@ -147,22 +141,21 @@ frontend/
   src/components/             LoadingState, ErrorState, EmptyState, FormField, SelectField, CharacterAvatar, Modal e ConfirmModal (D116, D120), useFocusTrap, useMediaQuery, usePageVisible, pagine 404 ed errore
   src/styles/                 _theme.scss (tema scuro D65), _elements.scss, _calendar.scss, _chat.scss, main.scss
   public/characters/          6 icone WebP 256×256; public/robots.txt
-docs/                         progettazione (fasi 01-09, decisioni, stato), rilascio-v1/v2/v3.md (checklist online), qualita.md (copertura e Lighthouse, T41), demo.md (copione del Demo Day, T42), screenshot/ (immagini del README)
+docs/                         progettazione (fasi 01-09, decisioni, stato), rilascio-v1/v2/v3.md (checklist online), qualita.md (Lighthouse, T41), demo.md (copione del Demo Day, T42), screenshot/ (immagini del README)
 ```
 
 ## Convenzioni
 
 - Codice, nomi e commit in inglese; documentazione in italiano.
-- Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, ...), un ramo per attività, `main` sempre funzionante, almeno un push al giorno.
-- Test prima del codice per tutti i calcoli; copertura minima dell'80% su service e logica.
-- Backend, dati dell'utente: i repository estendono `Repository` (non `JpaRepository`) e ogni metodo prende l'utente (D44); le scritture che possono arrivare insieme sono un'unica istruzione (upsert, `update ... where`); gli errori su più campi usano `FieldValidationException(Map)`. Ogni service che scrive ha un test `*CommitTest` senza `@Transactional` sul test (commit vero, nomi utente unici, pulizia nel `finally`): verificare con una mutazione (togliere `@Transactional` dal service) che fallisca.
+- Conventional Commits (`feat:`, `fix:`, `docs:`, ...), un ramo per attività, `main` sempre funzionante, almeno un push al giorno.
+- Backend, dati dell'utente: i repository estendono `Repository` (non `JpaRepository`) e ogni metodo prende l'utente (D44); le scritture che possono arrivare insieme sono un'unica istruzione (upsert, `update ... where`); gli errori su più campi usano `FieldValidationException(Map)`.
 - Frontend: la bozza di un modulo lungo sta in uno slice che si azzera con `sessionEnded` e con ogni nuovo login e ignora le risposte di richieste di una sessione finita (`requestId`); messaggi di errore con `text-danger-emphasis` (contrasto AA); per guidare il browser di prova senza screenshot si usano piccoli script con `javascript_tool` (il pannello può non essere visibile e i clic reali falliscono).
 - Nessun segreto nel codice: solo variabili d'ambiente (elenco in `docs/08-regole-di-lavoro.md`). Nuove variabili obbligatorie vanno in `AppProperties`, con un messaggio che nomina la variabile.
 - Schema: una migrazione già unita a `main` non si modifica mai, se ne crea una nuova (`V2__...`). Le colonne intere sono `integer` (D98) e ogni `CHECK` controlla anche `IS NOT NULL`, perché un controllo che vale NULL viene considerato superato.
 - Backend: un errore su un campo si lancia con `ConflictException(messaggio, campo)` o `FieldValidationException(campo, messaggio)` (risposta con `fields`); un service che scrive dati dell'utente risponde 401 con `UnauthorizedException` se l'utente del token non esiste più (D102). Gli errori voluti si lanciano con `NotFoundException`/`ConflictException` e un messaggio in italiano per l'utente; i DTO hanno messaggi di validazione in italiano scritti da noi. Le entità diventano DTO dentro un service `@Transactional(readOnly = true)` (open-in-view è spento).
 - Frontend: tutte le chiamate passano da `api/client.ts`; ogni pagina usa `LoadingState` ed `ErrorState` (D69).
-- Swagger (D136): ogni campo di un DTO ha `@Schema(example = ...)` (per un esempio `null`: `nullable = true`, e sui riferimenti anche `types = {"object", "null"}`), ogni parametro `@Parameter`; gli esempi delle richieste devono essere richieste valide. Un DTO di richiesta nuovo va aggiunto a `REQUEST_BODIES` di `OpenApiDocumentationTest`.
-- Definizione di "fatto" in 6 punti: `docs/08-regole-di-lavoro.md`.
+- Swagger (D136): ogni campo di un DTO ha `@Schema(example = ...)` (per un esempio `null`: `nullable = true`, e sui riferimenti anche `types = {"object", "null"}`), ogni parametro `@Parameter`; gli esempi delle richieste devono essere richieste valide.
+- Definizione di "fatto" in 5 punti: `docs/08-regole-di-lavoro.md`.
 
 ## Link utili
 
@@ -178,11 +171,11 @@ docs/                         progettazione (fasi 01-09, decisioni, stato), rila
 - **Server locali (`.claude/launch.json`):** `frontend` (sviluppo) e `frontend-prod` (build con la CSP, prima serve `npm run build`) usano entrambi la porta 5173, l'unica accettata dal CORS locale: se ne accende uno alla volta. Se il backend esce subito con `Connection to localhost:5433 refused`, il container del database è fermo (succede dopo un riavvio di Docker Desktop): `docker compose up -d`.
 - **Variabili facoltative** (`APP_RATELIMIT_*`, `APP_AGENTLIMITS_*`): valgono solo come vere variabili d'ambiente; scritte nel `.env` vengono ignorate, perché il `.env` entra come file di proprietà e solo le obbligatorie sono richiamate con `${...}` in `application.yml`.
 - **Lighthouse e screenshot:** con Chrome DevTools (MCP `chrome-devtools`): `lighthouse_audit` con i report nello scratchpad, `take_screenshot` con `filePath` per salvare un'immagine senza guardarla. Dettagli in `HANDOFF.md`.
-- **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); nei test si usa `@MockitoBean` al posto di `@MockBean`; `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
+- **Spring Boot 4:** gli starter hanno nomi nuovi (`spring-boot-starter-webmvc`, `spring-boot-starter-flyway`); `DataSourceBuilder` è in `org.springframework.boot.jdbc`.
 - **React Router 8:** `RouterProvider` si importa da `react-router/dom`, tutto il resto da `react-router`. Il pacchetto `react-router-dom` non esiste più.
 - **Jackson 3:** i pacchetti sono `tools.jackson.*`, ma le annotazioni restano in `com.fasterxml.jackson.annotation`. Il mapper di Spring ignora le chiavi sconosciute; per i nostri file c'è `DataFileReader`, che le rifiuta.
 - **Render:** si lavora con Claude in Chrome (nel browser integrato non c'è la sessione). I segreti (password del database, admin) li inserisce l'utente; `JWT_SECRET` e `ADMIN_PASSWORD` sono generati da Render. Il backend gratuito al risveglio impiega circa 3 minuti. Se un deploy risponde "Service Unavailable", guardare prima https://status.render.com; con la scheda di Chrome nascosta i menu della dashboard si aprono solo via JavaScript (dettagli in `HANDOFF.md`). `VITE_API_BASE_URL` è letta al build: dopo averla cambiata serve un nuovo deploy del sito statico. Dopo un merge controllare in Events che il deploy parta (il 21/10 per #53 non è partito; il 23/10 sono partiti da soli). Le variabili d'ambiente del backend sono le 9 che il codice usa (`ANTHROPIC_MODEL` tolta il 23/10). Dietro il proxy di Render le chiusure dei WebSocket decise dal server non arrivano al browser (D135).
-- **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10). La chiamata di prova vera è `OpenRouterClientLiveTest`, spenta di default: il comando è in `HANDOFF.md`.
+- **OpenRouter:** `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` sono nel `.env` e su Render (la chiave la inserisce l'utente). Il piano gratuito dà 20 richieste al minuto e 50 al giorno; un fornitore gratuito può rispondere 429 anche con la quota intatta (Gemma il 17/10).
 - **Norton su questo computer** ispeziona HTTPS e rifirma i certificati: Java non se ne fida (`PKIX path building failed`). Per chiamare OpenRouter da Java in locale si usa l'archivio di Windows: `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (già nella configurazione `backend` di `.claude/launch.json`). Su Render non serve.
 - Il wiki Fandom di Wuthering Waves blocca WebFetch (HTTP 402): leggerlo con il browser integrato. I contenuti sono CC BY-SA, quindi la fonte va citata.
 - **Script e fine riga:** i file sono in CRLF e la shell dimezza le barre rovesciate negli script passati in linea. Per testo con barre rovesciate (regex, escape) usare lo strumento di modifica; in uno script Python che sostituisce testo, non convertire due volte gli a capo (il risultato sarebbe `CR CR LF` e Git vedrebbe il file come binario).

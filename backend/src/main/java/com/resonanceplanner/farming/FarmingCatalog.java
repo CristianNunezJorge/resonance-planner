@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * The part of the catalog that the farming calculation needs (D112), as plain values: the calculation works on it
- * without the database, so it can be tested with a few handwritten values.
+ * without the database.
  *
  * @param expToNext EXP to go from each level to the next one
  * @param ascensions the ascensions of each character, by character id

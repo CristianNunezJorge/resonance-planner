@@ -21,10 +21,9 @@ const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>
 
-// A factory lets each test start from a fresh store
-export function setupStore(preloadedState?: Partial<RootState>) {
+function setupStore() {
   // No Redux DevTools in production: the actions of login and registration carry the password and the token
-  return configureStore({ reducer: rootReducer, preloadedState, devTools: import.meta.env.DEV })
+  return configureStore({ reducer: rootReducer, devTools: import.meta.env.DEV })
 }
 
 export const store = setupStore()
