@@ -71,7 +71,7 @@ Il backend usa il piano gratuito di Render: dopo 15 minuti senza richieste si sp
 
   Quando un limite finisce, la chat lo spiega e offre il piano base.
 - **Il modello non fa conti e non scrive il calendario:** le attività della proposta sono sempre quelle calcolate da Java; il modello sceglie i parametri e spiega. Le sue risposte si mostrano come testo semplice, mai come HTML.
-- **Verifica:** dieci scenari reali, dalla pianificazione alle domande fuori tema e ai tentativi di far ignorare le istruzioni, sono descritti con i risultati in [`docs/scenari-agente.md`](docs/scenari-agente.md).
+- **Verifica:** l'agente ha superato dieci scenari reali, dalla pianificazione alle domande fuori tema e ai tentativi di far ignorare le istruzioni.
 
 ## Come provarla
 
@@ -101,7 +101,7 @@ flowchart LR
 - **Frontend:** un'applicazione React su un sito statico. Tutte le chiamate passano da un unico client HTTP, che manda il token JWT nell'header `Authorization`.
 - **Backend:** API REST con Spring Boot. I dati personali stanno solo sotto `/api/me` e l'utente si ricava sempre dal token. Waveplate, materiali mancanti, run e piano giorno per giorno sono calcolati in Java.
 - **Un messaggio all'agente:** il backend manda al modello la domanda con cinque strumenti (`get_player_status`, `get_events`, `get_calendar`, `plan_schedule`, `create_plan_proposal`). Il modello chiede i dati e sceglie i parametri del piano; Java esegue ogni strumento e gli restituisce il risultato, per al massimo 6 giri. La proposta salvata è sempre l'ultimo piano calcolato dal pianificatore, mai un testo scritto dal modello.
-- **Notifiche:** il browser apre il WebSocket solo a pagina visibile e manda il token nel primo messaggio, mai nell'indirizzo. Il backend controlla ogni minuto gli utenti collegati e decide cosa avvisare. Il protocollo è in [`docs/05-api.md`](docs/05-api.md), perché il WebSocket non compare in Swagger.
+- **Notifiche:** il browser apre il WebSocket solo a pagina visibile e manda il token nel primo messaggio, mai nell'indirizzo. Il backend controlla ogni minuto gli utenti collegati e decide cosa avvisare. Il protocollo (`AUTH`, `PING`, tipi di notifica e chiusure) è descritto in cima alla pagina di Swagger, perché il WebSocket non è un'API REST.
 
 ## Scelte principali
 
@@ -113,7 +113,6 @@ flowchart LR
   - ruoli USER, ADMIN e GUEST, controllati sul server a ogni richiesta;
   - limiti al numero di richieste;
   - una Content-Security-Policy stretta sul sito.
-- **Registro delle decisioni:** ogni scelta ha la sua voce in [`docs/decisioni.md`](docs/decisioni.md), con le alternative scartate.
 
 ## Stack
 
@@ -136,12 +135,10 @@ backend/                   API Spring Boot
 frontend/                  applicazione React
   src/features/            una cartella per funzionalità: calendar, chat, roster, onboarding, notifications...
   src/api/client.ts        l'unico client HTTP
-docs/                      progettazione: scope, flussi, modello dati, API, agente, schermate, regole, task, decisioni
+docs/                      checklist dei tre rilasci e screenshot del README
 docker-compose.yml         PostgreSQL per lo sviluppo
 .env.example               variabili d'ambiente, senza valori
 ```
-
-La progettazione completa è in [`docs/`](docs/README.md).
 
 ## Variabili d'ambiente
 
@@ -249,7 +246,7 @@ npm run typecheck
 npm run build
 ```
 
-Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md), e negli scenari dell'agente, [`docs/scenari-agente.md`](docs/scenari-agente.md).
+Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md).
 
 ## Limiti noti
 
@@ -270,10 +267,8 @@ Le prove sul sito online sono nelle checklist di rilascio, [`docs/rilascio-v1.md
 
 ## Documentazione
 
-- [`docs/README.md`](docs/README.md): indice delle fasi di progettazione.
-- [`docs/decisioni.md`](docs/decisioni.md): registro delle decisioni, con le alternative scartate.
-- [`docs/05-api.md`](docs/05-api.md): endpoint, esempi, limiti di richieste e protocollo del WebSocket.
-- [`docs/06-agente.md`](docs/06-agente.md): strumenti, istruzioni e sicurezza dell'agente.
+- **API:** Swagger online, https://resonance-planner-api.onrender.com/swagger-ui.html, con un esempio su ogni campo, i limiti di richieste e il protocollo del WebSocket.
+- **Checklist di rilascio:** [`docs/rilascio-v1.md`](docs/rilascio-v1.md), [`docs/rilascio-v2.md`](docs/rilascio-v2.md) e [`docs/rilascio-v3.md`](docs/rilascio-v3.md), con le prove fatte sul sito online a ogni rilascio.
 
 ## Crediti
 
