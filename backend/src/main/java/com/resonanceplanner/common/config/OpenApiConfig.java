@@ -81,9 +81,14 @@ public class OpenApiConfig {
             (per esempio `2026-10-22T14:05:00Z`).
 
             ### Notifiche in tempo reale
-            Il WebSocket `/ws` non è un'API REST e Swagger non lo mostra: il protocollo (`AUTH`, `PING` e i tipi \
-            di notifica) è in \
-            [docs/05-api.md](https://github.com/CristianNunezJorge/resonance-planner/blob/main/docs/05-api.md#notifiche-in-tempo-reale-websocket-d135).
+            Il WebSocket `/ws` non è un'API REST e Swagger non lo mostra. È un WebSocket semplice, senza STOMP, \
+            che si apre solo dalle origini del CORS; i messaggi sono JSON con un campo `type`.
+            - Il browser manda come primo messaggio `{ "type": "AUTH", "token": "eyJ..." }`, perché il token non \
+            va mai nell'indirizzo, poi `{ "type": "PING" }` ogni 25 secondi.
+            - Il server manda `{ "type": ..., "message": ... }` con i tipi `WAVEPLATE_ALMOST_FULL`, `WAVEPLATE_FULL`, \
+            `EVENT_ENDING` ed `EVENTS_CHANGED`; `message` è testo semplice in italiano.
+            - Chiusure: `4401` token rifiutato (il browser non riprova), `4408` nessun messaggio da più di 90 \
+            secondi, `1008` primo messaggio diverso da `AUTH` o illeggibile, `1009` messaggio oltre 8 KB.
             """;
 
     @Bean

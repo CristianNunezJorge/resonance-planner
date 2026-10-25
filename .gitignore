@@ -26,3 +26,10 @@ npm-debug.log*
 # Operating system
 .DS_Store
 Thumbs.db
+
+# Planning notes and instructions, kept only on the author's computer: the repository keeps the release checklists
+CLAUDE.md
+HANDOFF.md
+presentazione/
+docs/*.md
+!docs/rilascio-v*.md
